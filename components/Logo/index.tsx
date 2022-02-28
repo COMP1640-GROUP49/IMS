@@ -6,5 +6,5 @@ type LogoProps = {
 };
 
 export const Logo = ({ width, height }: LogoProps) => {
-	return <Image src="/icon-logo.svg" width={width} height={height} alt="img-logo" />;
+	return <Image priority src="/icon-logo.svg" width={width} height={height} alt="img-logo" />;
 };
