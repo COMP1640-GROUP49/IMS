@@ -3,5 +3,37 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
+:root {
+	--colors-black: #000000;
+	--colors-white: '#FFFFFF';
+	--colors-sonic-silver: '#717171';
+	--colors-platinum: '#E3E3E3';
+	--colors-sliver-chalice: '#AAAAAA';
+	--colors-spanish-grey: '#8E8E8E';
+	--colors-jet: '#393939';
+	--colors-eerie-black: '#1C1C1C';
+	--colors-caribbean-green: '#34D399';
+	--colors-caribbean-green-25: '#CCF4E5';
+	--colors-orange-yellow: '#FBBF24';
+	--colors-orange-yellow-25: '#FEEFC8';
+	--colors-ultra-red: '#FB7185';
+	--colors-ultra-red-25: '#FEDBE0';
+}
+
+@layer components {
+	input {
+		@apply px-2 py-3 border border-silver rounded-lg outline-black placeholder-silver font-medium;
+	}
+
+	button {
+		@apply font-semi-bold;
+	}
+
+	.btn-primary {
+		@apply px-2 py-4 bg-black text-white rounded-lg font-semi-bold self-stretch;
+	}
+
+	.label-error {
+		@apply px-2 py-1 text-ultra-red bg-ultra-red-25 rounded-[4px];
+	}
 }
