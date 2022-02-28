@@ -14,8 +14,11 @@ module.exports = {
 				jet: '#393939',
 				'eerie-black': '#1C1C1C',
 				'caribbean-green': '#34D399',
+				'caribbean-green-25': '#CCF4E5',
 				'orange-yellow': '#FBBF24',
+				'orange-yellow-25': '#FEEFC8',
 				'ultra-red': '#FB7185',
+				'ultra-red-25': '#FEDBE0',
 			},
 			fontFamily: {
 				sans: ['Be Vietnam Pro', 'sans-serif'],
