@@ -36,4 +36,16 @@
 	.label-error {
 		@apply px-2 py-1 text-ultra-red bg-ultra-red-25 rounded-[4px];
 	}
+	.navbar {
+		@apply flex flex-row justify-between bg-white fixed w-full top-0 text-black p-6;
+	}
+	.profile-menu {
+		@apply p-6 absolute top-0 right-0 bg-white lg:items-center text-subtitle font-semibold;
+	}
+	.hamburger-menu {
+		@apply mr-auto absolute top-0 left-0 lg:static p-6 bg-white text-subtitle font-semibold lg:items-center lg:py-0;
+	}
+	.button-profile-center {
+		@apply flex flex-row items-center;
+	}
 }
