@@ -1,8 +1,44 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
-import { CreateNewUsers } from './admin/createNewUser';
+import { useEffect } from 'react';
+import supabase from 'utils/supabase';
 
 const Home: NextPage = () => {
+	useEffect(() => {
+		console.log('herherhehrerhhe');
+
+		const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+			const checkAuth = async () => {
+				console.log(session);
+				const userEmail = session?.user?.email;
+				const userId = session?.user?.id;
+				const { data } = await supabase.from('accounts_ref').select('username').match({
+					email: userEmail,
+				});
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+				if (!data?.[0]?.username) {
+					const data = await supabase.rpc('handle_delete_anon_account');
+					console.log(data);
+					// console.log('cut khoi server!');
+					// const { data: user, error } = await supabase.auth.api.deleteUser(
+					// 	`${userId!}, ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`
+					// );
+					// console.log('🚀 ~ file: index.tsx ~ line 22 ~ checkAuth ~ data', user, error);
+				} else {
+					console.log('hello nguoi quen');
+				}
+			};
+			void checkAuth();
+		});
+		//
+
+		// void getAuth();
+
+		return () => {
+			authListener?.unsubscribe();
+		};
+	}, []);
+
 	return (
 		<div>
 			{/* className="sm:bg-caribbean-green md:bg-orange-yellow lg: bg-ultra-red  h-40" */}
@@ -12,10 +48,7 @@ const Home: NextPage = () => {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 
-			<main>
-				{/* <h1 className="shadow">Screen size</h1> */}
-				<CreateNewUsers />
-			</main>
+			<main>{/* <h1 className="shadow">Screen size</h1> */}</main>
 		</div>
 	);
 };

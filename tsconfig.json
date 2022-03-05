@@ -18,4 +18,6 @@
 	},
 	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.*.js"],
 	"exclude": ["node_modules"]
+	// For facing import module error
+	// "typeRoots": ["../node_modules/@types", "../@types"]
 }

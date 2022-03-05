@@ -20,20 +20,78 @@
 	--colors-ultra-red-25: '#FEDBE0';
 }
 
-@layer components {
-	input {
-		@apply px-2 py-3 border border-silver rounded-lg outline-black placeholder-silver font-medium;
+@layer base {
+	input,
+	select {
+		@apply px-2 py-3 border border-silver rounded-lg outline-black placeholder-silver font-normal;
+	}
+
+	select {
+		@apply h-[50px] box-border text-silver;
+	}
+
+	/*  Use to add padding to move dropdown icon of select element to right due to limitation of its default
+	select {
+		@apply h-[50px] box-border text-silver border-r-[8px] border-solid border-r-transparent border-0 outline outline-1 outline-silver;
+	}
+	*/
+
+	input:focus,
+	select:focus {
+		@apply outline-2 outline-black;
+	}
+
+	option {
+		@apply text-black;
+	}
+
+	option:first-child {
+		@apply text-silver;
 	}
 
 	button {
 		@apply font-semi-bold;
 	}
 
+	h1 {
+		@apply font-semi-bold text-heading-4;
+	}
+}
+
+@layer components {
 	.btn-primary {
 		@apply px-2 py-4 bg-black text-white rounded-lg font-semi-bold self-stretch;
 	}
 
+	.label-success {
+		@apply px-2 py-1 text-caribbean-green bg-caribbean-green-25 rounded-[4px];
+	}
+
+	.label-warning {
+		@apply px-2 py-1 text-orange-yellow bg-orange-yellow-25 rounded-[4px];
+	}
+
 	.label-error {
 		@apply px-2 py-1 text-ultra-red bg-ultra-red-25 rounded-[4px];
+	}
+
+	.avatar-uploader {
+		@apply rounded-full border-dashed bg-white;
+		@apply text-transparent bg-avatar-upload-pattern bg-center bg-no-repeat;
+	}
+
+	.avatar-uploader:hover {
+		@apply cursor-pointer;
+		@apply rounded-full border-dashed bg-platinum;
+	}
+}
+
+@layer utilities {
+	.form-container {
+		@apply md:px-[10%] lg:px-[25%];
+	}
+
+	.avatar-uploader::-webkit-file-upload-button {
+		@apply hidden;
 	}
 }

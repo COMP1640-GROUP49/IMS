@@ -1,13 +1,12 @@
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from 'components/Button';
 import { Icon } from 'components/Icon';
 import { Input } from 'components/Input';
 import { Label } from 'components/Label';
 import { Logo } from 'components/Logo';
-import supabase from 'utils/supabase';
-import { loginAccount } from './api/auth';
+import { loginAccount, loginWithGoogle } from './api/auth';
 
 const Login: NextPage = () => {
 	const [username, setUsername] = useState('');
@@ -15,18 +14,6 @@ const Login: NextPage = () => {
 	const [hasError, setHasError] = useState(false);
 
 	const router = useRouter();
-
-	useEffect(() => {
-		// const getData = async () => {
-		// 	try {
-		// 		const { data } = await supabase.from('accounts').select();
-		// 		console.log(data);
-		// 	} catch (error) {
-		// 		console.log(error);
-		// 	}
-		// };
-		// void getData();
-	}, []);
 
 	const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setUsername(event.target.value);
@@ -45,18 +32,21 @@ const Login: NextPage = () => {
 	const handleLogin = async (event: React.FormEvent, { username, password }: LoginProps) => {
 		event.preventDefault();
 		try {
-			await loginAccount({ username, password });
-			await router.push(`/admin`);
+			const routeName = await loginAccount({ username, password });
+			await router.push(`/${routeName}`);
 		} catch (error) {
-			await router.push(`/`);
 			setHasError(true);
 		}
 	};
 
+	const handleLoginWithGoogle = async () => {
+		await loginWithGoogle();
+	};
+
 	return (
-		<div className="p-6 flex flex-wrap gap-6 justify-center items-center h-screen">
+		<div className="p-6 flex gap-6 justify-center items-center h-screen">
 			<form
-				className="flex flex-1 flex-wrap gap-6 flex-col lg:flex-row lg:justify-center items-center"
+				className="flex flex-1 gap-6 flex-col lg:flex-row lg:justify-center items-center"
 				onSubmit={(event) => handleLogin(event, { username, password })}
 			>
 				<div className="flex flex-1 justify-center lg:max-w-lg">
@@ -85,9 +75,19 @@ const Login: NextPage = () => {
 					</div>
 					{hasError ? <div className="label-error">Username or password is incorrect</div> : <></>}
 
-					<Button icon={true} className={'md:self-center lg:self-center'}>
+					<Button type="submit" icon={true} className={'btn-primary md:self-center lg:self-center'}>
 						<Icon name="LogIn" size="16" color="white" />
 						Log In
+					</Button>
+					<p className="self-center">or</p>
+					<Button
+						onClick={handleLoginWithGoogle}
+						type="button"
+						icon={true}
+						className={'btn-primary md:self-center lg:self-center'}
+					>
+						<Icon name="Chrome" size="16" color="white" />
+						Log In With Google
 					</Button>
 				</div>
 			</form>

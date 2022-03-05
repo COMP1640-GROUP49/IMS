@@ -12,13 +12,12 @@ type DataProps = {
 };
 
 let passwordHash: string = '';
-let isAdmin: boolean = false;
+let routeName: string = '';
 let accountRole: number;
 
 export const loginAccount = async ({ username, password }: DataProps) => {
 	const { data } = await supabase.from('accounts').select().match({ username: username });
 
-	const salt = bcrypt.genSaltSync(10);
 	// Get hash password from db
 	data!.forEach((account) => (passwordHash = account['password']));
 
@@ -30,21 +29,25 @@ export const loginAccount = async ({ username, password }: DataProps) => {
 
 		switch (accountRole) {
 			case 1:
-				isAdmin = true;
+				routeName = 'admin';
 				break;
 
 			default:
-				isAdmin = false;
+				routeName = '';
 				break;
 		}
-		console.log(accountRole, isAdmin);
-
-		// Check admin role
-		if (isAdmin) {
-		} else {
-			console.log('go to other stuff');
-		}
+		return routeName;
 	} else {
 		throw new Error('Username or password is incorrect');
+	}
+};
+
+export const loginWithGoogle = async () => {
+	try {
+		const { user, session, error } = await supabase.auth.signIn({
+			provider: 'google',
+		});
+	} catch (error) {
+		console.error(error);
 	}
 };

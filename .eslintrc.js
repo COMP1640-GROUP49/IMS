@@ -46,6 +46,7 @@ module.exports = {
 					'/^pages/',
 					'/^public/',
 					'/^styles/',
+					'/^lib/',
 					'/^util/',
 					['parent', 'sibling', 'index'],
 				],

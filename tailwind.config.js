@@ -49,6 +49,9 @@ module.exports = {
 				md: { min: '768px', max: '1023px' },
 				lg: { min: '1024px' },
 			},
+			backgroundImage: {
+				'avatar-upload-pattern': "url('../assets/img/upload.svg')",
+			},
 		},
 	},
 	plugins: [],

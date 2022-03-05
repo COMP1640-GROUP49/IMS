@@ -2,19 +2,20 @@ type InputProps = {
 	required: boolean;
 	placeholder?: string;
 	name: string;
-	value: string;
-	children: React.ReactNode;
+	value?: string;
 	onChange: React.ChangeEventHandler;
+	defaultValue: string | number | readonly string[] | undefined;
+	children: React.ReactNode;
 };
 
-export const Select = ({ name, value, required, placeholder, onChange, children }: InputProps) => {
+export const Select = ({ name, value, required, placeholder, onChange, defaultValue, children }: InputProps) => {
 	return (
 		<select
+			defaultValue={defaultValue}
 			name={name}
 			value={value}
 			onChange={onChange}
 			required={required}
-			className="self-stretch py-3 border-[1px] border-gray-300 hover:border-[2px] hover:border-slate-900 rounded-lg"
 			placeholder={placeholder}
 		>
 			{children}
