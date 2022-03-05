@@ -36,4 +36,16 @@
 	.label-error {
 		@apply px-2 py-1 text-ultra-red bg-ultra-red-25 rounded-[4px];
 	}
+	.btn {
+		@apply flex gap-x-3 items-center px-7 py-2 text-body bg-white text-black hover:text-white hover:bg-black rounded-lg border-2 border-black;
+	}
+	.tbody-td {
+		@apply px-3 sm:px-4 py-4 text-sm text-gray-500 flex justify-between lg:table-cell;
+	}
+	.thead-th {
+		@apply px-3 sm:px-4 py-2 text-body text-white lg:table-cell text-left;
+	}
+	.tbody-td-name {
+		@apply lg:hidden text-body text-black;
+	}
 }
