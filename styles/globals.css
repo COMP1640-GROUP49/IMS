@@ -60,7 +60,11 @@
 
 @layer components {
 	.btn-primary {
-		@apply px-2 py-4 bg-black text-white rounded-lg font-semi-bold self-stretch;
+		@apply px-2 py-4 bg-black text-white rounded-lg font-semi-bold;
+	}
+
+	.btn-google {
+		@apply px-2 py-[calc(1rem-1px)] bg-white text-sonic-silver rounded-lg font-semi-bold border border-sonic-silver box-content;
 	}
 
 	.label-success {
@@ -83,6 +87,16 @@
 	.avatar-uploader:hover {
 		@apply cursor-pointer;
 		@apply rounded-full border-dashed bg-platinum;
+	}
+
+	.divider {
+		@apply text-center relative;
+	}
+	.divider::before {
+		@apply content-[""] z-[-1] border-t border-t-platinum m-auto absolute w-full top-1/2 left-0 right-0 bottom-0;
+	}
+	.divider span {
+		@apply bg-white px-4;
 	}
 }
 

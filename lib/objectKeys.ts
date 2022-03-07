@@ -1,3 +1,3 @@
 export interface IObjectKeys {
-	[key: string]: string | number | undefined;
+	[key: string]: object | string | number | undefined;
 }

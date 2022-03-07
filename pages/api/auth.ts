@@ -3,8 +3,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import { User } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
 import supabase from 'utils/supabase';
+
+export interface IUserData extends User {
+	id: string;
+	created_at: string;
+	email?: string;
+	role?: string;
+	user_metadata: object;
+}
 
 type DataProps = {
 	username: string;
