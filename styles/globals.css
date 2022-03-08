@@ -29,6 +29,13 @@
 		@apply font-semi-bold;
 	}
 
+	td {
+		@apply font-semibold;
+	}
+	* {
+		@apply m-0 p-0 box-border;
+	}
+
 	.btn-primary {
 		@apply px-2 py-4 bg-black text-white rounded-lg font-semi-bold self-stretch;
 	}
@@ -37,15 +44,24 @@
 		@apply px-2 py-1 text-ultra-red bg-ultra-red-25 rounded-[4px];
 	}
 	.btn {
-		@apply flex gap-x-3 items-center px-7 py-2 text-body bg-white text-black hover:text-white hover:bg-black rounded-lg border-2 border-black;
+		@apply flex gap-x-3 items-center px-4 py-2 text-body bg-white text-black hover:text-white hover:bg-black rounded-lg border-2 border-black;
+	}
+	.btn-create {
+		@apply flex items-center gap-x-3 justify-center text-white p-6 bg-black text-body border rounded-lg text-center py-5 sm:w-full;
 	}
 	.tbody-td {
 		@apply px-3 sm:px-4 py-4 text-sm text-gray-500 flex justify-between lg:table-cell;
 	}
 	.thead-th {
-		@apply px-3 sm:px-4 py-2 text-body text-white lg:table-cell text-left;
+		@apply px-3 sm:px-4 py-2 text-body text-white lg:table-cell text-left border-0;
 	}
 	.tbody-td-name {
 		@apply lg:hidden text-body text-black;
+	}
+	.tbody-tr {
+		@apply whitespace-nowrap block max-w-full lg:table-row border sm:border-b-4 md:border-b-4;
+	}
+	.modal-content {
+		@apply flex justify-center items-center absolute top-0 left-0 w-full h-full bg-transparent py-3 sm:px-3;
 	}
 }

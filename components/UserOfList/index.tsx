@@ -6,20 +6,17 @@ import { useModal } from 'components/UseModal';
 export const UserCard = () => {
 	const { isShown, toggle } = useModal();
 	return (
-		<div className="sm:p-6 md:p-6 lg:p-6">
+		<div className="lg:container mx-auto sm:p-6 md:p-6 lg:p-6">
 			<div className="flex flex-col lg:flex-row lg:justify-between items-start lg:items-center py-7 sm:w-full">
 				<h1 className="font-semibold text-black text-heading-4">User</h1>
-				<button
-					onClick={toggle}
-					className="flex items-center gap-x-3 justify-center text-white p-6 bg-black font-semibold text-body border rounded-lg text-center py-5 sm:w-full"
-				>
+				<button onClick={toggle} className="btn-create ">
 					<Icon name="UserPlus" />
 					<span>Create new user account</span>
 				</button>
 				<Modal isShown={isShown} hide={toggle} headerText="Create Uers" modalContent={<h1>dasdadasdas</h1>} />
 			</div>
 			<div>
-				<h1 className="text-body f">List Of Users</h1>
+				<h1 className="text-body py-3 font-semibold">List Of Users</h1>
 			</div>
 			<div className="flex flex-col">
 				<div className="w-full">
@@ -37,7 +34,7 @@ export const UserCard = () => {
 								</tr>
 							</thead>
 							<tbody className="bg-white text-left">
-								<tr className="whitespace-nowrap block max-w-full lg:table-row border sm:border-b-4 md:border-b-4">
+								<tr className="tbody-tr">
 									<td className="tbody-td items-center">
 										<div className="tbody-td-name">Avarta</div>
 										<div className="text-body text-black">
@@ -66,7 +63,7 @@ export const UserCard = () => {
 									</td>
 
 									<td className="flex justify-between px-4 sm:px-3 py-3 lg:table-cell">
-										<div className="flex flex-1 justify-between lg:justify-start  lg:gap-x-3">
+										<div className="flex flex-1 justify-between lg:justify-start lg:gap-x-3">
 											<Link href="/">
 												<a className="btn">
 													<Icon name="Edit" size={16} className="hover:text-white" />

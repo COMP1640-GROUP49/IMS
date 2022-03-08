@@ -10,7 +10,7 @@ export interface ModalProps {
 }
 export const Modal: FunctionComponent<ModalProps> = ({ isShown, hide, modalContent, headerText }) => {
 	const modal = (
-		<div className="flex justify-center items-center absolute top-0 left-0 w-full 100vh bg-transparent py-3 sm:px-3">
+		<div className="modal-content">
 			<div className="bg-slate-400 w-[500px] h-full rounded-2xl p-2">
 				<div className="flex justify-end text-heading_5">
 					<button onClick={hide} className="p-2">
