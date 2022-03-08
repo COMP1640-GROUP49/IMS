@@ -8,7 +8,8 @@
 	--colors-white: '#FFFFFF';
 	--colors-sonic-silver: '#717171';
 	--colors-platinum: '#E3E3E3';
-	--colors-sliver-chalice: '#AAAAAA';
+	--colors-silver: '#C6C6C6';
+	--colors-silver-chalice: '#AAAAAA';
 	--colors-spanish-grey: '#8E8E8E';
 	--colors-jet: '#393939';
 	--colors-eerie-black: '#1C1C1C';
@@ -27,7 +28,7 @@
 	}
 
 	select {
-		@apply h-[50px] box-border text-silver;
+		@apply h-[50px] box-border bg-white text-silver;
 	}
 
 	/*  Use to add padding to move dropdown icon of select element to right due to limitation of its default
@@ -38,7 +39,7 @@
 
 	input:focus,
 	select:focus {
-		@apply outline-2 outline-black;
+		@apply outline-1 outline-black;
 	}
 
 	option {
@@ -50,7 +51,7 @@
 	}
 
 	button {
-		@apply font-semi-bold;
+		@apply h-[64px] font-semi-bold;
 	}
 
 	h1 {
@@ -61,6 +62,10 @@
 @layer components {
 	.btn-primary {
 		@apply px-2 py-4 bg-black text-white rounded-lg font-semi-bold self-stretch;
+	}
+
+	.btn-disabled {
+		@apply px-2 py-4 bg-platinum text-silver rounded-lg font-semi-bold self-stretch;
 	}
 
 	.label-success {

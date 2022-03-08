@@ -8,7 +8,7 @@ module.exports = {
 				'sonic-silver': '#717171',
 				platinum: '#E3E3E3',
 				silver: '#C6C6C6',
-				'sliver-chalice': '#AAAAAA',
+				'silver-chalice': '#AAAAAA',
 				'spanish-grey': '#8E8E8E',
 				'davys-grey': '#555555',
 				jet: '#393939',

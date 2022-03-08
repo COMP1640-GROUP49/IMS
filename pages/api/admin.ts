@@ -1,4 +1,5 @@
 import { IObjectKeys } from 'lib/objectKeys';
+import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
 
 export interface IFormData extends IObjectKeys {
@@ -18,7 +19,14 @@ export const checkUsernameExisted = async (username: string) => {
 		username: username,
 	});
 
-	return data;
+	return data!.length !== 0;
+};
+
+export const CheckEmailExisted = async (email: string) => {
+	const { data } = await supabase.from('accounts').select('account_email').match({
+		account_email: email,
+	});
+	return data!.length !== 0;
 };
 
 export const createNewAccount = async ({
@@ -33,25 +41,33 @@ export const createNewAccount = async ({
 	avatar,
 }: IFormData) => {
 	try {
-		console.log(email, username, password, role, department, full_name, address, phone, avatar);
-		const data = await supabase.auth.signUp(
-			{
-				email: email,
-				password: password,
-			},
-			{
-				data: {
-					username: username,
-					role: role,
-					department: department,
-					full_name: full_name,
-					address: address,
-					phone: phone,
-					avatar: avatar,
+		const creatingNewUserAccount = async () => {
+			const { user, error } = await supabase.auth.signUp(
+				{
+					email: email,
+					password: password,
 				},
+				{
+					data: {
+						username: username,
+						role: role,
+						department: department,
+						full_name: full_name,
+						address: address,
+						phone: phone,
+						avatar: avatar,
+					},
+				}
+			);
+			if (error) {
+				throw error.message;
 			}
+		};
+		await notifyToast(
+			creatingNewUserAccount(),
+			`Creating account for user @${username}.`,
+			`Account @${username} has been created.`
 		);
-		console.log('🚀 ~ file: admin.ts ~ line 45 ~ data', data);
 	} catch (error) {
 		throw error;
 	}

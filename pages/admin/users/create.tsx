@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AvatarUploader from 'components/AvatarUploader';
 import { Button } from 'components/Button';
 import { Icon } from 'components/Icon';
 import { Input } from 'components/Input';
 import { Label } from 'components/Label';
 import { Select } from 'components/Select';
-import { checkUsernameExisted, createNewAccount, IFormData, uploadAvatar } from 'pages/api/admin';
+import { CheckEmailExisted, checkUsernameExisted, createNewAccount, IFormData, uploadAvatar } from 'pages/api/admin';
+import { scrollToElement } from 'utils/scrollAnimate';
 
 const CreateNewUser = () => {
 	const [formData, setFormData] = useState<IFormData>();
@@ -15,10 +16,13 @@ const CreateNewUser = () => {
 		usernameValidation: string;
 		passwordValidation: string;
 		emailValidation: string;
+		roleValidation: string;
+		departmentValidation: string;
 		phoneValidation: string;
 	}
 
 	const [formValidation, setFormValidation] = useState<IFormValidation>();
+	const [isFormValidated, setIsFormValidated] = useState(false);
 
 	const fileUpdate = (data: File) => {
 		setAvatar(data);
@@ -40,14 +44,28 @@ const CreateNewUser = () => {
 
 	const handleCreateNewAccount = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+		await fileUpload();
 
 		// Check form validate before submit form
+		if (formData?.role === undefined) {
+			setFormValidation({
+				...formValidation!,
+				roleValidation: 'error',
+			});
 
-		await fileUpload();
-		try {
-			await createNewAccount(formData!);
-		} catch (error) {
-			throw error;
+			scrollToElement('select-role');
+		} else if (formData?.department === undefined) {
+			setFormValidation({
+				...formValidation!,
+				departmentValidation: 'error',
+			});
+			scrollToElement('select-department');
+		} else {
+			try {
+				await createNewAccount(formData);
+			} catch (error) {
+				throw error;
+			}
 		}
 	};
 
@@ -73,19 +91,21 @@ const CreateNewUser = () => {
 					usernameValidation: 'warning',
 				});
 			} else {
-				const usernameCheckResult = await checkUsernameExisted(event.target.value);
+				const usernameCheckResult = await checkUsernameExisted(event.target.value.trim());
 
 				if (formValidation) {
-					if (usernameCheckResult?.length === 0) {
-						setFormValidation({
-							...formValidation,
-							usernameValidation: 'success',
-						});
-					} else {
-						setFormValidation({
-							...formValidation,
-							usernameValidation: 'error',
-						});
+					if (event.target.value.trim() !== '') {
+						if (!usernameCheckResult) {
+							setFormValidation({
+								...formValidation,
+								usernameValidation: 'success',
+							});
+						} else {
+							setFormValidation({
+								...formValidation,
+								usernameValidation: 'error',
+							});
+						}
 					}
 				}
 			}
@@ -134,19 +154,27 @@ const CreateNewUser = () => {
 				const emailRegex =
 					/(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/;
 
-				const emailCheckResult = event.target.value.match(emailRegex);
+				const emailCheckExistedResult = await CheckEmailExisted(event.target.value.trim());
+				const emailRegexCheck = event.target.value.match(emailRegex);
 
-				if (emailCheckResult) {
+				// BUG: typing too  fast cause confusing validation's results
+				if (emailCheckExistedResult) {
+					setFormValidation({
+						...formValidation!,
+
+						emailValidation: 'error-existed',
+					});
+				} else if (!emailRegexCheck) {
+					setFormValidation({
+						...formValidation!,
+
+						emailValidation: 'error-format',
+					});
+				} else if (!emailCheckExistedResult && emailRegexCheck) {
 					setFormValidation({
 						...formValidation!,
 
 						emailValidation: 'success',
-					});
-				} else {
-					setFormValidation({
-						...formValidation!,
-
-						emailValidation: 'error',
 					});
 				}
 			}
@@ -154,12 +182,18 @@ const CreateNewUser = () => {
 
 		// phone validate
 		if (event.target.name === 'phone') {
-			/**
-			 * Took this regex from https://www.regextester.com/106725
-			 */
-			const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/g;
-			const phoneCheckResult = event.target.value.match(phoneRegex);
-			if (event.target.value.trim().length !== 0) {
+			if (event.target.value.trim() === '') {
+				setFormValidation({
+					...formValidation!,
+
+					phoneValidation: '',
+				});
+			} else {
+				/**
+				 * Took this regex from https://www.regextester.com/106725
+				 */
+				const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/g;
+				const phoneCheckResult = event.target.value.match(phoneRegex);
 				if (phoneCheckResult) {
 					setFormValidation({
 						...formValidation!,
@@ -170,12 +204,52 @@ const CreateNewUser = () => {
 					setFormValidation({
 						...formValidation!,
 
-						phoneValidation: 'error',
+						phoneValidation: 'warning',
 					});
 				}
 			}
 		}
+
+		if (event.target.name === 'role') {
+			if (event.target.value !== 'disabled') {
+				setFormValidation({
+					...formValidation!,
+
+					roleValidation: 'success',
+				});
+			}
+		}
+		if (event.target.name === 'department') {
+			if (event.target.value !== 'disabled') {
+				setFormValidation({
+					...formValidation!,
+
+					departmentValidation: 'success',
+				});
+			}
+		}
+		if (event.target.name === 'role') {
+			if (event.target.value !== 'disabled') {
+				setFormValidation({
+					...formValidation!,
+
+					roleValidation: 'success',
+				});
+			}
+		}
 	};
+
+	useEffect(() => {
+		if (
+			formValidation?.usernameValidation === 'success' &&
+			formValidation?.passwordValidation === 'success' &&
+			formValidation?.emailValidation === 'success'
+		) {
+			setIsFormValidated(true);
+		} else {
+			setIsFormValidated(false);
+		}
+	}, [formValidation, isFormValidated]);
 
 	return (
 		<div className="form-container flex flex-col gap-6 p-6">
@@ -213,6 +287,10 @@ const CreateNewUser = () => {
 							placeholder={"Input account's password"}
 							type="password"
 						/>
+						{/* TODO: Show/hide password */}
+						{/* <button>
+									<Icon name="Eye" size="32" color="gray" className="absolute bottom-4 right-2"></Icon>
+								</button> */}
 						{formValidation &&
 							(formValidation['passwordValidation'] === 'success' ? (
 								<div className="label-success">This password is valid.</div>
@@ -221,31 +299,38 @@ const CreateNewUser = () => {
 							) : formValidation['passwordValidation'] === 'error' ? (
 								<div className="label-error">Password must be greater than 6 characters.</div>
 							) : null)}
-						{/* <button>
-							<Icon name="Eye" size="32" color="gray" className="absolute bottom-4 right-2"></Icon>
-						</button> */}
 					</div>
-					<div className="flex flex-col gap-2">
+					<div id="select-role" className="flex flex-col gap-2">
 						<Label size="text-normal">Role</Label>
 						<Select name="role" required defaultValue={'disabled'} onChange={handleChange}>
 							<option disabled value={'disabled'}>
 								{"Select account's role"}
 							</option>
-							<option value="1">Admin</option>
-							<option value="2">QA Manager</option>
-							<option value="3">QA Coordinator</option>
+							<option value="0">Admin</option>
+							<option value="1">QA Manager</option>
+							<option value="2">QA Coordinator</option>
+							<option value="3">Staff</option>
 						</Select>
+						{formValidation &&
+							(formValidation['roleValidation'] === 'error' ? (
+								<div className="label-warning">Please select role for account.</div>
+							) : null)}
 					</div>
-					<div className="flex flex-col gap-2">
+					<div id="select-department" className="flex flex-col gap-2">
 						<Label size="text-normal">Department</Label>
 						<Select name="department" required defaultValue={'disabled'} onChange={handleChange}>
 							<option disabled value={'disabled'}>
 								{"Select account's department"}
 							</option>
-							<option value="1">Admin Department</option>
-							<option value="2">QA Department</option>
-							<option value="3">IT Department</option>
+							<option value="0">Admin Department</option>
+							<option value="1">QA Department</option>
+							<option value="2">IT Department</option>
+							<option value="3">Design Department</option>
 						</Select>
+						{formValidation &&
+							(formValidation['roleValidation'] === 'error' ? (
+								<div className="label-warning">Please select department for account.</div>
+							) : null)}
 					</div>
 					<div className="flex flex-col gap-2">
 						<Label size="text-normal">Email</Label>
@@ -255,8 +340,10 @@ const CreateNewUser = () => {
 								<div className="label-success">This email address is valid.</div>
 							) : formValidation['emailValidation'] === 'warning' ? (
 								<div className="label-warning">Please input the email address.</div>
-							) : formValidation['emailValidation'] === 'error' ? (
-								<div className="label-error">This email is invalid. Please check again.</div>
+							) : formValidation['emailValidation'] === 'error-format' ? (
+								<div className="label-error">This email has an invalid email address format. Please try again.</div>
+							) : formValidation['emailValidation'] === 'error-existed' ? (
+								<div className="label-error">This email has been registered in the system. Please try another one.</div>
 							) : null)}
 					</div>
 				</div>
@@ -272,7 +359,7 @@ const CreateNewUser = () => {
 						<Input
 							name="full_name"
 							onChange={handleChange}
-							required
+							required={false}
 							placeholder={"Input account's full name"}
 							type="text"
 						/>
@@ -283,7 +370,7 @@ const CreateNewUser = () => {
 						<Input
 							name="address"
 							onChange={handleChange}
-							required
+							required={false}
 							placeholder={"Input account's address"}
 							type="text"
 						/>
@@ -293,15 +380,15 @@ const CreateNewUser = () => {
 						<Input
 							name="phone"
 							onChange={handleChange}
-							required
+							required={false}
 							placeholder={"Input account's phone number"}
 							type="tel"
 						/>
-						{formValidation && formValidation['phoneValidation'] === 'error' ? (
-							<div className="label-warning">Invalid phone number.</div>
-						) : (
-							<div className="label-success">Phone number is valid.</div>
-						)}
+						{formValidation && formValidation['phoneValidation'] === 'warning' ? (
+							<div className="label-warning">Invalid phone number format.</div>
+						) : formValidation && formValidation['phoneValidation'] === 'success' ? (
+							<div className="label-success">This phone number is valid.</div>
+						) : null}
 					</div>
 					<div className="flex flex-col gap-2">
 						<Label size="text-normal">Avatar</Label>
@@ -309,8 +396,14 @@ const CreateNewUser = () => {
 					</div>
 				</div>
 
-				<Button icon={true} className={'h-[64px] md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2 '}>
-					<Icon name="Plus" size="16" color="white" />
+				<Button
+					disabled={!isFormValidated}
+					icon={true}
+					className={`${
+						isFormValidated ? `btn-primary` : `btn-disabled`
+					}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+				>
+					<Icon name="Plus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
 					Create new user account
 				</Button>
 			</form>
