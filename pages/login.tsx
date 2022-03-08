@@ -35,8 +35,7 @@ const Login: NextPage = () => {
 	const handleLogin = async (event: React.FormEvent, { username, password }: LoginProps) => {
 		event.preventDefault();
 		try {
-			const routeName = await loginAccount({ username, password });
-			await router.push(`/${routeName}`);
+			await loginAccount({ username, password });
 		} catch (error) {
 			setHasError(true);
 		}
@@ -49,14 +48,20 @@ const Login: NextPage = () => {
 	useEffect(() => {
 		try {
 			if (user) {
-				void router.push('/');
+				switch (user?.user_metadata?.role) {
+					case 0:
+						void router.push('/admin');
+						break;
+					default:
+						void router.push('/admin');
+						break;
+				}
 			}
 		} catch (error) {}
 	}, [user, router]);
 
 	return (
 		<div className="p-6 flex gap-6 justify-center items-center h-screen md:px-40">
-			{console.log(user)}
 			<form
 				className="flex flex-1 gap-6 flex-col lg:flex-row lg:justify-center items-center"
 				onSubmit={(event) => handleLogin(event, { username, password })}

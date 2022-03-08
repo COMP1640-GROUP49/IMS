@@ -1,10 +1,6 @@
-/* eslint-disable @typescript-eslint/no-inferrable-types */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { User } from '@supabase/supabase-js';
-import bcrypt from 'bcryptjs';
+// import bcrypt from 'bcryptjs';
+import { IObjectKeys } from 'lib/objectKeys';
 import supabase from 'utils/supabase';
 
 export interface IUserData extends User {
@@ -12,7 +8,14 @@ export interface IUserData extends User {
 	created_at: string;
 	email?: string;
 	role?: string;
-	user_metadata: object;
+	user_metadata: {
+		[key: string]: any;
+	};
+}
+
+interface IUserResponseData extends IObjectKeys {
+	account_email: string;
+	account_role?: number;
 }
 
 type DataProps = {
@@ -20,34 +23,24 @@ type DataProps = {
 	password: string;
 };
 
-let passwordHash: string = '';
-let routeName: string = '';
-let accountRole: number;
+const accountData: IUserResponseData = {
+	account_email: '',
+};
 
 export const loginAccount = async ({ username, password }: DataProps) => {
-	const { data } = await supabase.from('accounts').select().match({ username: username });
+	const { data } = await supabase.from('accounts').select('account_email, account_role').match({ username: username });
 
-	// Get hash password from db
-	data!.forEach((account) => (passwordHash = account['password']));
+	data!.forEach((accountField: IUserResponseData) => {
+		accountData.account_email = accountField['account_email'];
+	});
 
-	const isPasswordValid = bcrypt.compareSync(password, passwordHash);
+	if (data) {
+		const data = await supabase.auth.signIn({
+			email: accountData.account_email,
+			password: password,
+		});
 
-	// Check password validation
-	if (isPasswordValid) {
-		data!.forEach((account) => (accountRole = account['account_role']));
-
-		switch (accountRole) {
-			case 1:
-				routeName = 'admin';
-				break;
-
-			default:
-				routeName = '';
-				break;
-		}
-		return routeName;
-	} else {
-		throw new Error('Username or password is incorrect');
+		accountData.account_role = data?.user?.user_metadata?.role as IUserResponseData['account_role'];
 	}
 };
 
