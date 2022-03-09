@@ -57,60 +57,173 @@
 	h1 {
 		@apply font-semi-bold text-heading-4;
 	}
-}
 
-@layer components {
-	.btn-primary {
-		@apply px-2 py-4 bg-black text-white rounded-lg font-semi-bold;
-	}
-
-	.btn-google {
-		@apply px-2 py-[calc(1rem-1px)] bg-white text-sonic-silver rounded-lg font-semi-bold border border-sonic-silver;
+	@layer base {
+		li > hr {
+			@apply mt-4;
+		}
 	}
 
-	.btn-disabled {
-		@apply px-2 py-4 bg-platinum text-silver rounded-lg font-semi-bold self-stretch;
+	@layer components {
+		.btn-primary {
+			@apply px-2 py-4 bg-black text-white rounded-lg font-semi-bold;
+		}
+
+		.btn-google {
+			@apply px-2 py-[calc(1rem-1px)] bg-white text-sonic-silver rounded-lg font-semi-bold border border-sonic-silver;
+		}
+
+		.btn-disabled {
+			@apply px-2 py-4 bg-platinum text-silver rounded-lg font-semi-bold self-stretch;
+		}
+
+		.label-success {
+			@apply px-2 py-1 text-caribbean-green bg-caribbean-green-25 rounded-[4px];
+		}
+
+		.label-warning {
+			@apply px-2 py-1 text-orange-yellow bg-orange-yellow-25 rounded-[4px];
+		}
+
+		.btn-icon {
+			@apply p-2 shadow-0 rounded-full;
+		}
+
+		.btn-avatar {
+			@apply p-1 shadow-0 rounded-full flex;
+		}
+
+		.avatar-label {
+			@apply text-subtitle font-semi-bold;
+		}
+
+		.label-error {
+			@apply px-2 py-1 text-ultra-red bg-ultra-red-25 rounded-[4px];
+		}
+
+		.avatar-uploader {
+			@apply rounded-full border-dashed bg-white;
+			@apply text-transparent bg-avatar-upload-pattern bg-center bg-no-repeat;
+		}
+
+		.avatar-uploader:hover {
+			@apply cursor-pointer;
+			@apply rounded-full border-dashed bg-platinum;
+		}
+
+		.divider {
+			@apply text-center relative;
+		}
+		.divider::before {
+			@apply content-[""] z-[-1] border-t border-t-platinum m-auto absolute w-full top-1/2 left-0 right-0 bottom-0;
+		}
+		.divider span {
+			@apply bg-white px-4;
+		}
+
+		.navigation-bar {
+			@apply bg-white p-6 w-full flex flex-1 justify-between fixed top-0 items-center text-black lg:items-center;
+
+			@apply relative;
+
+			@apply lg:h-[calc(96px+48px)];
+		}
+
+		.menu-list,
+		.menu-item {
+			@apply flex flex-col gap-4;
+		}
+
+		.hamburger-menu {
+			@apply relative;
+		}
+
+		.hamburger-menu__open {
+			@apply bg-white p-4 rounded-lg shadow-1 absolute top-[calc(48px+64px)] h-auto;
+
+			@apply flex flex-col sm:w-[calc(100vw-48px)];
+
+			@apply md:min-w-[50vw];
+		}
+
+		.hamburger-menu__lg {
+			@apply flex p-6 justify-center top-0 left-0 bottom-0 shadow-none;
+		}
+
+		.hamburger-menu__lg svg {
+			@apply hidden;
+		}
+
+		.hamburger-menu__lg .menu-list {
+			@apply flex flex-row items-center gap-8;
+		}
+
+		.hamburger-menu__lg .menu-item {
+			@apply flex flex-row gap-8;
+		}
+
+		.hamburger-menu__lg .menu-list hr {
+			@apply hidden;
+		}
+
+		.hamburger-menu__lg .link-component {
+			@apply justify-center;
+		}
+
+		.hamburger-menu__lg .link-component:hover {
+			@apply bg-white;
+		}
+
+		.hamburger-menu__lg .link-component:hover p {
+			@apply text-black;
+		}
+
+		.profile-menu {
+			@apply relative;
+		}
+
+		.profile-menu__open {
+			@apply bg-white p-4 rounded-lg shadow-1 absolute top-[calc(48px+64px)] right-[24px] h-auto;
+
+			@apply flex flex-col;
+
+			@apply min-w-[250px];
+
+			@apply lg:top-[calc(48px+96px)];
+		}
+
+		.profile-menu__open .profile-menu__prefix-icon-lg {
+			@apply lg:mr-3;
+		}
+
+		.profile-menu__open .profile-menu__text-lg {
+			@apply lg:mr-auto;
+		}
+
+		.profile-menu__open .link-component {
+			@apply lg:text-black;
+		}
+
+		.link-component {
+			@apply p-4 flex items-center rounded-lg;
+
+			@apply text-subtitle font-semi-bold;
+
+			@apply lg:text-sonic-silver;
+		}
+
+		.link-component:hover {
+			@apply bg-platinum cursor-pointer;
+		}
 	}
 
-	.label-success {
-		@apply px-2 py-1 text-caribbean-green bg-caribbean-green-25 rounded-[4px];
-	}
+	@layer utilities {
+		.form-container {
+			@apply md:px-[10%] lg:px-[25%];
+		}
 
-	.label-warning {
-		@apply px-2 py-1 text-orange-yellow bg-orange-yellow-25 rounded-[4px];
-	}
-
-	.label-error {
-		@apply px-2 py-1 text-ultra-red bg-ultra-red-25 rounded-[4px];
-	}
-
-	.avatar-uploader {
-		@apply rounded-full border-dashed bg-white;
-		@apply text-transparent bg-avatar-upload-pattern bg-center bg-no-repeat;
-	}
-
-	.avatar-uploader:hover {
-		@apply cursor-pointer;
-		@apply rounded-full border-dashed bg-platinum;
-	}
-
-	.divider {
-		@apply text-center relative;
-	}
-	.divider::before {
-		@apply content-[""] z-[-1] border-t border-t-platinum m-auto absolute w-full top-1/2 left-0 right-0 bottom-0;
-	}
-	.divider span {
-		@apply bg-white px-4;
-	}
-}
-
-@layer utilities {
-	.form-container {
-		@apply md:px-[10%] lg:px-[25%];
-	}
-
-	.avatar-uploader::-webkit-file-upload-button {
-		@apply hidden;
+		.avatar-uploader::-webkit-file-upload-button {
+			@apply hidden;
+		}
 	}
 }

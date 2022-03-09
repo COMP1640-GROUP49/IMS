@@ -44,6 +44,10 @@ module.exports = {
 				'extra-bold': 800,
 				black: 900,
 			},
+			boxShadow: {
+				0: '0px 10px 20px rgba(0, 0, 0, 0.05)',
+				1: '5px 10px 20px 0 rgba(0, 0, 0, 0.1)',
+			},
 			screens: {
 				sm: { min: '0px', max: '767px' },
 				md: { min: '768px', max: '1023px' },

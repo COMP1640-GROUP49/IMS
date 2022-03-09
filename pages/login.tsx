@@ -7,8 +7,8 @@ import { Icon } from 'components/Icon';
 import { Input } from 'components/Input';
 import { Label } from 'components/Label';
 import { Logo } from 'components/Logo';
+import { loginAccount, loginWithGoogle } from 'pages/api/auth';
 import { useUserData } from 'lib/hooks';
-import { loginAccount, loginWithGoogle } from './api/auth';
 
 const Login: NextPage = () => {
 	const [username, setUsername] = useState('');

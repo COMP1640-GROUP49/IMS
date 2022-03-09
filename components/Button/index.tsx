@@ -4,7 +4,7 @@ type ButtonProps = {
 	icon?: boolean;
 	disabled?: boolean;
 	className?: string;
-	onClick?: (event: React.FormEvent) => void;
+	onClick?: (() => void) | (() => Promise<void>) | undefined;
 };
 
 export const Button = ({ type, icon, disabled, children, className, onClick }: ButtonProps) => {
