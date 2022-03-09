@@ -1,110 +1,96 @@
-import Image from 'next/image';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Avatar } from 'components/Avatar';
+import { Button } from 'components/Button';
 import { Icon } from 'components/Icon';
+import { LinkComponent } from 'components/Link';
 import { Logo } from 'components/Logo';
-import { LinkComponents } from '../Link';
 
 export const Header = () => {
-	const [open, setOpen] = useState(false);
-	const [user, setUser] = useState(false);
+	const [openHamburgerMenu, setOpenHamburgerMenu] = useState(false);
+	const [openProfileMenu, setOpenProfileMenu] = useState(false);
+
+	useEffect(() => {
+		// Close hamburger menu in large screen (for displaying navigation bar items in row)
+		const screenWidth = window.innerWidth;
+		function handleResize() {
+			if (screenWidth >= 1024) {
+				setOpenHamburgerMenu(false);
+			}
+		}
+
+		window.addEventListener('resize', handleResize);
+
+		return () => {
+			window.removeEventListener('resize', handleResize);
+		};
+	}, [openHamburgerMenu]);
+
 	return (
-		<nav className="bg-white w-[100%] h-[105px] fixed top-0 text-black text-xl flex justify-between lg:items-center z-50 ">
-			<div className="flex gap-x-4 items-center h-full mx-2">
-				{open ? (
-					<button className="w-12 hover:cursor-pointer hover:opacity-80  lg:hidden" onClick={() => setOpen(false)}>
+		<nav className="navigation-bar">
+			<div className="hamburger-menu">
+				{openHamburgerMenu ? (
+					<Button className="btn-icon lg:hidden" onClick={() => setOpenHamburgerMenu(false)}>
 						<Icon name="X" size="32" color="black" />
-					</button>
+					</Button>
 				) : (
-					<button className="w-12 hover:cursor-pointer hover:opacity-80 lg:hidden" onClick={() => setOpen(true)}>
-						<Icon name="AlignJustify" size="32" color="black" />
-					</button>
+					<Button className="btn-icon lg:hidden" onClick={() => setOpenHamburgerMenu(true)}>
+						<Icon hasPadding name="Menu" size="32" color="black" />
+					</Button>
 				)}
 			</div>
-
-			<div className="flex flex-row mr-auto">
-				<ul
-					className={`flex lg:flex-row flex-col justify-evenly absolute left-0 lg:static lg:w-auto w-96  h-[50vh] lg:h-auto bg-white top-[105px] space-y-5 lg:space-y-0 lg:items-center  
-                    ${
-											open ? 'block' : 'hidden lg:inline-flex'
-										} transition-all duration-500 ease-in-out pb-8 pt-2 lg:py-0 lg:mr-4 shadow-[5px 10px 20px rgba(0, 0, 0, 0.8)] md:shadow-none`}
-				>
-					<div>
-						<a className="flex items-center m-auto lg:h-auto bg-white space-y-5 lg:space-y-0 transition-all duration-500 ease-in pb-4 lg:py-3 mr-4 lg:w-20 ml-2">
-							<Logo width="96" height="96" />
-						</a>
-					</div>
+			<div className={`hamburger-menu__open ${openHamburgerMenu ? '' : 'hidden lg:hamburger-menu__lg'}`}>
+				<ul className="menu-list">
+					<li className="flex self-start lg:self-center">
+						<Logo width="96" height="96" />
+					</li>
 
 					<li>
-						<LinkComponents link="/" title="Dashboad">
+						<LinkComponent link="/admin" title="Dashboard">
 							<Icon name="Monitor" size="32" color="black" />
-						</LinkComponents>
+						</LinkComponent>
+						<hr />
 					</li>
-					<hr />
+					<ul className="menu-item">
+						<li>
+							<LinkComponent link="/users" title="Users">
+								<Icon name="Users" size="32" color="black" />
+							</LinkComponent>
+						</li>
+						<li>
+							<LinkComponent link="/departments" title="Departments">
+								<Icon name="Grid" size="32" color="black" />
+							</LinkComponent>
+							<hr />
+						</li>
+					</ul>
+
 					<li>
-						<LinkComponents link="/" title="User">
-							<Icon name="Users" size="32" color="black" />
-						</LinkComponents>
-					</li>
-					<li>
-						<LinkComponents link="/" title="Department">
-							<Icon name="Grid" size="32" color="black" />
-						</LinkComponents>
-					</li>
-					<hr />
-					<li>
-						<LinkComponents link="/" title="About">
+						<LinkComponent link="/about" title="About">
 							<Icon name="Info" size="32" color="black" />
-						</LinkComponents>
+						</LinkComponent>
 					</li>
 				</ul>
 			</div>
 
-			<div>
-				<div className="flex gap-x-1 items-center h-full mx-2 mr-5">
-					{user ? (
-						<button
-							className=" hover:cursor-pointer hover:opacity-80 transition-all flex flex-row items-center"
-							onClick={() => setUser(false)}
-						>
-							<span className="mr-3">
-								<Icon name="User" size="32" color="black" />
-							</span>
-							<span>abcxyz</span>
-						</button>
-					) : (
-						<button
-							className="hover:cursor-pointer hover:opacity-80  transition-all flex flex-row items-center"
-							onClick={() => setUser(true)}
-						>
-							<span className="mr-3">
-								<Icon name="User" size="32" color="black" />
-							</span>
-							<span>abcxyz</span>
-						</button>
-					)}
-				</div>
-				<ul
-					className={`flex flex-col gap-y-4 absolute right-0 w-64 h-32 lg:h-auto bg-white top-[105px] space-y-5 lg:space-y-0 lg:items-center ${
-						user ? 'block' : 'hidden'
-					} transition-all duration-500 ease-in-out py-4 shadow-5xl`}
-				>
-					<li className="hover:cursor-pointer hover:bg-white lg:hover:bg-transparent lg:text-black hover:text-slate-900 w-[90%] ml-auto rounded-l-[30px] transition-all pl-1 lg:pl-5 ease-in-out flex justify-between items-center">
-						<span className="flex justify-start items-center">
-							<Icon name="User" size="32" />
-							<h1 className="ml-3">My Profile</h1>
-						</span>
-						<span>
-							<Icon name="ChevronRight" size="32" />
-						</span>
+			<div className="profile-menu">
+				<Button className="flex flex-row items-center gap-4" onClick={() => setOpenProfileMenu(!openProfileMenu)}>
+					<div className="btn-avatar">
+						<Avatar src={'/profile-1634136540709-4d1c27a3cb3fimage.png'} size="56" className="rounded-full" />
+					</div>
+					<div className="avatar-label sm:hidden">@username</div>
+				</Button>
+			</div>
+			<div className={`profile-menu__open ${openProfileMenu ? '' : 'hidden'}`}>
+				<ul className="menu-list">
+					<li>
+						<LinkComponent link="/profile" title="My Profile">
+							<Icon name="User" size="32" color="black" />
+						</LinkComponent>
 					</li>
-					<li className="hover:cursor-pointer hover:bg-white lg:hover:bg-transparent lg:text-black hover:text-slate-900 w-[90%] ml-auto rounded-l-[30px] transition-all pl-1 lg:pl-5 ease-in-out flex justify-between items-center">
-						<span className="flex justify-start items-center">
-							<Icon name="LogOut" size="32" />
-							<h1 className="ml-3">Log out</h1>
-						</span>
-						<span>
-							<Icon name="ChevronRight" size="32" />
-						</span>
+					<li>
+						<LinkComponent link="/logout" title="Log Out">
+							<Icon name="LogOut" size="32" color="black" />
+						</LinkComponent>
 					</li>
 				</ul>
 			</div>

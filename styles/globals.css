@@ -33,7 +33,120 @@
 		@apply px-2 py-4 bg-black text-white rounded-lg font-semi-bold self-stretch;
 	}
 
+	.btn-icon {
+		@apply p-2 shadow-0 rounded-full;
+	}
+
+	.btn-avatar {
+		@apply p-1 shadow-0 rounded-full flex;
+	}
+
+	.avatar-label {
+		@apply text-subtitle font-semi-bold;
+	}
+
 	.label-error {
 		@apply px-2 py-1 text-ultra-red bg-ultra-red-25 rounded-[4px];
+	}
+
+	.navigation-bar {
+		@apply bg-white p-6 w-full flex flex-1 justify-between fixed top-0 items-center text-black lg:items-center;
+
+		@apply relative;
+
+		@apply lg:h-[calc(96px+48px)];
+	}
+
+	.menu-list,
+	.menu-item {
+		@apply flex flex-col gap-4;
+	}
+
+	.hamburger-menu {
+		@apply relative;
+	}
+
+	.hamburger-menu__open {
+		@apply bg-white p-4 rounded-lg shadow-1 absolute top-[calc(48px+64px)] h-auto;
+
+		@apply flex flex-col sm:w-[calc(100vw-48px)];
+
+		@apply md:min-w-[50vw];
+	}
+
+	.hamburger-menu__lg {
+		@apply flex p-6 justify-center top-0 left-0 bottom-0 shadow-none;
+	}
+
+	.hamburger-menu__lg svg {
+		@apply hidden;
+	}
+
+	.hamburger-menu__lg .menu-list {
+		@apply flex flex-row items-center gap-8;
+	}
+
+	.hamburger-menu__lg .menu-item {
+		@apply flex flex-row gap-8;
+	}
+
+	.hamburger-menu__lg .menu-list hr {
+		@apply hidden;
+	}
+
+	.hamburger-menu__lg .link-component {
+		@apply justify-center;
+	}
+
+	.hamburger-menu__lg .link-component:hover {
+		@apply bg-white;
+	}
+
+	.hamburger-menu__lg .link-component:hover p {
+		@apply text-black;
+	}
+
+	.profile-menu {
+		@apply relative;
+	}
+
+	.profile-menu__open {
+		@apply bg-white p-4 rounded-lg shadow-1 absolute top-[calc(48px+64px)] right-[24px] h-auto;
+
+		@apply flex flex-col;
+
+		@apply min-w-[250px];
+
+		@apply lg:top-[calc(48px+96px)];
+	}
+
+	.profile-menu__open .profile-menu__prefix-icon-lg {
+		@apply lg:mr-3;
+	}
+
+	.profile-menu__open .profile-menu__text-lg {
+		@apply lg:mr-auto;
+	}
+
+	.profile-menu__open .link-component {
+		@apply lg:text-black;
+	}
+
+	.link-component {
+		@apply p-4 flex items-center rounded-lg;
+
+		@apply text-subtitle font-semi-bold;
+
+		@apply lg:text-sonic-silver;
+	}
+
+	.link-component:hover {
+		@apply bg-platinum cursor-pointer;
+	}
+}
+
+@layer base {
+	li > hr {
+		@apply mt-4;
 	}
 }

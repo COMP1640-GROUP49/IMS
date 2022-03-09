@@ -6,7 +6,6 @@ import { Icon } from 'components/Icon';
 import { Input } from 'components/Input';
 import { Label } from 'components/Label';
 import { Logo } from 'components/Logo';
-import supabase from 'utils/supabase';
 import { loginAccount } from './api/auth';
 
 const Login: NextPage = () => {

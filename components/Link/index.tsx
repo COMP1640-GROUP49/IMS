@@ -6,17 +6,15 @@ type Props = {
 	children: React.ReactNode;
 };
 
-export const LinkComponents = ({ link, title, children }: Props) => {
+export const LinkComponent = ({ link, title, children }: Props) => {
 	return (
 		<Link href={link}>
-			<a className="hover:cursor-pointer hover:bg-white lg:hover:bg-transparent lg:text-black hover:text-slate-900 w-[90%]  rounded-l-[30px] transition-all pl-1 lg:pl-5 ease-in-out flex justify-between items-center ml-4">
-				<div className="mr-3 lg:hidden">{children}</div>
-				<div className="mr-auto">
-					<h1>{title}</h1>
+			<a className="link-component">
+				<div className="mr-3 lg:mr-0 profile-menu__prefix-icon-lg">{children}</div>
+				<div className="mr-auto lg:mr-0 profile-menu__text-lg">
+					<p>{title}</p>
 				</div>
-				<div className="lg:hidden">
-					<Icon name="ChevronRight" size="32" />
-				</div>
+				<Icon name="ChevronRight" size="32" />
 			</a>
 		</Link>
 	);

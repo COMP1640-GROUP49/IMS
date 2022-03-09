@@ -4,10 +4,11 @@ export type IconName = keyof typeof icons;
 
 export type IconProps = {
 	name?: IconName;
+	hasPadding?: boolean;
 } & icons.IconProps;
 
 /** Got this from https://github.com/feathericons/react-feather/issues/41 */
-export function Icon({ name, ...rest }: IconProps) {
+export function Icon({ name, hasPadding, ...rest }: IconProps) {
 	const IconComponent = icons[name!];
-	return <IconComponent {...rest} />;
+	return hasPadding ? <IconComponent {...rest} /> : <IconComponent {...rest} />;
 }
