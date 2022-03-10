@@ -86,7 +86,7 @@
 		}
 
 		.btn-icon {
-			@apply p-2 shadow-0 rounded-full;
+			@apply p-2 shadow-0 rounded-full h-auto;
 		}
 
 		.btn-avatar {
@@ -135,7 +135,7 @@
 		}
 
 		.hamburger-menu {
-			@apply relative;
+			@apply relative flex flex-col items-center justify-center;
 		}
 
 		.hamburger-menu__open {
