@@ -41,4 +41,4 @@ yarn-error.log*
 .eslintcache
 
 # vscode settings
-settings.json
+/.vscode/

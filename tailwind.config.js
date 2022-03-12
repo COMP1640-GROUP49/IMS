@@ -47,6 +47,7 @@ module.exports = {
 			boxShadow: {
 				0: '0px 10px 20px rgba(0, 0, 0, 0.05)',
 				1: '5px 10px 20px 0 rgba(0, 0, 0, 0.1)',
+				2: '0px 15px 20px rgba(0, 0, 0, 0.15);',
 			},
 			screens: {
 				sm: { min: '0px', max: '767px' },

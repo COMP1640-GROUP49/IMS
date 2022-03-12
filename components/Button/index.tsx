@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 type ButtonProps = {
 	type?: 'button' | 'submit' | 'reset' | undefined;
 	children: React.ReactNode;
@@ -13,10 +14,7 @@ export const Button = ({ type, icon, disabled, children, className, onClick }: B
 			disabled={disabled}
 			type={type}
 			onClick={onClick}
-			className={`
-			
-			
-			flex items-center justify-center gap-4 ${className!}`}
+			className={`flex items-center justify-center gap-4 ${className!}`}
 		>
 			{children}
 		</button>

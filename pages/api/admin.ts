@@ -121,3 +121,11 @@ export const uploadAvatar = async (avatarFile: File, username: string) => {
 		throw new Error('Bucket does not exists on the db!');
 	}
 };
+
+export const getUsersList = async () => {
+	const { data, error } = await supabase.from('accounts').select(`*,
+		account_role: account_roles(role_name),
+		account_department: departments(department_name)
+	`);
+	return { data, error };
+};

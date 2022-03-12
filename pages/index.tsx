@@ -1,7 +1,8 @@
 import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import MetaTags from 'components/MetaTags';
+import { Button } from 'components/Button';
+import { MetaTags } from 'components/MetaTags';
 import { useUserData } from 'lib/hooks';
 import { isEmptyOrUndefined } from 'utils/isEmpty';
 import supabase from 'utils/supabase';
@@ -57,7 +58,7 @@ const Home: NextPage = () => {
 			{!isLoading && isLoggedIn && (
 				<>
 					<MetaTags title="IMS" description="Checkout our home page" />
-					<button
+					<Button
 						className="btn-google"
 						onClick={async () => {
 							await supabase.auth.signOut();
@@ -65,7 +66,7 @@ const Home: NextPage = () => {
 						}}
 					>
 						Log Out
-					</button>
+					</Button>
 				</>
 			)}
 		</main>
