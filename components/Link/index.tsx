@@ -14,7 +14,7 @@ export const LinkComponent = ({ link, title, children }: Props) => {
 				<div className="mr-auto lg:mr-0 profile-menu__text-lg">
 					<p>{title}</p>
 				</div>
-				<Icon name="ChevronRight" size="32" />
+				<Icon className="ml-6" color="#717171" name="ChevronRight" size="32" />
 			</a>
 		</Link>
 	);

@@ -1,10 +1,10 @@
 import Head from 'next/head';
 
-export default function MetaTags({
+export const MetaTags = ({
 	title = 'IMS',
 	description = 'Idea Management System - COMP1640',
 	image = 'https://images.unsplash.com/photo-1480944657103-7fed22359e1d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1632&q=80',
-}) {
+}) => {
 	return (
 		<Head>
 			<title>{title}</title>
@@ -20,4 +20,4 @@ export default function MetaTags({
 			<link rel="icon" href="/favicon.ico" />
 		</Head>
 	);
-}
+};

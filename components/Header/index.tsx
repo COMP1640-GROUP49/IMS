@@ -36,24 +36,24 @@ export const Header = () => {
 			</div>
 			<div className={`hamburger-menu__open ${openHamburgerMenu ? '' : 'hidden lg:hamburger-menu__lg'}`}>
 				<ul className="menu-list">
-					<li className="flex self-start lg:self-center">
+					<li className="flex self-start lg:self-center mb-4">
 						<Logo width="96" height="96" />
 					</li>
 
 					<li>
-						<LinkComponent link="/admin" title="Dashboard">
+						<LinkComponent link={`/admin`} title="Dashboard">
 							<Icon name="Monitor" size="32" color="black" />
 						</LinkComponent>
 						<hr />
 					</li>
 					<ul className="menu-item">
 						<li>
-							<LinkComponent link="/users" title="Users">
+							<LinkComponent link={`/admin/users`} title="Users">
 								<Icon name="Users" size="32" color="black" />
 							</LinkComponent>
 						</li>
 						<li>
-							<LinkComponent link="/departments" title="Departments">
+							<LinkComponent link={`/admin/departments`} title="Departments">
 								<Icon name="Grid" size="32" color="black" />
 							</LinkComponent>
 							<hr />
