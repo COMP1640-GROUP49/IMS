@@ -86,9 +86,11 @@ export const uploadAvatar = async (avatarFile: File, username: string) => {
 	};
 
 	const getAvatarFileUrl = async () => {
-		const { data, error } = await supabase.storage.from('users').download(`${username}/avatars/${username}-avatar`);
-		if (data) {
-			const url = URL.createObjectURL(data);
+		const { signedURL, error } = await supabase.storage
+			.from('users')
+			.createSignedUrl(`${username}/avatars/${username}-avatar`, 999999999999); // Expired time of signed URL of avatar
+		if (signedURL) {
+			const url = signedURL;
 			return url;
 		} else {
 			throw error;
