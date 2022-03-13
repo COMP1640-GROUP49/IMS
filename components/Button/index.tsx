@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
 type ButtonProps = {
 	type?: 'button' | 'submit' | 'reset' | undefined;
 	children: React.ReactNode;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import React, { useEffect, useState } from 'react';
 import AvatarUploader from 'components/AvatarUploader';
 import { Button } from 'components/Button';
@@ -254,7 +255,7 @@ const CreateNewUser = () => {
 	return (
 		<div className="form-container flex flex-col gap-6 p-6">
 			<h1>Create New User Account</h1>
-			<form onSubmit={handleCreateNewAccount} className="flex flex-col gap-6">
+			<form onSubmit={void handleCreateNewAccount} className="flex flex-col gap-6">
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col gap-2">
 						<Label size="text-subtitle">Account</Label>
