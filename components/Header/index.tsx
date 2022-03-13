@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import React, { useEffect, useState } from 'react';
 import { Avatar } from 'components/Avatar';
 import { Button } from 'components/Button';
 import { Icon } from 'components/Icon';
 import { LinkComponent } from 'components/Link';
 import { Logo } from 'components/Logo';
+import { logOut } from 'pages/api/auth';
 
 export const Header = () => {
 	const [openHamburgerMenu, setOpenHamburgerMenu] = useState(false);
@@ -84,9 +86,11 @@ export const Header = () => {
 						</LinkComponent>
 					</li>
 					<li>
-						<LinkComponent link="/logout" title="Log Out">
-							<Icon name="LogOut" size="32" color="black" />
-						</LinkComponent>
+						<Button onClick={logOut}>
+							<LinkComponent link="/login" title="Log Out">
+								<Icon name="LogOut" size="32" color="black" />
+							</LinkComponent>
+						</Button>
 					</li>
 				</ul>
 			</div>

@@ -28,7 +28,10 @@ const accountData: IUserResponseData = {
 };
 
 export const loginAccount = async ({ username, password }: DataProps) => {
-	const { data } = await supabase.from('accounts').select('account_email, account_role').match({ username: username });
+	const { data, error } = await supabase
+		.from('accounts')
+		.select('account_email, account_role')
+		.match({ username: username });
 
 	data!.forEach((accountField: IUserResponseData) => {
 		accountData.account_email = accountField['account_email'];
@@ -49,7 +52,14 @@ export const loginWithGoogle = async () => {
 		const { user, session, error } = await supabase.auth.signIn({
 			provider: 'google',
 		});
+		if (error) {
+			console.error(error);
+		}
 	} catch (error) {
 		console.error(error);
 	}
+};
+
+export const logOut = async () => {
+	const { error } = await supabase.auth.signOut();
 };

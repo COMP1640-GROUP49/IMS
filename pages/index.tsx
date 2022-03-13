@@ -16,8 +16,6 @@ const Home: NextPage = () => {
 
 	const user = useUserData();
 
-	console.log('1', isEmptyOrUndefined(user as object), isLoggedIn, isLoading);
-
 	useEffect(() => {
 		const checkAuth = () => {
 			if (isLoading) {
@@ -55,7 +53,6 @@ const Home: NextPage = () => {
 
 	return (
 		<main>
-			{console.log('2', isEmptyOrUndefined(user as object), isLoggedIn, isLoading)}
 			{!isLoading && isLoggedIn && (
 				<>
 					<MetaTags title="IMS" description="Checkout our home page" />

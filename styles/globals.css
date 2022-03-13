@@ -154,6 +154,10 @@
 		@apply px-2 py-[calc(1rem-1px)] bg-white text-sonic-silver rounded-lg font-semi-bold border border-sonic-silver;
 	}
 
+	.btn-google:hover {
+		@apply shadow-2;
+	}
+
 	.btn-disabled {
 		@apply px-2 py-4 bg-platinum text-silver rounded-lg font-semi-bold self-stretch;
 	}
