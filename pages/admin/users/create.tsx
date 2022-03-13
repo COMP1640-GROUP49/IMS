@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import React, { useEffect, useState } from 'react';
 import AvatarUploader from 'components/AvatarUploader';
 import { Button } from 'components/Button';

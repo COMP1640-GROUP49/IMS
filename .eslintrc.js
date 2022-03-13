@@ -56,6 +56,18 @@ module.exports = {
 		'@typescript-eslint/explicit-module-boundary-types': 'off',
 		'@typescript-eslint/no-explicit-any': 'off',
 		'@typescript-eslint/no-non-null-assertion': 'off',
+		/**
+		 * Fix bugs of @typescript-eslint from https://github.com/typescript-eslint/typescript-eslint/pull/4541
+		 */
+		'@typescript-eslint/no-misused-promises': ['error', { checksVoidReturningArgument: false }],
+		'@typescript-eslint/no-misused-promises': [
+			'error',
+			{
+				checksVoidReturn: {
+					arguments: false,
+				},
+			},
+		],
 		'react/jsx-filename-extension': [1, { extensions: ['.tsx', 'jsx'] }],
 		'react/prop-types': 0,
 	},
