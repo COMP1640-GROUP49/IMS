@@ -3892,7 +3892,7 @@ private@^0.1.8:
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
   integrity sha512-VvivMrbvd2nKkiG38qjULzlc+4Vx4wm/whI9pQD35YrARNnhxeiRktSOhSukRLFNlzg6Br/cJPet5J/u19r/mg==
 
-prop-types@^15.7.2:
+prop-types@^15.6.1, prop-types@^15.7.2:
   version "15.8.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==
@@ -3943,6 +3943,13 @@ react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
+
+react-paginate@^8.1.2:
+  version "8.1.2"
+  resolved "https://registry.yarnpkg.com/react-paginate/-/react-paginate-8.1.2.tgz#08d90945d0d021f1da78f2848c0f60e6c25e2391"
+  integrity sha512-buBkBiN9J8gvZYwYNixlTGRmWOC5C6+tH2XHTN8B5qGkRPOSYFkAqxhWUnxSVAeLKxpVZGPya/gOL2eJQNZGvg==
+  dependencies:
+    prop-types "^15.6.1"
 
 react-spinners@^0.11.0:
   version "0.11.0"
