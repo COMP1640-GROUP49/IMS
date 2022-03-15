@@ -131,11 +131,18 @@ export const uploadAvatar = async (avatarFile: File, username: string) => {
 	}
 };
 
-export const getUsersList = async () => {
-	const { data, error } = await supabase.from('accounts').select(`*,
+export const getUsersList = async (limit?: number) => {
+	const noLimit = 99999;
+
+	const { data, error } = await supabase
+		.from('accounts')
+		.select(
+			`*,
 		account_role: account_roles(role_name),
 		account_department: departments(department_name)
-	`);
+	`
+		)
+		.limit(limit || noLimit);
 	return { data, error };
 };
 
