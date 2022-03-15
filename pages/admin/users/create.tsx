@@ -1,17 +1,29 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
-import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import React, { FormEvent, useEffect, useState } from 'react';
 import AvatarUploader from 'components/AvatarUploader';
 import { Button } from 'components/Button';
+import { Header } from 'components/Header';
 import { Icon } from 'components/Icon';
 import { Input } from 'components/Input';
 import { Label } from 'components/Label';
+import { MetaTags } from 'components/MetaTags';
 import { Select } from 'components/Select';
-import { CheckEmailExisted, checkUsernameExisted, createNewAccount, IFormData, uploadAvatar } from 'pages/api/admin';
+import {
+	CheckEmailExisted,
+	checkUsernameExisted,
+	createNewAccount,
+	IFormData,
+	keepAdminSession,
+	uploadAvatar,
+} from 'pages/api/admin';
 import { scrollToElement } from 'utils/scrollAnimate';
 
 const CreateNewUser = () => {
 	const [formData, setFormData] = useState<IFormData>();
 	const [avatar, setAvatar] = useState<File>();
+
+	const router = useRouter();
 
 	interface IFormValidation {
 		usernameValidation: string;
@@ -43,8 +55,8 @@ const CreateNewUser = () => {
 		}
 	};
 
-	const handleCreateNewAccount = async (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
+	const handleCreateNewAccount = async (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
+		(event as FormEvent<HTMLFormElement>).preventDefault();
 		await fileUpload();
 
 		// Check form validate before submit form
@@ -63,7 +75,11 @@ const CreateNewUser = () => {
 			scrollToElement('select-department');
 		} else {
 			try {
-				await createNewAccount(formData);
+				const { newUserData, adminSession } = await createNewAccount(formData);
+				if (newUserData) {
+					await keepAdminSession(adminSession?.refresh_token as string);
+					void router.reload();
+				}
 			} catch (error) {
 				throw error;
 			}
@@ -110,7 +126,6 @@ const CreateNewUser = () => {
 					}
 				}
 			}
-			console.log(formValidation);
 		}
 
 		// password validation
@@ -253,162 +268,177 @@ const CreateNewUser = () => {
 	}, [formValidation, isFormValidated]);
 
 	return (
-		<div className="form-container flex flex-col gap-6 p-6">
-			<h1>Create New User Account</h1>
-			<form onSubmit={void handleCreateNewAccount} className="flex flex-col gap-6">
-				<div className="flex flex-col gap-4">
-					<div className="flex flex-col gap-2">
-						<Label size="text-subtitle">Account</Label>
-						<hr />
-					</div>
-					<div className="flex flex-col gap-2">
-						<Label size="text-normal">Username</Label>
-						<Input
-							name="username"
-							onChange={handleChange}
-							required
-							placeholder={"Input account's username"}
-							type="text"
-						/>
-						{formValidation &&
-							(formValidation['usernameValidation'] === 'success' ? (
-								<div className="label-success">This username is available.</div>
-							) : formValidation['usernameValidation'] === 'warning' ? (
-								<div className="label-warning">Please input the username.</div>
-							) : formValidation['usernameValidation'] === 'error' ? (
-								<div className="label-error">This username is not available. Please choose another one.</div>
-							) : null)}
-					</div>
-					<div className="flex flex-col gap-2">
-						<Label size="text-normal">Password</Label>
-						<Input
-							name="password"
-							onChange={handleChange}
-							required
-							placeholder={"Input account's password"}
-							type="password"
-						/>
-						{/* TODO: Show/hide password */}
-						{/* <button>
+		<>
+			<MetaTags title="Create New User Account" description="Create a new user account" />
+			<Header />
+			<main className="below-navigation-bar">
+				<div className="form-container flex flex-col gap-6 p-6">
+					<h1>Create New User Account</h1>
+					<form onSubmit={handleCreateNewAccount} className="flex flex-col gap-6">
+						<div className="flex flex-col gap-4">
+							<div className="flex flex-col gap-2">
+								<Label size="text-subtitle">Account</Label>
+								<hr />
+							</div>
+							<div className="flex flex-col gap-2">
+								<Label size="text-normal">Username</Label>
+								<Input
+									name="username"
+									onChange={handleChange}
+									required
+									placeholder={"Input account's username"}
+									type="text"
+								/>
+								{formValidation &&
+									(formValidation['usernameValidation'] === 'success' ? (
+										<div className="label-success">This username is available.</div>
+									) : formValidation['usernameValidation'] === 'warning' ? (
+										<div className="label-warning">Please input the username.</div>
+									) : formValidation['usernameValidation'] === 'error' ? (
+										<div className="label-error">This username is not available. Please choose another one.</div>
+									) : null)}
+							</div>
+							<div className="flex flex-col gap-2">
+								<Label size="text-normal">Password</Label>
+								<Input
+									name="password"
+									onChange={handleChange}
+									required
+									placeholder={"Input account's password"}
+									type="password"
+								/>
+								{/* TODO: Show/hide password */}
+								{/* <button>
 									<Icon name="Eye" size="32" color="gray" className="absolute bottom-4 right-2"></Icon>
 								</button> */}
-						{formValidation &&
-							(formValidation['passwordValidation'] === 'success' ? (
-								<div className="label-success">This password is valid.</div>
-							) : formValidation['passwordValidation'] === 'warning' ? (
-								<div className="label-warning">Please input the password.</div>
-							) : formValidation['passwordValidation'] === 'error' ? (
-								<div className="label-error">Password must be greater than 6 characters.</div>
-							) : null)}
-					</div>
-					<div id="select-role" className="flex flex-col gap-2">
-						<Label size="text-normal">Role</Label>
-						<Select name="role" required defaultValue={'disabled'} onChange={handleChange}>
-							<option disabled value={'disabled'}>
-								{"Select account's role"}
-							</option>
-							<option value="0">Admin</option>
-							<option value="1">QA Manager</option>
-							<option value="2">QA Coordinator</option>
-							<option value="3">Staff</option>
-						</Select>
-						{formValidation &&
-							(formValidation['roleValidation'] === 'error' ? (
-								<div className="label-warning">Please select role for account.</div>
-							) : null)}
-					</div>
-					<div id="select-department" className="flex flex-col gap-2">
-						<Label size="text-normal">Department</Label>
-						<Select name="department" required defaultValue={'disabled'} onChange={handleChange}>
-							<option disabled value={'disabled'}>
-								{"Select account's department"}
-							</option>
-							<option value="0">Admin Department</option>
-							<option value="1">QA Department</option>
-							<option value="2">IT Department</option>
-							<option value="3">Design Department</option>
-						</Select>
-						{formValidation &&
-							(formValidation['roleValidation'] === 'error' ? (
-								<div className="label-warning">Please select department for account.</div>
-							) : null)}
-					</div>
-					<div className="flex flex-col gap-2">
-						<Label size="text-normal">Email</Label>
-						<Input name="email" onChange={handleChange} required placeholder={"Input account's email"} type="email" />
-						{formValidation &&
-							(formValidation['emailValidation'] === 'success' ? (
-								<div className="label-success">This email address is valid.</div>
-							) : formValidation['emailValidation'] === 'warning' ? (
-								<div className="label-warning">Please input the email address.</div>
-							) : formValidation['emailValidation'] === 'error-format' ? (
-								<div className="label-error">This email has an invalid email address format. Please try again.</div>
-							) : formValidation['emailValidation'] === 'error-existed' ? (
-								<div className="label-error">This email has been registered in the system. Please try another one.</div>
-							) : null)}
-					</div>
-				</div>
-				<div className="flex flex-col gap-4">
-					<div className="flex flex-col gap-2">
-						<Label optional size="text-subtitle">
-							Information
-						</Label>
-						<hr />
-					</div>
-					<div className="flex flex-col gap-2">
-						<Label size="text-normal">Full name</Label>
-						<Input
-							name="full_name"
-							onChange={handleChange}
-							required={false}
-							placeholder={"Input account's full name"}
-							type="text"
-						/>
-					</div>
+								{formValidation &&
+									(formValidation['passwordValidation'] === 'success' ? (
+										<div className="label-success">This password is valid.</div>
+									) : formValidation['passwordValidation'] === 'warning' ? (
+										<div className="label-warning">Please input the password.</div>
+									) : formValidation['passwordValidation'] === 'error' ? (
+										<div className="label-error">Password must be greater than 6 characters.</div>
+									) : null)}
+							</div>
+							<div id="select-role" className="flex flex-col gap-2">
+								<Label size="text-normal">Role</Label>
+								<Select name="role" required defaultValue={'disabled'} onChange={handleChange}>
+									<option disabled value={'disabled'}>
+										{"Select account's role"}
+									</option>
+									<option value="0">Admin</option>
+									<option value="1">QA Manager</option>
+									<option value="2">QA Coordinator</option>
+									<option value="3">Staff</option>
+								</Select>
+								{formValidation &&
+									(formValidation['roleValidation'] === 'error' ? (
+										<div className="label-warning">Please select role for account.</div>
+									) : null)}
+							</div>
+							<div id="select-department" className="flex flex-col gap-2">
+								<Label size="text-normal">Department</Label>
+								<Select name="department" required defaultValue={'disabled'} onChange={handleChange}>
+									<option disabled value={'disabled'}>
+										{"Select account's department"}
+									</option>
+									<option value="0">Admin Department</option>
+									<option value="1">QA Department</option>
+									<option value="2">IT Department</option>
+									<option value="3">Design Department</option>
+									<option value="3">Business Department</option>
+								</Select>
+								{formValidation &&
+									(formValidation['roleValidation'] === 'error' ? (
+										<div className="label-warning">Please select department for account.</div>
+									) : null)}
+							</div>
+							<div className="flex flex-col gap-2">
+								<Label size="text-normal">Email</Label>
+								<Input
+									name="email"
+									onChange={handleChange}
+									required
+									placeholder={"Input account's email"}
+									type="email"
+								/>
+								{formValidation &&
+									(formValidation['emailValidation'] === 'success' ? (
+										<div className="label-success">This email address is valid.</div>
+									) : formValidation['emailValidation'] === 'warning' ? (
+										<div className="label-warning">Please input the email address.</div>
+									) : formValidation['emailValidation'] === 'error-format' ? (
+										<div className="label-error">This email has an invalid email address format. Please try again.</div>
+									) : formValidation['emailValidation'] === 'error-existed' ? (
+										<div className="label-error">
+											This email has been registered in the system. Please try another one.
+										</div>
+									) : null)}
+							</div>
+						</div>
+						<div className="flex flex-col gap-4">
+							<div className="flex flex-col gap-2">
+								<Label optional size="text-subtitle">
+									Information
+								</Label>
+								<hr />
+							</div>
+							<div className="flex flex-col gap-2">
+								<Label size="text-normal">Full name</Label>
+								<Input
+									name="full_name"
+									onChange={handleChange}
+									required={false}
+									placeholder={"Input account's full name"}
+									type="text"
+								/>
+							</div>
 
-					<div className="flex flex-col gap-2">
-						<Label size="text-normal">Address</Label>
-						<Input
-							name="address"
-							onChange={handleChange}
-							required={false}
-							placeholder={"Input account's address"}
-							type="text"
-						/>
-					</div>
-					<div className="flex flex-col gap-2">
-						<Label size="text-normal">Phone number</Label>
-						<Input
-							name="phone"
-							onChange={handleChange}
-							required={false}
-							placeholder={"Input account's phone number"}
-							type="tel"
-						/>
-						{formValidation && formValidation['phoneValidation'] === 'warning' ? (
-							<div className="label-warning">Invalid phone number format.</div>
-						) : formValidation && formValidation['phoneValidation'] === 'success' ? (
-							<div className="label-success">This phone number is valid.</div>
-						) : null}
-					</div>
-					<div className="flex flex-col gap-2">
-						<Label size="text-normal">Avatar</Label>
-						<AvatarUploader fileUpdate={fileUpdate} size="150" />
-					</div>
-				</div>
+							<div className="flex flex-col gap-2">
+								<Label size="text-normal">Address</Label>
+								<Input
+									name="address"
+									onChange={handleChange}
+									required={false}
+									placeholder={"Input account's address"}
+									type="text"
+								/>
+							</div>
+							<div className="flex flex-col gap-2">
+								<Label size="text-normal">Phone number</Label>
+								<Input
+									name="phone"
+									onChange={handleChange}
+									required={false}
+									placeholder={"Input account's phone number"}
+									type="tel"
+								/>
+								{formValidation && formValidation['phoneValidation'] === 'warning' ? (
+									<div className="label-warning">Invalid phone number format.</div>
+								) : formValidation && formValidation['phoneValidation'] === 'success' ? (
+									<div className="label-success">This phone number is valid.</div>
+								) : null}
+							</div>
+							<div className="flex flex-col gap-2">
+								<Label size="text-normal">Avatar</Label>
+								<AvatarUploader fileUpdate={fileUpdate} size="150" />
+							</div>
+						</div>
 
-				<Button
-					disabled={!isFormValidated}
-					icon={true}
-					className={`${
-						isFormValidated ? `btn-primary` : `btn-disabled`
-					}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
-				>
-					<Icon name="Plus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
-					Create new user account
-				</Button>
-			</form>
-		</div>
+						<Button
+							disabled={!isFormValidated}
+							icon={true}
+							className={`${
+								isFormValidated ? `btn-primary` : `btn-disabled`
+							}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+						>
+							<Icon name="Plus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+							Create new user account
+						</Button>
+					</form>
+				</div>
+			</main>
+		</>
 	);
 };
 

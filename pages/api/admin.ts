@@ -1,6 +1,8 @@
+import { Session } from '@supabase/supabase-js';
 import { IObjectKeys } from 'lib/objectKeys';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
+import { IUserData } from './auth';
 
 export interface IFormData extends IObjectKeys {
 	email: string;
@@ -29,6 +31,7 @@ export const CheckEmailExisted = async (email: string) => {
 	return data!.length !== 0;
 };
 
+let newUserData: IUserData;
 export const createNewAccount = async ({
 	email,
 	username,
@@ -40,6 +43,8 @@ export const createNewAccount = async ({
 	phone,
 	avatar,
 }: IFormData) => {
+	const adminSession = supabase.auth.session();
+
 	try {
 		const creatingNewUserAccount = async () => {
 			const { user, error } = await supabase.auth.signUp(
@@ -61,6 +66,8 @@ export const createNewAccount = async ({
 			);
 			if (error) {
 				throw error.message;
+			} else {
+				newUserData = user as IUserData;
 			}
 		};
 		await notifyToast(
@@ -68,6 +75,8 @@ export const createNewAccount = async ({
 			`Creating account for user @${username}.`,
 			`Account @${username} has been created.`
 		);
+
+		return { newUserData, adminSession };
 	} catch (error) {
 		throw error;
 	}
@@ -128,4 +137,12 @@ export const getUsersList = async () => {
 		account_department: departments(department_name)
 	`);
 	return { data, error };
+};
+
+/**
+ * Due to issues of signUp() from Supabase (auto signIn after signUp)
+ * https://github.com/supabase/gotrue-js/pull/249
+ */
+export const keepAdminSession = async (refreshToken: string) => {
+	await supabase.auth.setSession(refreshToken);
 };

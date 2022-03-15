@@ -1,21 +1,20 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { NextPage } from 'next';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import { useRouter, withRouter } from 'next/router';
+import React, { useState } from 'react';
 import { Button } from 'components/Button';
 import { Icon } from 'components/Icon';
 import { Input } from 'components/Input';
 import { Label } from 'components/Label';
 import { Logo } from 'components/Logo';
 import { loginAccount, loginWithGoogle } from 'pages/api/auth';
-import { useUserData } from 'lib/hooks';
 
-const Login: NextPage = () => {
+const Login: NextPage = (props: any) => {
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [hasError, setHasError] = useState(false);
-	const user = useUserData();
 
 	const router = useRouter();
 
@@ -36,7 +35,23 @@ const Login: NextPage = () => {
 	const handleLogin = async (event: React.FormEvent, { username, password }: LoginProps) => {
 		event.preventDefault();
 		try {
-			await loginAccount({ username, password });
+			const data = await loginAccount({ username, password });
+			console.log('🚀 ~ file: login.tsx ~ line 40 ~ handleLogin ~ data', data);
+
+			if (data && data['error']) {
+				setHasError(true);
+			} else {
+				setHasError(false);
+				if (data?.user) {
+					switch (data?.user?.user_metadata?.role) {
+						case '0':
+							void router.push('/admin');
+							break;
+						default:
+							void router.push('/');
+					}
+				}
+			}
 		} catch (error) {
 			setHasError(true);
 		}
@@ -45,21 +60,6 @@ const Login: NextPage = () => {
 	const handleLoginWithGoogle = async () => {
 		await loginWithGoogle();
 	};
-
-	useEffect(() => {
-		try {
-			if (user) {
-				switch (user?.user_metadata?.role) {
-					case 0:
-						void router.push('/admin');
-						break;
-					default:
-						void router.push('/admin');
-						break;
-				}
-			}
-		} catch (error) {}
-	}, [user, router]);
 
 	return (
 		<div className="p-6 flex gap-6 justify-center items-center h-screen md:px-40">
@@ -91,19 +91,44 @@ const Login: NextPage = () => {
 							type="password"
 						></Input>
 					</div>
-					{hasError ? <div className="label-error">Username or password is incorrect</div> : <></>}
-					<div className="flex flex-col gap-2">
-						<Button type="submit" icon={true} className={'btn-primary'}>
-							<Icon name="LogIn" size="16" color="white" />
-							Log In
-						</Button>
-						<p className="divider self-stretch text-sonic-silver">
-							<span>or</span>
-						</p>
-						<Button onClick={handleLoginWithGoogle} type="button" icon={true} className={'btn-google '}>
-							<Image priority src="/google.svg" width="16" height="16" alt="img-logo" />
-							Continue with Google
-						</Button>
+					<div className="flex flex-1 flex-col gap-6 self-stretch justify-center lg:justify-start lg:max-w-lg ">
+						<div className="flex flex-col gap-2">
+							<Label size="text-subtitle">Username</Label>
+							<Input
+								value={username}
+								onChange={handleUsernameChange}
+								required={true}
+								placeholder="Input your username"
+								type="text"
+							></Input>
+						</div>
+						<div className="flex flex-col gap-2">
+							<Label size="text-subtitle">Password</Label>
+							<Input
+								value={password}
+								onChange={handlePasswordChange}
+								required={true}
+								placeholder="Input your password"
+								type="password"
+							></Input>
+						</div>
+						{hasError ? <div className="label-error">Username or password is incorrect.</div> : <></>}
+						<div className="flex flex-col gap-2">
+							<Button type="submit" icon={true} className={'btn-primary'}>
+								<Icon name="LogIn" size="16" color="white" />
+								Log In
+							</Button>
+							<p className="divider self-stretch text-sonic-silver">
+								<span>or</span>
+							</p>
+							{props?.router?.query?.error === 'google account error' && (
+								<div className="label-error">This Google account is not valid. Please try another one.</div>
+							)}
+							<Button onClick={handleLoginWithGoogle} type="button" icon={true} className={'btn-google '}>
+								<Image priority src="/google.svg" width="16" height="16" alt="img-logo" />
+								Continue with Google
+							</Button>
+						</div>
 					</div>
 				</div>
 			</form>
@@ -111,4 +136,4 @@ const Login: NextPage = () => {
 	);
 };
 
-export default Login;
+export default withRouter(Login);

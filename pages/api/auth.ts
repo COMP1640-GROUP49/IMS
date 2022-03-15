@@ -41,15 +41,25 @@ export const loginAccount = async ({ username, password }: DataProps) => {
 		});
 
 		accountData.account_role = data?.user?.user_metadata?.role as IUserResponseData['account_role'];
+
+		return data;
 	}
 };
 
 export const loginWithGoogle = async () => {
 	try {
-		const { user, session, error } = await supabase.auth.signIn({
+		await supabase.auth.signIn({
 			provider: 'google',
 		});
 	} catch (error) {
-		console.error(error);
+		throw error;
+	}
+};
+
+export const logOut = async () => {
+	const { error } = await supabase.auth.signOut();
+
+	if (error) {
+		throw error;
 	}
 };
