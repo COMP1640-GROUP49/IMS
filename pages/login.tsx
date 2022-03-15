@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { NextPage } from 'next';
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import { useRouter, withRouter } from 'next/router';
+import React, { useState } from 'react';
 import { Button } from 'components/Button';
 import { Icon } from 'components/Icon';
 import { Input } from 'components/Input';
@@ -9,13 +11,13 @@ import { Label } from 'components/Label';
 import { Logo } from 'components/Logo';
 import { MetaTags } from 'components/MetaTags';
 import { loginAccount, loginWithGoogle } from 'pages/api/auth';
-import { useUserData } from 'lib/hooks';
 
-const Login: NextPage = () => {
+const Login: NextPage = (props: any) => {
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [hasError, setHasError] = useState(false);
-	const [hasGoogleError, setGoogleHasError] = useState(false);
+
+	const router = useRouter();
 
 	const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setUsername(event.target.value);
@@ -35,9 +37,21 @@ const Login: NextPage = () => {
 		event.preventDefault();
 		try {
 			const data = await loginAccount({ username, password });
+			console.log('🚀 ~ file: login.tsx ~ line 40 ~ handleLogin ~ data', data);
 
-			if (data === undefined) {
+			if (data && data['error']) {
 				setHasError(true);
+			} else {
+				setHasError(false);
+				if (data?.user) {
+					switch (data?.user?.user_metadata?.role) {
+						case '0':
+							void router.push('/admin');
+							break;
+						default:
+							void router.push('/');
+					}
+				}
 			}
 		} catch (error) {
 			setHasError(true);
@@ -47,16 +61,6 @@ const Login: NextPage = () => {
 	const handleLoginWithGoogle = async () => {
 		await loginWithGoogle();
 	};
-
-	const user = useUserData();
-
-	useEffect(() => {
-		// if (!user) {
-		// 	setGoogleHasError(true);
-		// }
-		//   return () => {
-		//   }
-	}, [user]);
 
 	return (
 		<main>
@@ -99,7 +103,9 @@ const Login: NextPage = () => {
 							<p className="divider self-stretch text-sonic-silver">
 								<span>or</span>
 							</p>
-							{hasGoogleError ? <div className="label-error">This Google account is not valid.</div> : <></>}
+							{props?.router?.query?.error === 'google account error' && (
+								<div className="label-error">This Google account is not valid. Please try another one.</div>
+							)}
 							<Button onClick={handleLoginWithGoogle} type="button" icon={true} className={'btn-google '}>
 								<Image priority src="/google.svg" width="16" height="16" alt="img-logo" />
 								Continue with Google
@@ -112,4 +118,4 @@ const Login: NextPage = () => {
 	);
 };
 
-export default Login;
+export default withRouter(Login);
