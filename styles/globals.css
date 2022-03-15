@@ -333,6 +333,38 @@
 	.avatar {
 		@apply object-cover;
 	}
+
+	.pagination {
+		@apply flex bg-white;
+
+		@apply font-semi-bold;
+	}
+
+	.pagination li {
+		@apply py-4 rounded-lg;
+	}
+
+	.pagination li a {
+		@apply py-4 px-6 rounded-lg;
+	}
+
+	.pagination li:hover {
+		@apply shadow-1;
+	}
+
+	.pagination li.selected {
+		@apply bg-black text-white;
+	}
+
+	.pagination li.disabled {
+		@apply text-sonic-silver;
+	}
+	.pagination li.disabled:hover {
+		@apply shadow-none;
+	}
+	.pagination li.disabled a:hover {
+		@apply cursor-default;
+	}
 }
 
 @layer utilities {

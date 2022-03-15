@@ -3,3 +3,10 @@ export const scrollToElement = (id: string) => {
 		behavior: 'smooth',
 	});
 };
+
+export const scrollToElementByClassName = (className: string) => {
+	document.getElementsByClassName(className)[0]?.scrollIntoView({
+		behavior: 'smooth',
+		block: 'start',
+	});
+};
