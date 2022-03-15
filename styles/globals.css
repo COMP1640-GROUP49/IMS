@@ -209,9 +209,12 @@
 	.navigation-bar {
 		@apply bg-white p-6 w-full flex flex-1 justify-between fixed top-0 items-center text-black lg:items-center;
 
-		@apply relative;
+		/* @apply relative; */
+		@apply z-50;
 
 		@apply lg:h-[calc(96px+48px)];
+
+		/* Specify for fix navigation bar */
 	}
 
 	.menu-list,
@@ -276,7 +279,7 @@
 
 		/* @apply min-w-[250px]; */
 
-		@apply lg:top-[calc(48px+96px)];
+		@apply lg:top-[calc(48px+96px-24px)];
 	}
 
 	.profile-menu__open .profile-menu__prefix-icon-lg {
@@ -339,6 +342,10 @@
 
 	.avatar-uploader::-webkit-file-upload-button {
 		@apply hidden;
+	}
+
+	.below-navigation-bar {
+		@apply mt-[112px] lg:mt-36;
 	}
 }
 

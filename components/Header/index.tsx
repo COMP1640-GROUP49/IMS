@@ -1,17 +1,22 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Avatar } from 'components/Avatar';
 import { Button } from 'components/Button';
 import { Icon } from 'components/Icon';
 import { LinkComponent } from 'components/Link';
 import { Logo } from 'components/Logo';
-import { logOut } from 'pages/api/auth';
+import { UserContext } from 'components/PrivateRoute';
+import { IUserData, logOut } from 'pages/api/auth';
 
 export const Header = () => {
 	const [openHamburgerMenu, setOpenHamburgerMenu] = useState(false);
 	const [openProfileMenu, setOpenProfileMenu] = useState(false);
+	const [userData, setUserData] = useState<IUserData>();
+
+	const user = useContext(UserContext);
 
 	useEffect(() => {
+		user && setUserData(user);
 		// Close hamburger menu in large screen (for displaying navigation bar items in row)
 		const screenWidth = window.innerWidth;
 		function handleResize() {
@@ -73,9 +78,15 @@ export const Header = () => {
 			<div className="profile-menu">
 				<Button className="flex flex-row items-center gap-4" onClick={() => setOpenProfileMenu(!openProfileMenu)}>
 					<div className="btn-avatar">
-						<Avatar src={'/profile-1634136540709-4d1c27a3cb3fimage.png'} size="56" className="rounded-full" />
+						{userData?.user_metadata['avatar'] ? (
+							<Avatar src={`${userData?.user_metadata['avatar'] as string}`} size="56" className="rounded-full" />
+						) : (
+							<Avatar src={'/default-avatar.png'} size="56" className="rounded-full" />
+						)}
 					</div>
-					<div className="avatar-label sm:hidden">@username</div>
+					<div className="avatar-label sm:hidden">
+						{userData?.user_metadata['username'] && `@${userData?.user_metadata['username'] as string}`}
+					</div>
 				</Button>
 			</div>
 			<div className={`profile-menu__open ${openProfileMenu ? '' : 'hidden'}`}>

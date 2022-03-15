@@ -9,13 +9,16 @@ type AvatarProps = {
 
 export const Avatar = ({ src, size, alt, className }: AvatarProps) => {
 	return (
-		<Image
-			className={`${className as string} avatar`}
-			src={src}
-			// layout="responsive"
-			width={size}
-			height={size}
-			alt={alt}
-		/>
+		<div className={`${className as string}`} style={{ width: `${size as string}px`, height: `${size as string}px` }}>
+			<Image
+				className={`${className as string} avatar`}
+				src={src}
+				layout="responsive"
+				width={size}
+				height={size}
+				alt={alt}
+				priority
+			/>
+		</div>
 	);
 };
