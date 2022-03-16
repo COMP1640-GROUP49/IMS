@@ -8,6 +8,7 @@ import { Button } from 'components/Button';
 import { Header } from 'components/Header';
 import { Icon } from 'components/Icon';
 import { MetaTags } from 'components/MetaTags';
+import Pagination from 'components/Pagination';
 import { UserList } from 'components/UserList';
 import { getUsersList } from 'pages/api/admin';
 import { IAccountData, IAccountsProps } from 'lib/interfaces';
@@ -62,27 +63,14 @@ const UsersManagement: NextPage<IAccountsProps> = ({ data: accounts }) => {
 					</Link>
 				</div>
 				<UserList accounts={currentItems} />
-				<div className="flex justify-between items-center sm:flex-col gap-6">
-					<p>
-						Showing from <span className="font-bold">{itemOffset + 1}</span> to{' '}
-						<span className="font-bold">
-							{currentItems && accounts.indexOf(currentItems[currentItems?.length - 1]) + 1}
-						</span>{' '}
-						of <span className="font-bold">{accounts.length} </span>results
-					</p>
-					<ReactPaginate
-						onClick={handlePaginationClick}
-						initialPage={0}
-						className="pagination"
-						breakLabel="..."
-						nextLabel=">"
-						onPageChange={handlePageClick}
-						pageRangeDisplayed={3}
-						pageCount={pageCount}
-						previousLabel="<"
-						renderOnZeroPageCount={null!}
-					/>{' '}
-				</div>
+				<Pagination
+					items={accounts as []}
+					currentItems={currentItems as []}
+					itemOffset={itemOffset}
+					pageCount={pageCount}
+					handlePaginationClick={handlePaginationClick}
+					handlePageClick={handlePageClick}
+				/>
 				{/* <Modal isShown={isShown} hide={toggle} headerText="Create Uers" modalContent={<h1>dasdadasdas</h1>} /> */}
 			</main>
 			{/* <div className="flex flex-col lgs:flex-row lg:justify-between items-start lg:items-center py-7 sm:w-full"> */}

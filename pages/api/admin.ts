@@ -1,8 +1,8 @@
-import { Session } from '@supabase/supabase-js';
+import { IUserData } from 'pages/api/auth';
+import { IAccountData } from 'lib/interfaces';
 import { IObjectKeys } from 'lib/objectKeys';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
-import { IUserData } from './auth';
 
 export interface IFormData extends IObjectKeys {
 	email: string;
@@ -152,4 +152,10 @@ export const getUsersList = async (limit?: number) => {
  */
 export const keepAdminSession = async (refreshToken: string) => {
 	await supabase.auth.setSession(refreshToken);
+};
+
+export const getAccountData = async (account_id: string) => {
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+	const { data } = await supabase.from('accounts').select().match({ account_id: account_id }).single();
+	return data as IAccountData;
 };

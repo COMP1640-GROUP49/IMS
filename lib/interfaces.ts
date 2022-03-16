@@ -1,4 +1,4 @@
-import { IObjectKeys } from './objectKeys';
+import { IObjectKeys } from 'lib/objectKeys';
 
 export interface IAccountData extends IObjectKeys {
 	account: {
