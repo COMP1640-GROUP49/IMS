@@ -8,10 +8,12 @@ type AvatarUploaderProps = {
 
 const AvatarUploader = ({ size, fileUpdate, value }: AvatarUploaderProps) => {
 	setTimeout(() => {
-		const avatarUploaderEl = document.getElementsByClassName('avatar-uploader')[0] as HTMLElement;
-		if (avatarUploaderEl && value) {
-			avatarUploaderEl.style.backgroundImage = `url('${value}')`;
-			avatarUploaderEl.style.backgroundSize = 'cover';
+		if (typeof document !== 'undefined') {
+			const avatarUploaderEl = document.getElementsByClassName('avatar-uploader')[0] as HTMLElement;
+			if (avatarUploaderEl && value) {
+				avatarUploaderEl.style.backgroundImage = `url('${value}')`;
+				avatarUploaderEl.style.backgroundSize = 'cover';
+			}
 		}
 	}, 1);
 
