@@ -367,8 +367,13 @@
 	.pagination li.disabled a:hover {
 		@apply cursor-default;
 	}
+
+	.profile-header {
+		@apply flex flex-col items-center gap-1;
+	}
+
 	.profile-content {
-		@apply flex flex-col gap-y-6;
+		@apply flex flex-col gap-6;
 	}
 }
 

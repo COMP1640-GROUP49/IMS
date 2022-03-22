@@ -17,7 +17,7 @@ export const Avatar = ({ src, size, alt, className }: AvatarProps) => {
 				width={size}
 				height={size}
 				alt={alt}
-				priority
+				priority={false}
 			/>
 		</div>
 	);

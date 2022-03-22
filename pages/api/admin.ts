@@ -182,3 +182,8 @@ export const getAccountData = async (account_id?: string, username?: string) => 
 		return data as IAccountData;
 	}
 };
+
+export const updateUserAvatar = async (id: string, avatarUrl: string) => {
+	const data = await supabase.rpc('update_user_avatar', { id_val: id, avatar_url: avatarUrl });
+	return data;
+};
