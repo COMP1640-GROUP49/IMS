@@ -8,19 +8,7 @@ import { IAccountData } from 'lib/interfaces';
 
 export const UserCard = ({ account }: IAccountData) => {
 	const { asPath } = useRouter();
-	const {
-		account_id,
-		username,
-		encrypted_password,
-		account_role,
-		account_department,
-		account_email,
-		account_full_name,
-		account_address,
-		account_phone_number,
-		avatar_url,
-		created,
-	} = account;
+	const { account_id, username, account_role, account_department, avatar_url, created } = account;
 	return (
 		<tr className="user-card">
 			<td className="avatar-cell">

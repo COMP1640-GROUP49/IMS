@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import React, { useContext, useEffect, useState } from 'react';
 import { Avatar } from 'components/Avatar';
@@ -14,7 +15,6 @@ export const Header = () => {
 	const [userData, setUserData] = useState<IUserData>();
 
 	const user = useContext(UserContext);
-
 	useEffect(() => {
 		user && setUserData(user);
 		// Close hamburger menu in large screen (for displaying navigation bar items in row)
@@ -92,7 +92,7 @@ export const Header = () => {
 			<div className={`profile-menu__open ${openProfileMenu ? '' : 'hidden'}`}>
 				<ul className="menu-list">
 					<li>
-						<LinkComponent link="/profile" title="My Profile">
+						<LinkComponent link={`/user/${userData?.user_metadata['username']}`} title="My Profile">
 							<Icon name="User" size="32" color="black" />
 						</LinkComponent>
 					</li>

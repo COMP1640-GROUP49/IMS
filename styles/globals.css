@@ -66,7 +66,9 @@
 	h1 {
 		@apply font-semi-bold text-heading-4;
 	}
-
+	h2 {
+		@apply font-semibold text-heading-2;
+	}
 	li > hr {
 		@apply mt-4;
 	}
@@ -364,6 +366,9 @@
 	}
 	.pagination li.disabled a:hover {
 		@apply cursor-default;
+	}
+	.profile-content {
+		@apply flex flex-col gap-y-6;
 	}
 }
 

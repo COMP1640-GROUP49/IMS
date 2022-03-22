@@ -1,3 +1,4 @@
+import { ParsedUrlQuery } from 'querystring';
 import { IObjectKeys } from 'lib/objectKeys';
 
 export interface IAccountData extends IObjectKeys {
@@ -22,4 +23,8 @@ export interface IAccountData extends IObjectKeys {
 
 export interface IAccountsProps {
 	data: IAccountData[];
+}
+
+export interface IParams extends ParsedUrlQuery {
+	username: string;
 }

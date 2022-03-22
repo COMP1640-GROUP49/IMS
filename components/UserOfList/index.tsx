@@ -1,19 +1,19 @@
 import Link from 'next/link';
 import { Icon } from 'components/Icon';
-import { Modal } from 'components/Modal';
-import { useModal } from 'components/UseModal';
+// import { Modal } from 'components/Modal';
+// import { useModal } from 'components/UseModal';
 
 export const UserCard = () => {
-	const { isShown, toggle } = useModal();
+	// const { isShown, toggle } = useModal();
 	return (
 		<div className="lg:container mx-auto sm:p-6 md:p-6 lg:p-6">
 			<div className="flex flex-col lg:flex-row lg:justify-between items-start lg:items-center py-7 sm:w-full">
 				<h1 className="font-semibold text-black text-heading-4">User</h1>
-				<button onClick={toggle} className="btn-create ">
+				{/* <button onClick={toggle} className="btn-create ">
 					<Icon name="UserPlus" />
 					<span>Create new user account</span>
-				</button>
-				<Modal isShown={isShown} hide={toggle} headerText="Create Uers" modalContent={<h1>dasdadasdas</h1>} />
+				</button> */}
+				{/* <Modal isShown={isShown} hide={toggle} headerText="Create Uers" modalContent={<h1>dasdadasdas</h1>} /> */}
 			</div>
 			<div>
 				<h1 className="text-body py-3 font-semibold">List Of Users</h1>
@@ -38,7 +38,7 @@ export const UserCard = () => {
 									<td className="tbody-td items-center">
 										<div className="tbody-td-name">Avarta</div>
 										<div className="text-body text-black">
-											<img src="https://picsum.photos/id/237/200/300" className="w-20 h-20 rounded-[50%]" />
+											{/* <img src="https://picsum.photos/id/237/200/300" className="w-20 h-20 rounded-[50%]" /> */}
 										</div>
 									</td>
 									<td className="tbody-td">

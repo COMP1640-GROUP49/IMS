@@ -3,7 +3,6 @@ import { GetServerSideProps, NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import ReactPaginate from 'react-paginate';
 import { Button } from 'components/Button';
 import { Header } from 'components/Header';
 import { Icon } from 'components/Icon';
