@@ -1,27 +1,35 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 import React, { FunctionComponent } from 'react';
 // import ReactDOM from 'react-dom';
+import { Button } from 'components/Button';
 import { Icon } from 'components/Icon';
+import Portal from 'components/Portal';
 
 export interface ModalProps {
-	isShown: boolean;
-	hide: () => void;
-	modalContent: JSX.Element;
-	headerText: string;
+	children?: React.ReactNode;
+	headerText?: string;
+	onCancel: () => void;
 }
-export const Modal: FunctionComponent<ModalProps> = ({ isShown, hide, modalContent, headerText }) => {
-	const modal = (
-		<div className="modal-content">
-			<div className="bg-slate-400 w-[500px] h-full rounded-2xl p-2">
-				<div className="flex justify-end text-heading_5">
-					<button onClick={hide} className="p-2">
-						<Icon name="X" size={32} color="black" />
-					</button>
+const Modal = ({ onCancel, headerText, children }: ModalProps) => {
+	return (
+		<>
+			<div onClick={onCancel} className="modal-bg" />
+			<Portal>
+				<div className="modal-container">
+					<div className="flex flex-col gap-6">
+						<Button icon className="modal__button-close" onClick={onCancel}>
+							<Icon name="X" size={32} color="black" />
+						</Button>
+						<div className={`${(headerText as string) ? 'modal-header mt-[calc(32px+16px)]' : 'invisible'}`}>
+							<h1>{headerText}</h1>
+						</div>
+						<div className="modal-content">{children}</div>
+					</div>
 				</div>
-				<div>{headerText}</div>
-				<div>{modalContent}</div>
-			</div>
-		</div>
+			</Portal>
+		</>
 	);
-	return <></>;
-	// return isShown ? ReactDOM.createPortal(modal, document.getElementById('modal-root')!) : null;
 };
+
+export default Modal;

@@ -40,6 +40,10 @@
 		@apply h-[50px] box-border bg-white text-silver;
 	}
 
+	.form-edit select {
+		@apply h-[50px] box-border bg-white text-black;
+	}
+
 	/*  Use to add padding to move dropdown icon of select element to right due to limitation of its default
 	select {
 		@apply h-[50px] box-border text-silver border-r-[8px] border-solid border-r-transparent border-0 outline outline-1 outline-silver;
@@ -142,24 +146,42 @@
 	.btn-primary:hover {
 		@apply shadow-2;
 	}
+
 	.btn-secondary {
 		@apply px-4 py-2 bg-white text-black border border-black rounded-lg font-semi-bold;
+	}
+
+	.btn-secondary svg {
+		@apply stroke-black;
 	}
 
 	.btn-secondary:hover {
 		@apply bg-black text-white;
 	}
 
+	.btn-secondary:hover svg {
+		@apply stroke-white;
+	}
+
 	.btn-google {
 		@apply px-2 py-[calc(1rem-1px)] bg-white text-sonic-silver rounded-lg font-semi-bold border border-sonic-silver;
 	}
 
-	.btn-google:hover {
+	.btn-google:hover,
+	.btn-danger:hover {
 		@apply shadow-2;
 	}
 
 	.btn-disabled {
 		@apply px-2 py-4 bg-platinum text-silver rounded-lg font-semi-bold self-stretch;
+	}
+
+	.btn-disabled svg {
+		@apply stroke-silver;
+	}
+
+	.btn-danger {
+		@apply px-2 py-4 bg-ultra-red text-white rounded-lg font-semi-bold self-stretch relative;
 	}
 
 	.label-success {
@@ -332,11 +354,11 @@
 
 	.avatar {
 		@apply object-cover;
+		@apply z-0;
 	}
 
 	.pagination {
-		@apply flex bg-white;
-
+		@apply flex flex-wrap bg-white;
 		@apply font-semi-bold;
 	}
 
@@ -365,6 +387,43 @@
 	.pagination li.disabled a:hover {
 		@apply cursor-default;
 	}
+
+	.modal-bg {
+		@apply fixed inset-0 bg-black opacity-50 z-50;
+	}
+
+	.modal-container {
+		@apply fixed inset-x-0 bg-white rounded-lg p-6 z-50;
+		/* Center fixed el */
+		@apply top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+
+		@apply sm:w-[calc(100%-48px)] md:w-[calc(84%-48px)] lg:w-[calc(52%-48px)];
+	}
+
+	.modal-header {
+		@apply relative;
+
+		@apply flex flex-col;
+
+		@apply min-h-[32px];
+	}
+
+	.modal-content {
+		@apply flex flex-col;
+		@apply max-h-[75vh] overflow-y-auto;
+	}
+
+	.modal__button-close {
+		@apply absolute top-[8px] right-[8px];
+
+		@apply h-auto rounded-lg items-start !important;
+
+		@apply p-2;
+	}
+
+	.modal__button-close:hover {
+		@apply shadow-1;
+	}
 }
 
 @layer utilities {
@@ -380,7 +439,3 @@
 		@apply mt-[112px] lg:mt-36;
 	}
 }
-
-/* .modal-content {
-	@apply flex justify-center items-center absolute top-0 left-0 w-full h-full bg-transparent py-3 sm:px-3;
-} */

@@ -3,9 +3,18 @@ import React from 'react';
 type AvatarUploaderProps = {
 	size: string;
 	fileUpdate: (data: File) => void;
+	value?: string;
 };
 
-const AvatarUploader = ({ size, fileUpdate }: AvatarUploaderProps) => {
+const AvatarUploader = ({ size, fileUpdate, value }: AvatarUploaderProps) => {
+	setTimeout(() => {
+		const avatarUploaderEl = document.getElementsByClassName('avatar-uploader')[0] as HTMLElement;
+		if (avatarUploaderEl && value) {
+			avatarUploaderEl.style.backgroundImage = `url('${value}')`;
+			avatarUploaderEl.style.backgroundSize = 'cover';
+		}
+	}, 1);
+
 	const handleChangeAvatar = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0] as Blob;
 
@@ -25,7 +34,6 @@ const AvatarUploader = ({ size, fileUpdate }: AvatarUploaderProps) => {
 				} catch (error) {
 					console.error(error);
 				}
-			} else {
 			}
 		} else {
 			null;
@@ -34,6 +42,7 @@ const AvatarUploader = ({ size, fileUpdate }: AvatarUploaderProps) => {
 
 	return (
 		<input
+			name="avatar_url"
 			className="avatar-uploader"
 			style={{ width: `${size}px`, height: `${size}px` }}
 			type="file"

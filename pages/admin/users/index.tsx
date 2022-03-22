@@ -3,7 +3,6 @@ import { GetServerSideProps, NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import ReactPaginate from 'react-paginate';
 import { Button } from 'components/Button';
 import { Header } from 'components/Header';
 import { Icon } from 'components/Icon';
@@ -15,8 +14,10 @@ import { IAccountData, IAccountsProps } from 'lib/interfaces';
 import { scrollToElementByClassName } from 'utils/scrollAnimate';
 
 export const getServerSideProps: GetServerSideProps = async () => {
-	const { data } = await getUsersList();
-
+	const { data, error } = await getUsersList();
+	if (error) {
+		throw error;
+	}
 	return {
 		props: {
 			data,
@@ -71,14 +72,7 @@ const UsersManagement: NextPage<IAccountsProps> = ({ data: accounts }) => {
 					handlePaginationClick={handlePaginationClick}
 					handlePageClick={handlePageClick}
 				/>
-				{/* <Modal isShown={isShown} hide={toggle} headerText="Create Uers" modalContent={<h1>dasdadasdas</h1>} /> */}
 			</main>
-			{/* <div className="flex flex-col lgs:flex-row lg:justify-between items-start lg:items-center py-7 sm:w-full"> */}
-
-			{/* <UserList />
-			{data.map((d) => (
-				<div key={`${d.account_id}`}>{d?.username}</div>
-			))} */}
 		</>
 	);
 };

@@ -82,6 +82,40 @@ export const createNewAccount = async ({
 	}
 };
 
+export const updateAccount = async (
+	id: string,
+	username?: string,
+	password?: string,
+	role?: string,
+	department?: string,
+	email?: string,
+	full_name?: string,
+	address?: string,
+	phone?: string
+) => {
+	try {
+		const updateUserData = async () => {
+			await supabase.rpc('update_user_data', {
+				id_val: id,
+				username_val: username,
+				password_val: password,
+				role_val: role,
+				department_val: department,
+				email_val: email,
+				full_name_val: full_name,
+				address_val: address,
+				phone_val: phone,
+			});
+		};
+
+		await notifyToast(
+			updateUserData(),
+			`Update account data for user @${username as string}.`,
+			`Account @${username as string} has been updated.`
+		);
+	} catch (error) {}
+};
+
 export const uploadAvatar = async (avatarFile: File, username: string) => {
 	const updateAvatar = async () => {
 		const { error } = await supabase.storage.from('users').upload(`${username}/avatars/${username}-avatar`, avatarFile);
@@ -138,11 +172,11 @@ export const getUsersList = async (limit?: number) => {
 		.from('accounts')
 		.select(
 			`*,
-		account_role: account_roles(role_name),
-		account_department: departments(department_name)
-	`
+		account_role: account_roles(role_id, role_name),
+		account_department:  departments(department_id, department_name)`
 		)
-		.limit(limit || noLimit);
+		.limit(limit || noLimit)
+		.order('created', { ascending: false });
 	return { data, error };
 };
 
@@ -158,4 +192,31 @@ export const getAccountData = async (account_id: string) => {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 	const { data } = await supabase.from('accounts').select().match({ account_id: account_id }).single();
 	return data as IAccountData;
+};
+
+export const updateUserAvatar = async (id: string, avatarUrl: string) => {
+	const data = await supabase.rpc('update_user_avatar', { id_val: id, avatar_url: avatarUrl });
+	return data;
+};
+
+export const modifyAvatarStorage = async (oldUsername: string, newUsername?: string) => {
+	newUsername &&
+		(await supabase.storage
+			.from('users')
+			.copy(`${oldUsername}/avatars/${oldUsername}-avatar`, `${newUsername}/avatars/${newUsername}-avatar`));
+	await supabase.storage.from('users').remove([`${oldUsername}/avatars/${oldUsername}-avatar`]);
+};
+
+export const deleteAccount = async (id: string, username: string) => {
+	const deleteUserData = async () => {
+		await supabase.rpc('delete_user_data', { id_val: id });
+	};
+
+	await modifyAvatarStorage(username);
+
+	await notifyToast(
+		deleteUserData(),
+		`Deleting account of user @${username}.`,
+		`Account @${username} has been deleted.`
+	);
 };

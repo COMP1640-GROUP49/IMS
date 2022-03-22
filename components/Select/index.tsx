@@ -4,7 +4,7 @@ type InputProps = {
 	name: string;
 	value?: string;
 	onChange: React.ChangeEventHandler;
-	defaultValue: string | number | readonly string[] | undefined;
+	defaultValue?: string | number | readonly string[] | undefined;
 	children: React.ReactNode;
 };
 

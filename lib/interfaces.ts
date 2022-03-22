@@ -6,10 +6,12 @@ export interface IAccountData extends IObjectKeys {
 		username: string;
 		encrypted_password: string;
 		account_role: {
-			role_name: string;
+			role_id?: string;
+			role_name?: string;
 		};
 		account_department: {
-			department_name: string;
+			department_id?: string;
+			department_name?: string;
 		};
 		account_email: string;
 		account_full_name?: string;

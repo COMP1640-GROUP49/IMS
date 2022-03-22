@@ -7,5 +7,7 @@ type LogoProps = {
 };
 
 export const Logo = ({ width, height, className }: LogoProps) => {
-	return <Image className={className} priority src="/icon-logo.svg" width={width} height={height} alt="img-logo" />;
+	return (
+		<Image className={className} priority={false} src="/icon-logo.svg" width={width} height={height} alt="img-logo" />
+	);
 };

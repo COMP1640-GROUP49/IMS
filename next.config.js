@@ -4,7 +4,7 @@
 const nextConfig = {
 	reactStrictMode: true,
 	images: {
-		domains: ['ukrqpqyqympltvzphuzr.supabase.co'],
+		domains: ['ukrqpqyqympltvzphuzr.supabase.co', 'ukrqpqyqympltvzphuzr.supabase.in'],
 	},
 	// webpack: (config) => {
 	// 	config.experiments = { topLevelAwait: true };

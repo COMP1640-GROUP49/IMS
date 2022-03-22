@@ -107,7 +107,7 @@ const Login: NextPage = (props: any) => {
 								<div className="label-error">This Google account is not valid. Please try another one.</div>
 							)}
 							<Button onClick={handleLoginWithGoogle} type="button" icon={true} className={'btn-google '}>
-								<Image priority src="/google.svg" width="16" height="16" alt="img-logo" />
+								<Image priority={false} src="/google.svg" width="16" height="16" alt="img-logo" />
 								Continue with Google
 							</Button>
 						</div>

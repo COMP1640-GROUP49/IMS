@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { useRouter } from 'next/router';
-import React, { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import AvatarUploader from 'components/AvatarUploader';
 import { Button } from 'components/Button';
-import { Header } from 'components/Header';
 import { Icon } from 'components/Icon';
 import { Input } from 'components/Input';
 import { Label } from 'components/Label';
@@ -12,18 +11,19 @@ import { Select } from 'components/Select';
 import {
 	CheckEmailExisted,
 	checkUsernameExisted,
-	createNewAccount,
-	IFormData,
-	keepAdminSession,
+	modifyAvatarStorage,
+	updateAccount,
+	updateUserAvatar,
 	uploadAvatar,
 } from 'pages/api/admin';
+import { IAccountData } from 'lib/interfaces';
 import { scrollToElement } from 'utils/scrollAnimate';
 
-const CreateNewUser = () => {
-	const [formData, setFormData] = useState<IFormData>();
-	const [avatar, setAvatar] = useState<File>();
-
+export const EditUserModal = ({ account }: IAccountData) => {
 	const router = useRouter();
+	const [formData, setFormData] = useState<IAccountData['account']>(account);
+	const [formDataChanges, setFormDataChanges] = useState(false);
+	const [avatar, setAvatar] = useState<File>();
 
 	interface IFormValidation {
 		usernameValidation: string;
@@ -34,7 +34,15 @@ const CreateNewUser = () => {
 		phoneValidation: string;
 	}
 
-	const [formValidation, setFormValidation] = useState<IFormValidation>();
+	const [formValidation, setFormValidation] = useState<IFormValidation>({
+		usernameValidation: 'loaded',
+		passwordValidation: 'loaded',
+		emailValidation: 'loaded',
+		roleValidation: 'loaded',
+		departmentValidation: 'loaded',
+		phoneValidation: 'loaded',
+	});
+
 	const [isFormValidated, setIsFormValidated] = useState(false);
 
 	const fileUpdate = (data: File) => {
@@ -43,43 +51,60 @@ const CreateNewUser = () => {
 	};
 
 	const fileUpload = async () => {
-		if (avatar && formData!['username']) {
+		if (avatar && formData['username']) {
 			try {
-				const avatarUrl = await uploadAvatar(avatar, formData!['username']);
-				formData!['avatar'] = avatarUrl;
+				const avatarUrl = await uploadAvatar(avatar, formData['username']);
+				formData['avatar_url'] = avatarUrl;
 			} catch (error) {
 				throw new Error('Avatar upload error!');
 			}
 		} else {
-			formData!['avatar'] = '';
+			formData['avatar_url'] = '';
 		}
 	};
 
-	const handleCreateNewAccount = async (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
+	const handleUpdateAccount = async (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
 		(event as FormEvent<HTMLFormElement>).preventDefault();
 		await fileUpload();
 
 		// Check form validate before submit form
-		if (formData?.role === undefined) {
+		if (formData?.account_role === undefined) {
 			setFormValidation({
-				...formValidation!,
+				...formValidation,
 				roleValidation: 'error',
 			});
 
 			scrollToElement('select-role');
-		} else if (formData?.department === undefined) {
+		} else if (formData?.account_department === undefined) {
 			setFormValidation({
-				...formValidation!,
+				...formValidation,
 				departmentValidation: 'error',
 			});
 			scrollToElement('select-department');
 		} else {
 			try {
-				const { newUserData, adminSession } = await createNewAccount(formData);
-				if (newUserData) {
-					await keepAdminSession(adminSession?.refresh_token as string);
-					void router.reload();
+				if (avatar) {
+					await updateUserAvatar(account.account_id, formData?.avatar_url as string);
 				}
+				await updateAccount(
+					account.account_id,
+					formData?.username,
+					formData?.encrypted_password,
+					formData?.account_role.role_id,
+					formData?.account_department.department_id,
+					formData?.account_email,
+					formData?.account_full_name,
+					formData?.account_address,
+					formData?.account_phone_number
+				);
+
+				if (formData?.username !== account.username) {
+					const newUsername = formData?.username;
+					const oldUsername = account.username;
+					await modifyAvatarStorage(oldUsername, newUsername);
+				}
+
+				router.reload();
 			} catch (error) {
 				throw error;
 			}
@@ -90,21 +115,39 @@ const CreateNewUser = () => {
 		// For changing color of select options except the 1st option
 		event.target.style.color = 'black';
 
+		// Convert from role, department id -> name
 		setFormData({
-			...formData!,
-			[event.target.name]: event.target.value.trim(),
+			...formData,
+			[event.target.name]: event.target.value,
 		});
+
+		if (event.target.name === 'account_role') {
+			setFormData({
+				...formData,
+				account_role: {
+					role_id: event.target.value.trim(),
+				},
+			});
+		}
+		if (event.target.name === 'account_department') {
+			setFormData({
+				...formData,
+				account_department: {
+					department_id: event.target.value.trim(),
+				},
+			});
+		}
 
 		// username validation
 		if (event.target.name === 'username') {
 			setFormValidation({
-				...formValidation!,
+				...formValidation,
 				usernameValidation: '',
 			});
 
 			if (event.target.value.trim() === '') {
 				setFormValidation({
-					...formValidation!,
+					...formValidation,
 					usernameValidation: 'warning',
 				});
 			} else {
@@ -116,6 +159,11 @@ const CreateNewUser = () => {
 							setFormValidation({
 								...formValidation,
 								usernameValidation: 'success',
+							});
+						} else if (event.target.value.trim() === account.username) {
+							setFormValidation({
+								...formValidation,
+								usernameValidation: 'loaded',
 							});
 						} else {
 							setFormValidation({
@@ -129,25 +177,25 @@ const CreateNewUser = () => {
 		}
 
 		// password validation
-		if (event.target.name === 'password') {
+		if (event.target.name === 'encrypted_password') {
 			if (event.target.value.trim() === '') {
 				setFormValidation({
-					...formValidation!,
+					...formValidation,
 
-					passwordValidation: 'warning',
+					passwordValidation: 'loaded',
 				});
 			} else {
 				const passwordCheckResult = event.target.value.length >= 6;
 
 				if (passwordCheckResult) {
 					setFormValidation({
-						...formValidation!,
+						...formValidation,
 
 						passwordValidation: 'success',
 					});
 				} else {
 					setFormValidation({
-						...formValidation!,
+						...formValidation,
 
 						passwordValidation: 'error',
 					});
@@ -156,12 +204,17 @@ const CreateNewUser = () => {
 		}
 
 		// email validation
-		if (event.target.name === 'email') {
+		if (event.target.name === 'account_email') {
 			if (event.target.value.trim() === '') {
 				setFormValidation({
-					...formValidation!,
+					...formValidation,
 
 					emailValidation: 'warning',
+				});
+			} else if (event.target.value.trim() === account.account_email) {
+				setFormValidation({
+					...formValidation,
+					emailValidation: 'loaded',
 				});
 			} else {
 				/**
@@ -176,19 +229,19 @@ const CreateNewUser = () => {
 				// BUG: typing too  fast cause confusing validation's results
 				if (emailCheckExistedResult) {
 					setFormValidation({
-						...formValidation!,
+						...formValidation,
 
 						emailValidation: 'error-existed',
 					});
 				} else if (!emailRegexCheck) {
 					setFormValidation({
-						...formValidation!,
+						...formValidation,
 
 						emailValidation: 'error-format',
 					});
 				} else if (!emailCheckExistedResult && emailRegexCheck) {
 					setFormValidation({
-						...formValidation!,
+						...formValidation,
 
 						emailValidation: 'success',
 					});
@@ -197,12 +250,17 @@ const CreateNewUser = () => {
 		}
 
 		// phone validate
-		if (event.target.name === 'phone') {
+		if (event.target.name === 'account_phone_number') {
 			if (event.target.value.trim() === '') {
 				setFormValidation({
-					...formValidation!,
+					...formValidation,
 
-					phoneValidation: '',
+					phoneValidation: 'loaded',
+				});
+			} else if (event.target.value.trim() === account.account_phone_number) {
+				setFormValidation({
+					...formValidation,
+					phoneValidation: 'loaded',
 				});
 			} else {
 				/**
@@ -212,13 +270,13 @@ const CreateNewUser = () => {
 				const phoneCheckResult = event.target.value.match(phoneRegex);
 				if (phoneCheckResult) {
 					setFormValidation({
-						...formValidation!,
+						...formValidation,
 
 						phoneValidation: 'success',
 					});
 				} else {
 					setFormValidation({
-						...formValidation!,
+						...formValidation,
 
 						phoneValidation: 'warning',
 					});
@@ -226,21 +284,31 @@ const CreateNewUser = () => {
 			}
 		}
 
-		if (event.target.name === 'role') {
+		if (event.target.name === 'account_role') {
 			if (event.target.value !== 'disabled') {
 				setFormValidation({
-					...formValidation!,
+					...formValidation,
 
 					roleValidation: 'success',
 				});
+			} else if (event.target.value === account.account_role.role_id) {
+				setFormValidation({
+					...formValidation,
+					roleValidation: 'loaded',
+				});
 			}
 		}
-		if (event.target.name === 'department') {
+		if (event.target.name === 'account_department') {
 			if (event.target.value !== 'disabled') {
 				setFormValidation({
-					...formValidation!,
+					...formValidation,
 
 					departmentValidation: 'success',
+				});
+			} else if (event.target.value === account.account_department.department_id) {
+				setFormValidation({
+					...formValidation,
+					departmentValidation: 'loaded',
 				});
 			}
 		}
@@ -248,24 +316,42 @@ const CreateNewUser = () => {
 
 	useEffect(() => {
 		if (
-			formValidation?.usernameValidation === 'success' &&
-			formValidation?.passwordValidation === 'success' &&
-			formValidation?.emailValidation === 'success'
+			(formValidation?.usernameValidation === 'success' || formValidation?.usernameValidation === 'loaded') &&
+			(formValidation?.passwordValidation === 'success' || formValidation?.passwordValidation === 'loaded') &&
+			(formValidation?.emailValidation === 'success' || formValidation?.emailValidation === 'loaded') &&
+			(formValidation?.roleValidation === 'success' || formValidation?.roleValidation === 'loaded') &&
+			(formValidation?.departmentValidation === 'success' || formValidation?.departmentValidation === 'loaded') &&
+			(formValidation?.phoneValidation === 'success' || formValidation?.phoneValidation === 'loaded')
 		) {
 			setIsFormValidated(true);
 		} else {
 			setIsFormValidated(false);
 		}
-	}, [formValidation, isFormValidated]);
+
+		if (
+			formData?.username !== account.username ||
+			(formData?.encrypted_password !== account.encrypted_password && formData?.encrypted_password !== '') ||
+			formData?.account_role !== account.account_role ||
+			formData?.account_department !== account.account_department ||
+			formData?.account_email !== account.account_email ||
+			(formData?.account_full_name !== account.account_full_name && formData?.account_full_name !== '') ||
+			(formData?.account_address !== account.account_address && formData?.account_address !== '') ||
+			(formData?.account_phone_number !== account.account_phone_number && formData?.account_phone_number !== '') ||
+			typeof avatar !== 'undefined'
+		) {
+			setFormDataChanges(true);
+		} else {
+			setFormDataChanges(false);
+		}
+	}, [formValidation, isFormValidated, formData, account, avatar]);
 
 	return (
 		<>
-			<MetaTags title="Create New User Account" description="Create a new user account" />
-			<Header />
-			<main className="below-navigation-bar">
-				<div className="form-container flex flex-col gap-6 p-6">
-					<h1>Create New User Account</h1>
-					<form onSubmit={handleCreateNewAccount} className="flex flex-col gap-6">
+			<MetaTags title={`Edit @${account.username} account`} description="Create a new user account" />
+			{/* {console.log('formdataChange', formDataChanges, isFormValidated, formValidation)} */}
+			<main>
+				<div className="flex flex-col gap-6">
+					<form onSubmit={handleUpdateAccount} className="form-edit flex flex-col gap-6">
 						<div className="flex flex-col gap-4">
 							<div className="flex flex-col gap-2">
 								<Label size="text-subtitle">Account</Label>
@@ -275,6 +361,7 @@ const CreateNewUser = () => {
 								<Label size="text-normal">Username</Label>
 								<Input
 									name="username"
+									value={formData?.username || ''}
 									onChange={handleChange}
 									required
 									placeholder={"Input account's username"}
@@ -290,12 +377,12 @@ const CreateNewUser = () => {
 									) : null)}
 							</div>
 							<div className="flex flex-col gap-2">
-								<Label size="text-normal">Password</Label>
+								<Label size="text-normal">New Password</Label>
 								<Input
-									name="password"
+									name="encrypted_password"
 									onChange={handleChange}
-									required
-									placeholder={"Input account's password"}
+									required={false}
+									placeholder={"Input account's new password if needed to change"}
 									type="password"
 								/>
 								{/* TODO: Show/hide password */}
@@ -305,15 +392,13 @@ const CreateNewUser = () => {
 								{formValidation &&
 									(formValidation['passwordValidation'] === 'success' ? (
 										<div className="label-success">This password is valid.</div>
-									) : formValidation['passwordValidation'] === 'warning' ? (
-										<div className="label-warning">Please input the password.</div>
 									) : formValidation['passwordValidation'] === 'error' ? (
 										<div className="label-error">Password must be greater than 6 characters.</div>
 									) : null)}
 							</div>
 							<div id="select-role" className="flex flex-col gap-2">
 								<Label size="text-normal">Role</Label>
-								<Select name="role" required defaultValue={'disabled'} onChange={handleChange}>
+								<Select value={formData?.account_role?.role_id} name="account_role" required onChange={handleChange}>
 									<option disabled value={'disabled'}>
 										{"Select account's role"}
 									</option>
@@ -329,7 +414,12 @@ const CreateNewUser = () => {
 							</div>
 							<div id="select-department" className="flex flex-col gap-2">
 								<Label size="text-normal">Department</Label>
-								<Select name="department" required defaultValue={'disabled'} onChange={handleChange}>
+								<Select
+									name="account_department"
+									value={formData?.account_department?.department_id}
+									required
+									onChange={handleChange}
+								>
 									<option disabled value={'disabled'}>
 										{"Select account's department"}
 									</option>
@@ -347,7 +437,8 @@ const CreateNewUser = () => {
 							<div className="flex flex-col gap-2">
 								<Label size="text-normal">Email</Label>
 								<Input
-									name="email"
+									name="account_email"
+									value={formData?.account_email || ''}
 									onChange={handleChange}
 									required
 									placeholder={"Input account's email"}
@@ -377,7 +468,8 @@ const CreateNewUser = () => {
 							<div className="flex flex-col gap-2">
 								<Label size="text-normal">Full name</Label>
 								<Input
-									name="full_name"
+									name="account_full_name"
+									value={formData.account_full_name || ''}
 									onChange={handleChange}
 									required={false}
 									placeholder={"Input account's full name"}
@@ -388,7 +480,8 @@ const CreateNewUser = () => {
 							<div className="flex flex-col gap-2">
 								<Label size="text-normal">Address</Label>
 								<Input
-									name="address"
+									name="account_address"
+									value={formData.account_address || ''}
 									onChange={handleChange}
 									required={false}
 									placeholder={"Input account's address"}
@@ -398,7 +491,8 @@ const CreateNewUser = () => {
 							<div className="flex flex-col gap-2">
 								<Label size="text-normal">Phone number</Label>
 								<Input
-									name="phone"
+									name="account_phone_number"
+									value={formData.account_phone_number || ''}
 									onChange={handleChange}
 									required={false}
 									placeholder={"Input account's phone number"}
@@ -412,25 +506,31 @@ const CreateNewUser = () => {
 							</div>
 							<div className="flex flex-col gap-2">
 								<Label size="text-normal">Avatar</Label>
-								<AvatarUploader fileUpdate={fileUpdate} size="150" />
+								<AvatarUploader value={formData.avatar_url} fileUpdate={fileUpdate} size="150" />
 							</div>
 						</div>
-
-						<Button
-							disabled={!isFormValidated}
-							icon={true}
-							className={`${
-								isFormValidated ? `btn-primary` : `btn-disabled`
-							}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
-						>
-							<Icon name="Plus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
-							Create new user account
-						</Button>
+						<div className="flex justify-between sm:flex-col sm:gap-4">
+							<Button
+								disabled={!formDataChanges || !isFormValidated ? true : false}
+								icon={true}
+								className={`${
+									isFormValidated && formDataChanges ? `btn-secondary` : `btn-disabled`
+								}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+							>
+								<Icon name="Save" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+								Save changes
+							</Button>
+							<Button
+								icon={true}
+								className={` btn-primary md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+							>
+								<Icon name="Save" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+								Delete account
+							</Button>
+						</div>
 					</form>
 				</div>
 			</main>
 		</>
 	);
 };
-
-export default CreateNewUser;
