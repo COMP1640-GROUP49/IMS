@@ -188,10 +188,33 @@ export const keepAdminSession = async (refreshToken: string) => {
 	await supabase.auth.setSession(refreshToken);
 };
 
-export const getAccountData = async (account_id: string) => {
+export const getAccountData = async (account_id?: string, username?: string) => {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-	const { data } = await supabase.from('accounts').select().match({ account_id: account_id }).single();
-	return data as IAccountData;
+	if (username) {
+		const { data } = await supabase
+			.from<IAccountData>('accounts')
+			.select(
+				`*,
+		account_role: account_roles(role_name),
+		account_department: departments(department_name)
+	`
+			)
+			.match({ username: username })
+			.single();
+		return data as IAccountData;
+	} else {
+		const { data } = await supabase
+			.from<IAccountData>('accounts')
+			.select(
+				`*,
+		account_role: account_roles(role_name),
+		account_department: departments(department_name)
+	`
+			)
+			.match({ account_id: account_id })
+			.single();
+		return data as IAccountData;
+	}
 };
 
 export const updateUserAvatar = async (id: string, avatarUrl: string) => {

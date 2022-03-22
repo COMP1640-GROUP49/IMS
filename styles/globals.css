@@ -70,7 +70,9 @@
 	h1 {
 		@apply font-semi-bold text-heading-4;
 	}
-
+	h2 {
+		@apply font-semibold text-heading-2;
+	}
 	li > hr {
 		@apply mt-4;
 	}
@@ -388,7 +390,7 @@
 		@apply cursor-default;
 	}
 
-	.modal-bg {
+	<<<<<<< HEAD .modal-bg {
 		@apply fixed inset-0 bg-black opacity-50 z-50;
 	}
 
@@ -423,6 +425,13 @@
 
 	.modal__button-close:hover {
 		@apply shadow-1;
+	}
+	.profile-header {
+		@apply flex flex-col items-center gap-1;
+	}
+
+	.profile-content {
+		@apply flex flex-col gap-6;
 	}
 }
 

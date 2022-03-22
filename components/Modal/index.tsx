@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-import React, { FunctionComponent } from 'react';
-// import ReactDOM from 'react-dom';
+import React from 'react';
 import { Button } from 'components/Button';
 import { Icon } from 'components/Icon';
 import Portal from 'components/Portal';
