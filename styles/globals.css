@@ -390,7 +390,7 @@
 		@apply cursor-default;
 	}
 
-	<<<<<<< HEAD .modal-bg {
+	.modal-bg {
 		@apply fixed inset-0 bg-black opacity-50 z-50;
 	}
 

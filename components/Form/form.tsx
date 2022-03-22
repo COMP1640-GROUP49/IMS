@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { useRouter } from 'next/router';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { ClipLoader } from 'react-spinners';
 import AvatarUploader from 'components/AvatarUploader';
 import { Button } from 'components/Button';
@@ -8,10 +8,12 @@ import { Icon } from 'components/Icon';
 import { Input } from 'components/Input';
 import { Label } from 'components/Label';
 import { MetaTags } from 'components/MetaTags';
+import Modal from 'components/Modal';
 import { Select } from 'components/Select';
 import {
 	CheckEmailExisted,
 	checkUsernameExisted,
+	deleteAccount,
 	modifyAvatarStorage,
 	updateAccount,
 	updateUserAvatar,
@@ -28,6 +30,14 @@ export const EditUserModal = ({ account }: IAccountData) => {
 	const [formDataChanges, setFormDataChanges] = useState(false);
 	const [avatar, setAvatar] = useState<File>();
 
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const handleShowDeleteModal = useCallback(() => {
+		setShowDeleteModal(!showDeleteModal);
+	}, [showDeleteModal]);
+
+	const handleCloseDeleteModal = useCallback(() => {
+		setShowDeleteModal(false);
+	}, []);
 	interface IFormValidation {
 		usernameValidation: string;
 		passwordValidation: string;
@@ -317,6 +327,11 @@ export const EditUserModal = ({ account }: IAccountData) => {
 		}
 	};
 
+	const handleDeleteAccount = async () => {
+		await deleteAccount(account.account_id, account.username);
+		router.reload();
+	};
+
 	useEffect(() => {
 		if (
 			(formValidation?.usernameValidation === 'success' || formValidation?.usernameValidation === 'loaded') &&
@@ -519,6 +534,7 @@ export const EditUserModal = ({ account }: IAccountData) => {
 						</div>
 						<div className="flex justify-between sm:flex-col sm:gap-4">
 							<Button
+								type="submit"
 								disabled={!formDataChanges || !isFormValidated ? true : false}
 								icon={true}
 								className={`${
@@ -529,12 +545,33 @@ export const EditUserModal = ({ account }: IAccountData) => {
 								Save changes
 							</Button>
 							<Button
+								type="button"
+								onClick={handleShowDeleteModal}
 								icon={true}
 								className={` btn-primary md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
 							>
 								<Icon name="Save" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
 								Delete account
 							</Button>
+							{showDeleteModal && (
+								<Modal onCancel={handleCloseDeleteModal}>
+									<div className="flex flex-col gap-6 justify-center">
+										<p>
+											Are you sure you want to delete this account{' '}
+											<span className="font-semi-bold">@{account.username}</span>?
+										</p>
+										<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
+											{/*TODO: Edit delete button box-shadow*/}
+											<Button onClick={handleDeleteAccount} className="btn-danger w-full">
+												Delete it
+											</Button>
+											<Button onClick={handleCloseDeleteModal} className="btn-secondary w-full">
+												Cancel
+											</Button>
+										</div>
+									</div>
+								</Modal>
+							)}
 						</div>
 					</form>
 				</div>
