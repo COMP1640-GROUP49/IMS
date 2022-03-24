@@ -16,14 +16,10 @@ export const useUserData = () => {
 	const [user, setUser] = useState<IUserData>(initUser as IUserData);
 
 	useEffect(() => {
-		// console.log(1, initUser);
 		const { data: AuthProvider } = supabase.auth.onAuthStateChange((event, session) => {
-			// console.log(2);
 			if (event == 'SIGNED_IN' && session && session['user']) {
 				setTimeout(() => {
 					setUser(session['user'] as IUserData);
-					// console.log('init', initSession);
-					console.log('later', session);
 				}, 500);
 			} else if (event == 'SIGNED_OUT') {
 				setTimeout(() => {

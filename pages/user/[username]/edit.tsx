@@ -12,7 +12,6 @@ const EditProfilePage = () => {
 			<MetaTags title={`Edit @${user?.user_metadata?.username as string}'s Profile`} />
 			<Header />
 			<EditProfile data={user} />
-			{console.log(user)}
 		</>
 	);
 };

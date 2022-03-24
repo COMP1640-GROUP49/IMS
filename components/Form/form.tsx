@@ -583,7 +583,6 @@ export const EditUserModal = ({ account }: IAccountData) => {
 export const EditProfile = ({ data }: any) => {
 	const router = useRouter();
 	const [formData, setFormData] = useState<IUserData>(data as IUserData);
-	console.log('🚀 ~ file: form.tsx ~ line 18 ~ EditProfile ~ formData', formData);
 	const [formDataChanges, setFormDataChanges] = useState(false);
 	const [avatar, setAvatar] = useState<File>();
 

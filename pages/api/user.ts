@@ -9,7 +9,6 @@ export const updateProfile = async (
 	address: string,
 	phone: string
 ) => {
-	console.log(id, username, name, address, phone);
 	const updateUserProfile = async () => {
 		const data = await supabase.rpc('update_user_profile', {
 			id_val: id,
@@ -18,7 +17,6 @@ export const updateProfile = async (
 			address_val: address,
 			phone_val: phone,
 		});
-		console.log('🚀 ~ file: user.ts ~ line 12 ~ updateUserProfile ~ data', data);
 
 		await supabase.auth.refreshSession();
 	};

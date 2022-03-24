@@ -37,7 +37,6 @@ const Login: NextPage = (props: any) => {
 		event.preventDefault();
 		try {
 			const data = await loginAccount({ username, password });
-			console.log('🚀 ~ file: login.tsx ~ line 40 ~ handleLogin ~ data', data);
 
 			if (data && data['error']) {
 				setHasError(true);
