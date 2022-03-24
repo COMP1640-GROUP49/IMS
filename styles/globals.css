@@ -236,9 +236,13 @@
 		/* @apply relative; */
 		@apply z-50;
 
-		@apply lg:h-[calc(96px+48px)];
+		@apply h-[112px] lg:h-[calc(96px+48px)];
 
 		/* Specify for fix navigation bar */
+	}
+
+	.navigation-bar-user {
+		@apply flex flex-1 justify-between items-center;
 	}
 
 	.menu-list,
@@ -443,7 +447,6 @@
 	.avatar-uploader::-webkit-file-upload-button {
 		@apply hidden;
 	}
-
 	.below-navigation-bar {
 		@apply mt-[112px] lg:mt-36;
 	}

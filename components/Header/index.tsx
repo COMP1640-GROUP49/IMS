@@ -107,47 +107,49 @@ export const Header = () => {
 		</nav>
 	) : (
 		<nav className="navigation-bar">
-			<div className="nav-logo">
-				<ul className="menu-list">
-					<Link href={'/'} passHref>
-						<a>
-							<li className="flex self-start lg:self-center">
-								<Logo width="96" height="96" />
-							</li>
-						</a>
-					</Link>
-				</ul>
-			</div>
+			<div className="navigation-bar-user">
+				<div className="nav-logo">
+					<ul className="menu-list">
+						<Link href={'/'} passHref>
+							<a>
+								<li className="flex self-start lg:self-center">
+									<Logo width={(112 - 48 + 8) as unknown as string} height={(112 - 48 + 8) as unknown as string} />
+								</li>
+							</a>
+						</Link>
+					</ul>
+				</div>
 
-			<div className="profile-menu">
-				<Button className="flex flex-row items-center gap-4" onClick={() => setOpenProfileMenu(!openProfileMenu)}>
-					<div className="btn-avatar">
-						{user?.user_metadata['avatar'] ? (
-							<Avatar src={`${user?.user_metadata['avatar'] as string}`} size="56" className="rounded-full" />
-						) : (
-							<Avatar src={'/default-avatar.png'} size="56" className="rounded-full" />
-						)}
-					</div>
-					<div className="avatar-label sm:hidden">
-						{user?.user_metadata['username'] && `@${user?.user_metadata['username'] as string}`}
-					</div>
-				</Button>
-			</div>
-			<div className={`profile-menu__open ${openProfileMenu ? '' : 'hidden'}`}>
-				<ul className="menu-list">
-					<li>
-						<LinkComponent link={`/user/${user?.user_metadata['username']}`} title="My Profile">
-							<Icon name="User" size="32" color="black" />
-						</LinkComponent>
-					</li>
-					<li>
-						<Button onClick={logOut}>
-							<LinkComponent link="/login" title="Log Out">
-								<Icon name="LogOut" size="32" color="black" />
+				<div className="profile-menu">
+					<Button className="flex flex-row items-center gap-4" onClick={() => setOpenProfileMenu(!openProfileMenu)}>
+						<div className="btn-avatar">
+							{user?.user_metadata['avatar'] ? (
+								<Avatar src={`${user?.user_metadata['avatar'] as string}`} size="56" className="rounded-full" />
+							) : (
+								<Avatar src={'/default-avatar.png'} size="56" className="rounded-full" />
+							)}
+						</div>
+						<div className="avatar-label sm:hidden">
+							{user?.user_metadata['username'] && `@${user?.user_metadata['username'] as string}`}
+						</div>
+					</Button>
+				</div>
+				<div className={`profile-menu__open ${openProfileMenu ? '' : 'hidden'}`}>
+					<ul className="menu-list">
+						<li>
+							<LinkComponent link={`/user/${user?.user_metadata['username']}`} title="My Profile">
+								<Icon name="User" size="32" color="black" />
 							</LinkComponent>
-						</Button>
-					</li>
-				</ul>
+						</li>
+						<li>
+							<Button onClick={logOut}>
+								<LinkComponent link="/login" title="Log Out">
+									<Icon name="LogOut" size="32" color="black" />
+								</LinkComponent>
+							</Button>
+						</li>
+					</ul>
+				</div>
 			</div>
 		</nav>
 	);
