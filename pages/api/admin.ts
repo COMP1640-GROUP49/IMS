@@ -95,7 +95,8 @@ export const updateAccount = async (
 ) => {
 	try {
 		const updateUserData = async () => {
-			await supabase.rpc('update_user_data', {
+			console.log('🚀 ~ file: admin.ts ~ line 99 ~ updateUserData ~ password', password);
+			const data = await supabase.rpc('update_user_data', {
 				id_val: id,
 				username_val: username,
 				password_val: password,
@@ -106,6 +107,7 @@ export const updateAccount = async (
 				address_val: address,
 				phone_val: phone,
 			});
+			console.log('🚀 ~ file: admin.ts ~ line 110 ~ updateUserData ~ data', data);
 		};
 
 		await notifyToast(
