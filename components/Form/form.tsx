@@ -80,6 +80,10 @@ export const EditUserModal = ({ account }: IAccountData) => {
 		(event as FormEvent<HTMLFormElement>).preventDefault();
 		await fileUpload();
 
+		if (formData?.encrypted_password === account?.encrypted_password) {
+			formData.encrypted_password = null!;
+		}
+
 		// Check form validate before submit form
 		if (formData?.account_role === undefined) {
 			setFormValidation({
@@ -117,7 +121,7 @@ export const EditUserModal = ({ account }: IAccountData) => {
 					await modifyAvatarStorage(oldUsername, newUsername);
 				}
 
-				router.reload();
+				// router.reload();
 			} catch (error) {
 				throw error;
 			}
@@ -583,7 +587,6 @@ export const EditUserModal = ({ account }: IAccountData) => {
 export const EditProfile = ({ data }: any) => {
 	const router = useRouter();
 	const [formData, setFormData] = useState<IUserData>(data as IUserData);
-	console.log('🚀 ~ file: form.tsx ~ line 18 ~ EditProfile ~ formData', formData);
 	const [formDataChanges, setFormDataChanges] = useState(false);
 	const [avatar, setAvatar] = useState<File>();
 

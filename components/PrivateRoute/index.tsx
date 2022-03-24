@@ -48,12 +48,7 @@ const PrivateRoute = ({ children }: any) => {
 		}
 	}, [user]);
 
-	return (
-		<UserContext.Provider value={user}>
-			{console.log('private route:', user, asPath)}
-			{children}
-		</UserContext.Provider>
-	);
+	return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
 };
 
 export default PrivateRoute;
