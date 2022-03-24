@@ -121,7 +121,7 @@ export const EditUserModal = ({ account }: IAccountData) => {
 					await modifyAvatarStorage(oldUsername, newUsername);
 				}
 
-				// router.reload();
+				router.reload();
 			} catch (error) {
 				throw error;
 			}
