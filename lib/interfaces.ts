@@ -30,3 +30,13 @@ export interface IAccountsProps {
 export interface IParams extends ParsedUrlQuery {
 	username: string;
 }
+
+export interface IDepartments extends IObjectKeys {
+	department: {
+		department_id: string;
+		department_name: string;
+	};
+}
+export interface IDeparmentsProps {
+	data: IDepartments[];
+}

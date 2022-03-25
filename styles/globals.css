@@ -127,11 +127,11 @@
 		@apply lg:rounded-r-lg;
 	}
 
-	td {
+	user-card td {
 		@apply flex justify-between lg:table-cell;
 	}
 
-	td:last-child {
+	.user-card td:last-child {
 		@apply mt-4 lg:mt-0;
 	}
 
@@ -349,12 +349,21 @@
 	.user-card {
 		@apply bg-white rounded-lg p-6 lg:p-0 shadow-0 lg:shadow-none;
 	}
-
+	.department-card {
+		@apply flex flex-row justify-between items-center bg-white rounded-lg p-4 mt-0 shadow-0 lg:shadow-0;
+	}
 	.user-card:hover {
 		@apply sm:shadow-1;
 	}
 
 	.user-card:not(:last-child) {
+		@apply mb-6;
+	}
+	.department-card:hover {
+		@apply sm:shadow-1;
+	}
+
+	.department-card:not(:last-child) {
 		@apply mb-6;
 	}
 
