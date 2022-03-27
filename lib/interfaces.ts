@@ -31,12 +31,12 @@ export interface IParams extends ParsedUrlQuery {
 	username: string;
 }
 
-export interface IDepartments extends IObjectKeys {
+export interface IDepartmentsData extends IObjectKeys {
 	department: {
 		department_name: string;
 		department_id: string;
 	};
 }
 export interface IDeparmentsProps {
-	data: IDepartments[];
+	data: IDepartmentsData[];
 }

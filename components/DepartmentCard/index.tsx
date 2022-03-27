@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useCallback, useState } from 'react';
@@ -6,11 +7,14 @@ import { Button } from 'components/Button';
 import { EditDepartment } from 'components/Form/form';
 import { Icon } from 'components/Icon';
 import Modal from 'components/Modal';
-import { IDepartments } from 'lib/interfaces';
+import { deleteDepartment } from 'pages/api/department';
+import { IDepartmentsData } from 'lib/interfaces';
 
-const DepartmentCard = ({ department }: IDepartments) => {
-	const { department_name } = department;
+const DepartmentCard = ({ department }: IDepartmentsData) => {
+	const { department_name, department_id } = department;
 	const { asPath } = useRouter();
+	const router = useRouter();
+
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const handleShowDeleteModal = useCallback(() => {
 		setShowDeleteModal(!showDeleteModal);
@@ -18,6 +22,7 @@ const DepartmentCard = ({ department }: IDepartments) => {
 	const handleCloseDeleteModal = useCallback(() => {
 		setShowDeleteModal(false);
 	}, []);
+
 	const [showEditDepartmentModal, setShowEditDepartmentModal] = useState(false);
 	const handleShowEditDepartmentModal = useCallback(() => {
 		setShowEditDepartmentModal(!showDeleteModal);
@@ -25,6 +30,11 @@ const DepartmentCard = ({ department }: IDepartments) => {
 	const handleCloseEditDepartmentModal = useCallback(() => {
 		setShowEditDepartmentModal(false);
 	}, []);
+
+	const handleDeleteDepartment = async () => {
+		await deleteDepartment(department_id, department_name);
+		router.reload();
+	};
 	return (
 		<>
 			<tr className="department-card">
@@ -46,7 +56,7 @@ const DepartmentCard = ({ department }: IDepartments) => {
 						</Button>
 						{showEditDepartmentModal && (
 							<Modal onCancel={handleCloseEditDepartmentModal}>
-								<EditDepartment />
+								<EditDepartment departments={department} />
 							</Modal>
 						)}
 						<Button onClick={handleShowDeleteModal} icon className="btn-primary">
@@ -60,7 +70,9 @@ const DepartmentCard = ({ department }: IDepartments) => {
 									</p>
 									<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
 										{/*TODO: Edit delete button box-shadow*/}
-										<Button className="btn-danger w-full">Delete it</Button>
+										<Button onClick={handleDeleteDepartment} className="btn-danger w-full">
+											Delete it
+										</Button>
 										<Button onClick={handleCloseDeleteModal} className="btn-secondary w-full">
 											Cancel
 										</Button>

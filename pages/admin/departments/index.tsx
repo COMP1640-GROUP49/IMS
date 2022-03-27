@@ -8,8 +8,8 @@ import { Icon } from 'components/Icon';
 import { MetaTags } from 'components/MetaTags';
 import Modal from 'components/Modal';
 import Pagination from 'components/Pagination';
-import { getDepartmentList } from 'pages/api/admin';
-import { IDeparmentsProps, IDepartments } from 'lib/interfaces';
+import { getDepartmentList } from 'pages/api/department';
+import { IDeparmentsProps, IDepartmentsData } from 'lib/interfaces';
 import { scrollToElementByClassName } from 'utils/scrollAnimate';
 import { CreateDepartment } from './[department]/create';
 
@@ -27,7 +27,8 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 const DeparmentManager: NextPage<IDeparmentsProps> = ({ data: department }) => {
 	const limit = 5;
-	const [currentItems, setCurrentItems] = useState<IDepartments[]>();
+	console.log(department);
+	const [currentItems, setCurrentItems] = useState<IDepartmentsData[]>();
 	console.log('🚀 ~ file: index.tsx ~ line 31 ~ currentItems', currentItems);
 	const [pageCount, setPageCount] = useState(0);
 	const [itemOffset, setItemOffset] = useState(0);

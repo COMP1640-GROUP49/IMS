@@ -61,7 +61,7 @@ export const Header = () => {
 							</LinkComponent>
 						</li>
 						<li>
-							<LinkComponent link={`${asPath}/departments`} title="Departments">
+							<LinkComponent link={`/admin/departments`} title="Departments">
 								<Icon name="Grid" size="32" color="black" />
 							</LinkComponent>
 							<hr />

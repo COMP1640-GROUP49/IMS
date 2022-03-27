@@ -20,8 +20,9 @@ import {
 	uploadAvatar,
 } from 'pages/api/admin';
 import { IUserData } from 'pages/api/auth';
+import { updateDepartment } from 'pages/api/department';
 import { updateProfile } from 'pages/api/user';
-import { IAccountData } from 'lib/interfaces';
+import { IAccountData, IDepartmentsData } from 'lib/interfaces';
 import { scrollToElement } from 'utils/scrollAnimate';
 
 export const EditUserModal = ({ account }: IAccountData) => {
@@ -896,14 +897,39 @@ export const EditProfile = ({ data }: any) => {
 	);
 };
 
-export const EditDepartment = () => {
+export const EditDepartment = ({ departments }: any) => {
+	const [editDepartment, setEditDepartment] = useState<IDepartmentsData>(departments as IDepartmentsData);
+	const router = useRouter();
 	const [isFormValidated, setIsFormValidated] = useState(false);
+	const [formValidation, setFormValidation] = useState<IFormValidation>();
+	interface IFormValidation {
+		departmentName: string;
+	}
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		console.log(event);
+		setEditDepartment({
+			...editDepartment,
+			[event.target.name]: event.target.value,
+		});
+		if (event.target.name !== '') {
+			setFormValidation({
+				...formValidation!,
+				departmentName: 'success',
+			});
+		}
 	};
-	const handleCreateDepartment = (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
+
+	const handleCreateDepartment = async (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
 		(event as FormEvent<HTMLFormElement>).preventDefault();
+		await updateDepartment(editDepartment?.department_name as string, editDepartment?.department_id as string);
+		router.reload();
 	};
+	useEffect(() => {
+		if (formValidation?.departmentName === 'success') {
+			setIsFormValidated(true);
+		} else {
+			setIsFormValidated(false);
+		}
+	}, [formValidation, isFormValidated]);
 	return (
 		<>
 			<form onSubmit={handleCreateDepartment} className="flex flex-col gap-6">
@@ -911,7 +937,8 @@ export const EditDepartment = () => {
 					<div className="flex flex-col gap-2">
 						<Label size="text-normal">Department Name</Label>
 						<Input
-							name="deparment_name"
+							value={editDepartment?.department_name as string}
+							name="department_name"
 							onChange={handleChange}
 							required
 							placeholder={"Input department's name"}

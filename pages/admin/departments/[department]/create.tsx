@@ -5,34 +5,50 @@ import { Button } from 'components/Button';
 import { Icon } from 'components/Icon';
 import { Input } from 'components/Input';
 import { Label } from 'components/Label';
-import { createDepartment } from 'pages/api/admin';
-import { IDepartments } from 'lib/interfaces';
+import { checkDepartmentExisted, createDepartment } from 'pages/api/department';
+import { IDepartmentsData } from 'lib/interfaces';
 
 export const CreateDepartment = () => {
 	const [isFormValidated, setIsFormValidated] = useState(false);
-	const [formDepartment, setFormDeparment] = useState<IDepartments>();
+	const [formDepartment, setFormDeparment] = useState<IDepartmentsData>();
 	const [formValidation, setFormValidation] = useState<IFormValidation>();
 	const router = useRouter();
 	interface IFormValidation {
-		departmentName: string;
+		departmentNameValidation: string;
 	}
-	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+	const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
 		setFormDeparment({
 			...formDepartment!,
 			[event.target.name]: event.target.value.trim(),
 		});
-		if (event.target.name !== '') {
+		if (event.target.name.trim() === 'department_name') {
 			setFormValidation({
 				...formValidation!,
-				departmentName: 'success',
+				departmentNameValidation: '',
 			});
+			const departmentCheckResult = await checkDepartmentExisted(event.target.value.trim());
+			if (formValidation) {
+				if (event.target.value.trim() !== '') {
+					if (!departmentCheckResult) {
+						setFormValidation({
+							...formValidation,
+							departmentNameValidation: 'success',
+						});
+					} else {
+						setFormValidation({
+							...formValidation,
+							departmentNameValidation: 'error',
+						});
+					}
+				}
+			}
 		}
 	};
 	const handleCreateDepartment = async (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
 		(event as FormEvent<HTMLFormElement>).preventDefault();
 		console.log(formDepartment);
-		const { newDepartment } = await createDepartment(formDepartment as IDepartments);
 		try {
+			const { newDepartment } = await createDepartment(formDepartment as IDepartmentsData);
 			if (newDepartment) {
 				void router.reload();
 			}
@@ -41,7 +57,7 @@ export const CreateDepartment = () => {
 		}
 	};
 	useEffect(() => {
-		if (formValidation?.departmentName === 'success') {
+		if (formValidation?.departmentNameValidation === 'success') {
 			setIsFormValidated(true);
 		} else {
 			setIsFormValidated(false);
@@ -60,6 +76,10 @@ export const CreateDepartment = () => {
 							placeholder={"Input department's name"}
 							type="text"
 						/>
+						{formValidation &&
+							(formValidation['departmentNameValidation'] === 'error' ? (
+								<div className="label-error">This department is not available. Please choose another one.</div>
+							) : null)}
 					</div>
 					<Button
 						disabled={!isFormValidated}
