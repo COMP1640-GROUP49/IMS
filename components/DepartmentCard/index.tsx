@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useCallback, useState } from 'react';
@@ -8,7 +9,7 @@ import Modal from 'components/Modal';
 import { IDepartments } from 'lib/interfaces';
 
 const DepartmentCard = ({ department }: IDepartments) => {
-	const { department_name, department_id } = department;
+	const { department_name } = department;
 	const { asPath } = useRouter();
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const handleShowDeleteModal = useCallback(() => {
@@ -28,7 +29,7 @@ const DepartmentCard = ({ department }: IDepartments) => {
 		<>
 			<tr className="department-card">
 				<td>
-					<Link href={`${asPath}/${department_name}/topics`} passHref>
+					<Link href={`${asPath}/${department_name}`} passHref>
 						<div className="flex flex-col">
 							<h3 className="text-subtitle font-semibold">{department_name}</h3>
 							<div className="flex gap-x-2">

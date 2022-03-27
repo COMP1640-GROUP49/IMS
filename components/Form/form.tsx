@@ -928,7 +928,6 @@ export const EditDepartment = () => {
 						<Icon name="Plus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
 						Save change
 					</Button>
-					;
 				</div>
 			</form>
 		</>

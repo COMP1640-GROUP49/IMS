@@ -8,7 +8,7 @@ type Props = {
 
 export const LinkComponent = ({ link, title, children }: Props) => {
 	return (
-		<Link href={link!} passHref>
+		<Link href={link!}>
 			<a className="link-component">
 				<div className="mr-3 lg:mr-0 profile-menu__prefix-icon-lg">{children}</div>
 				<div className="mr-auto lg:mr-0 profile-menu__text-lg">

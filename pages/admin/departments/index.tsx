@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { GetServerSideProps, GetStaticPaths, GetStaticProps, NextPage } from 'next';
-import { useRouter } from 'next/router';
+import { GetServerSideProps, NextPage } from 'next';
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from 'components/Button';
 import { DepartmentList } from 'components/DepartmentList';
@@ -9,13 +8,13 @@ import { Icon } from 'components/Icon';
 import { MetaTags } from 'components/MetaTags';
 import Modal from 'components/Modal';
 import Pagination from 'components/Pagination';
+import { getDepartmentList } from 'pages/api/admin';
 import { IDeparmentsProps, IDepartments } from 'lib/interfaces';
 import { scrollToElementByClassName } from 'utils/scrollAnimate';
-import supabase from 'utils/supabase';
 import { CreateDepartment } from './[department]/create';
 
 export const getServerSideProps: GetServerSideProps = async () => {
-	const { data, error } = await supabase.from('departments').select('*');
+	const { data, error } = await getDepartmentList();
 	if (error) {
 		throw error;
 	}
@@ -27,17 +26,12 @@ export const getServerSideProps: GetServerSideProps = async () => {
 };
 
 const DeparmentManager: NextPage<IDeparmentsProps> = ({ data: department }) => {
-	const [showCreateDepartmentModal, setShowCreateDepartmentModal] = useState(false);
-	const handleShowCreateDepartmentModal = useCallback(() => {
-		setShowCreateDepartmentModal(!showCreateDepartmentModal);
-	}, [showCreateDepartmentModal]);
-	const handleCloseEditDepartmentModal = useCallback(() => {
-		setShowCreateDepartmentModal(false);
-	}, []);
 	const limit = 5;
 	const [currentItems, setCurrentItems] = useState<IDepartments[]>();
+	console.log('🚀 ~ file: index.tsx ~ line 31 ~ currentItems', currentItems);
 	const [pageCount, setPageCount] = useState(0);
 	const [itemOffset, setItemOffset] = useState(0);
+
 	useEffect(() => {
 		const endOffset = itemOffset + limit;
 		setCurrentItems(department.slice(itemOffset, endOffset));
@@ -48,9 +42,18 @@ const DeparmentManager: NextPage<IDeparmentsProps> = ({ data: department }) => {
 		const newOffset = (event.selected * limit) % department.length;
 		setItemOffset(newOffset);
 	};
+
 	const handlePaginationClick = () => {
 		scrollToElementByClassName('scrollPos');
 	};
+
+	const [showCreateDepartmentModal, setShowCreateDepartmentModal] = useState(false);
+	const handleShowCreateDepartmentModal = useCallback(() => {
+		setShowCreateDepartmentModal(!showCreateDepartmentModal);
+	}, [showCreateDepartmentModal]);
+	const handleCloseEditDepartmentModal = useCallback(() => {
+		setShowCreateDepartmentModal(false);
+	}, []);
 
 	return (
 		<>
@@ -69,7 +72,7 @@ const DeparmentManager: NextPage<IDeparmentsProps> = ({ data: department }) => {
 						</Modal>
 					)}
 				</div>
-				<DepartmentList department={department} />
+				<DepartmentList department={currentItems} />
 				<Pagination
 					items={department as []}
 					currentItems={currentItems as []}

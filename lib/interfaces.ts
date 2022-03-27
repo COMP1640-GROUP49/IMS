@@ -33,8 +33,8 @@ export interface IParams extends ParsedUrlQuery {
 
 export interface IDepartments extends IObjectKeys {
 	department: {
-		department_id: string;
 		department_name: string;
+		department_id: string;
 	};
 }
 export interface IDeparmentsProps {

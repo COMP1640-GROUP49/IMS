@@ -1,25 +1,52 @@
-import { FormEvent, useState } from 'react';
+/* eslint-disable @typescript-eslint/no-misused-promises */
+import { useRouter } from 'next/router';
+import { FormEvent, useEffect, useState } from 'react';
 import { Button } from 'components/Button';
 import { Icon } from 'components/Icon';
 import { Input } from 'components/Input';
 import { Label } from 'components/Label';
+import { createDepartment } from 'pages/api/admin';
 import { IDepartments } from 'lib/interfaces';
 
 export const CreateDepartment = () => {
 	const [isFormValidated, setIsFormValidated] = useState(false);
-
 	const [formDepartment, setFormDeparment] = useState<IDepartments>();
+	const [formValidation, setFormValidation] = useState<IFormValidation>();
+	const router = useRouter();
+	interface IFormValidation {
+		departmentName: string;
+	}
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		console.log(event);
 		setFormDeparment({
 			...formDepartment!,
 			[event.target.name]: event.target.value.trim(),
 		});
+		if (event.target.name !== '') {
+			setFormValidation({
+				...formValidation!,
+				departmentName: 'success',
+			});
+		}
 	};
-	const handleCreateDepartment = (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
+	const handleCreateDepartment = async (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
 		(event as FormEvent<HTMLFormElement>).preventDefault();
 		console.log(formDepartment);
+		const { newDepartment } = await createDepartment(formDepartment as IDepartments);
+		try {
+			if (newDepartment) {
+				void router.reload();
+			}
+		} catch (error) {
+			throw error;
+		}
 	};
+	useEffect(() => {
+		if (formValidation?.departmentName === 'success') {
+			setIsFormValidated(true);
+		} else {
+			setIsFormValidated(false);
+		}
+	}, [formValidation, isFormValidated]);
 	return (
 		<>
 			<form onSubmit={handleCreateDepartment} className="flex flex-col gap-6">
@@ -27,7 +54,7 @@ export const CreateDepartment = () => {
 					<div className="flex flex-col gap-2">
 						<Label size="text-normal">Department Name</Label>
 						<Input
-							name="deparment_name"
+							name="department_name"
 							onChange={handleChange}
 							required
 							placeholder={"Input department's name"}

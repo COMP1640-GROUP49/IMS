@@ -1,8 +1,9 @@
 import { IUserData } from 'pages/api/auth';
-import { IAccountData } from 'lib/interfaces';
+import { IAccountData, IDeparmentsProps , IDepartments } from 'lib/interfaces';
 import { IObjectKeys } from 'lib/objectKeys';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
+
 
 export interface IFormData extends IObjectKeys {
 	email: string;
@@ -29,6 +30,33 @@ export const CheckEmailExisted = async (email: string) => {
 		account_email: email,
 	});
 	return data!.length !== 0;
+};
+let newDepartment: IDepartments;
+export const createDepartment = async ({ department_name }: IDepartments) => {
+	console.log('🚀 ~ file: admin.ts ~ line 36 ~ createDepartment ~ department_name', department_name);
+	const { data: count } = await supabase.from('departments').select('*', { count: 'exact' });
+
+	try {
+		const creatingDepartment = async () => {
+			const { data, error } = await supabase.from('departments').insert({
+				department_id: count?.length,
+				department_name: department_name,
+			});
+			if (error) {
+				throw error.message;
+			} else {
+				newDepartment = data as unknown as IDepartments;
+			}
+		};
+		await notifyToast(
+			creatingDepartment(),
+			`Creating account for user @${department_name as string}.`,
+			`Account @${department_name as string} has been created.`
+		);
+		return newDepartment;
+	} catch (error) {
+		throw error;
+	}
 };
 
 let newUserData: IUserData;
@@ -163,6 +191,15 @@ export const uploadAvatar = async (avatarFile: File, username: string) => {
 	} catch (error) {
 		throw new Error('Bucket does not exists on the db!');
 	}
+};
+
+export const getDepartmentList = async (limit?: number) => {
+	const noLimit = 99999;
+	const { data, error } = await supabase
+		.from('departments')
+		.select('*')
+		.limit(limit || noLimit);
+	return { data, error };
 };
 
 export const getUsersList = async (limit?: number) => {
