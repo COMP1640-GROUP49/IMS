@@ -22,7 +22,7 @@ import {
 import { IUserData } from 'pages/api/auth';
 import { updateDepartment } from 'pages/api/department';
 import { updateProfile } from 'pages/api/user';
-import { IAccountData, IDepartmentsData } from 'lib/interfaces';
+import { IAccountData, IDepartmentData } from 'lib/interfaces';
 import { scrollToElement } from 'utils/scrollAnimate';
 
 export const EditUserModal = ({ account }: IAccountData) => {
@@ -898,7 +898,7 @@ export const EditProfile = ({ data }: any) => {
 };
 
 export const EditDepartment = ({ departments }: any) => {
-	const [editDepartment, setEditDepartment] = useState<IDepartmentsData>(departments as IDepartmentsData);
+	const [editDepartment, setEditDepartment] = useState<IDepartmentData>(departments as IDepartmentData);
 	const router = useRouter();
 	const [isFormValidated, setIsFormValidated] = useState(false);
 	const [formValidation, setFormValidation] = useState<IFormValidation>();

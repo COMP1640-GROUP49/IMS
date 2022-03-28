@@ -30,13 +30,45 @@ export interface IAccountsProps {
 export interface IParams extends ParsedUrlQuery {
 	username: string;
 }
+export interface IParamsDepartment extends ParsedUrlQuery {
+	department_name: string;
+}
 
-export interface IDepartmentsData extends IObjectKeys {
+export interface IDepartmentData extends IObjectKeys {
 	department: {
 		department_name: string;
 		department_id: string;
+		topics?: ITopicsProps;
+		accounts?: [];
 	};
 }
+
+export interface ITopicData extends IObjectKeys {
+	topic: {
+		topic_id: string;
+		topic_name: string;
+		topic_start_date: string;
+		topic_first_closure_date: string;
+		topic_final_closure_date: string;
+		topic_description?: string;
+		department_id: number;
+		category?: ICategoryDataProps;
+	};
+}
+export interface ICategoryData extends IObjectKeys {
+	categorys: {
+		categoty_id: string;
+		category_name: string;
+		categoty_description: string;
+	};
+}
+
+export interface ITopicsProps {
+	data: ITopicData[];
+}
 export interface IDeparmentsProps {
-	data: IDepartmentsData[];
+	data: IDepartmentData[];
+}
+export interface ICategoryDataProps {
+	data: ICategoryData;
 }

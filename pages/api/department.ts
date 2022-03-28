@@ -1,17 +1,17 @@
-import { IDepartmentsData } from 'lib/interfaces';
+import { IDepartmentData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
 
-export const getDepartmentList = async (limit?: number) => {
-	const noLimit = 99999;
-	const { data, error } = await supabase
-		.from('departments')
-		.select('*')
-		.limit(limit || noLimit);
-	return { data, error };
-};
-let newDepartment: IDepartmentsData;
-export const createDepartment = async ({ department_name }: IDepartmentsData) => {
+// export const getDepartmentList = async (limit?: number) => {
+// 	const noLimit = 99999;
+// 	const { data, error } = await supabase
+// 		.from('departments')
+// 		.select('*')
+// 		.limit(limit || noLimit);
+// 	return { data, error };
+// };
+let newDepartment: IDepartmentData;
+export const createDepartment = async ({ department_name }: IDepartmentData) => {
 	const { data: count } = await supabase.from('departments').select('*', { count: 'exact' });
 
 	try {
@@ -23,7 +23,7 @@ export const createDepartment = async ({ department_name }: IDepartmentsData) =>
 			if (error) {
 				throw error.message;
 			} else {
-				newDepartment = data as unknown as IDepartmentsData;
+				newDepartment = data as unknown as IDepartmentData;
 			}
 		};
 		await notifyToast(
@@ -54,7 +54,7 @@ export const updateDepartment = async (department_name: string, department_id: s
 
 export const deleteDepartment = async (department_id: string, department_name: string) => {
 	const deleteDepartment = async () => {
-		await supabase.from('cities').delete().match({ department_id: department_id });
+		await supabase.from('departments').delete().match({ department_id: department_id });
 	};
 	await notifyToast(
 		deleteDepartment(),
@@ -70,3 +70,23 @@ export const checkDepartmentExisted = async (department_name: string) => {
 
 	return data!.length !== 0;
 };
+
+export const getDepartmentTopics = async (limit?: number) => {
+	const noLimit = 99999;
+	const { data, error } = await supabase
+		.from('departments')
+		.select(`*, topics(*, categories(category_name)), accounts(username)`)
+		.order('department_name', { ascending: true })
+		.limit(limit || noLimit);
+	return { data, error };
+};
+
+// export const getDepartmentData = async (department_name: string) => {
+// 	const noLimit = 99999;
+// 	const { data, error } = await supabase
+// 		.from<IDepartmentData>('topics')
+// 		.select(`*`)
+// 		.match({ department_name: department_name })
+// 		.single();
+// 	return { data, error };
+// };

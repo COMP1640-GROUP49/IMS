@@ -1,18 +1,18 @@
 import { ClipLoader } from 'react-spinners';
 import DepartmentCard from 'components/DepartmentCard';
 
-export const DepartmentList = ({ department }: any) => {
+export const DepartmentList = ({ departments }: any) => {
 	return (
 		<div className="flex flex-col gap-6 user-list shadow-0">
 			<div>
-				<p className="text-body font-semi-bold users-list">List of department</p>
+				<p className="text-body font-semi-bold users-list">List of departments</p>
 			</div>
 			<div className="lg:p-6 lg:shadow-0">
 				<table>
 					<tbody>
-						{department ? (
-							(department as []).map((departments) => (
-								<DepartmentCard key={departments['department_id']} department={departments} />
+						{departments ? (
+							(departments as []).map((department) => (
+								<DepartmentCard key={department['department_id']} department={department} />
 							))
 						) : (
 							<tr>

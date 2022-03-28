@@ -8,13 +8,13 @@ import { Icon } from 'components/Icon';
 import { MetaTags } from 'components/MetaTags';
 import Modal from 'components/Modal';
 import Pagination from 'components/Pagination';
-import { getDepartmentList } from 'pages/api/department';
-import { IDeparmentsProps, IDepartmentsData } from 'lib/interfaces';
+import { getDepartmentTopics } from 'pages/api/department';
+import { IDeparmentsProps, IDepartmentData } from 'lib/interfaces';
 import { scrollToElementByClassName } from 'utils/scrollAnimate';
 import { CreateDepartment } from './[department]/create';
 
 export const getServerSideProps: GetServerSideProps = async () => {
-	const { data, error } = await getDepartmentList();
+	const { data, error } = await getDepartmentTopics();
 	if (error) {
 		throw error;
 	}
@@ -25,22 +25,20 @@ export const getServerSideProps: GetServerSideProps = async () => {
 	};
 };
 
-const DeparmentManager: NextPage<IDeparmentsProps> = ({ data: department }) => {
+const DeparmentManager: NextPage<IDeparmentsProps> = ({ data: departments }) => {
 	const limit = 5;
-	console.log(department);
-	const [currentItems, setCurrentItems] = useState<IDepartmentsData[]>();
-	console.log('🚀 ~ file: index.tsx ~ line 31 ~ currentItems', currentItems);
+	const [currentItems, setCurrentItems] = useState<IDepartmentData[]>();
 	const [pageCount, setPageCount] = useState(0);
 	const [itemOffset, setItemOffset] = useState(0);
 
 	useEffect(() => {
 		const endOffset = itemOffset + limit;
-		setCurrentItems(department.slice(itemOffset, endOffset));
-		setPageCount(Math.ceil(department.length / limit));
-	}, [itemOffset, department, limit]);
+		setCurrentItems(departments.slice(itemOffset, endOffset));
+		setPageCount(Math.ceil(departments.length / limit));
+	}, [itemOffset, departments, limit]);
 
 	const handlePageClick = (event: any) => {
-		const newOffset = (event.selected * limit) % department.length;
+		const newOffset = (event.selected * limit) % departments.length;
 		setItemOffset(newOffset);
 	};
 
@@ -58,14 +56,14 @@ const DeparmentManager: NextPage<IDeparmentsProps> = ({ data: department }) => {
 
 	return (
 		<>
-			<MetaTags title="Department Management" description="Manage department of IMS" />
+			<MetaTags title="Department Management" description="Manage departments of IMS" />
 			<Header />
 			<main className="body-container flex flex-col gap-6 below-navigation-bar">
 				<div className="flex flex-col gap-6 lg:flex-row  lg:justify-between">
 					<h1 className="scrollPos">Departments</h1>
 					<Button onClick={handleShowCreateDepartmentModal} icon className="btn-primary self-start sm:self-stretch">
 						<Icon name="PlusSquare" size="16" />
-						Create new department
+						Create new departments
 					</Button>
 					{showCreateDepartmentModal && (
 						<Modal onCancel={handleCloseEditDepartmentModal} headerText={`Create New Department`}>
@@ -73,9 +71,9 @@ const DeparmentManager: NextPage<IDeparmentsProps> = ({ data: department }) => {
 						</Modal>
 					)}
 				</div>
-				<DepartmentList department={currentItems} />
+				<DepartmentList departments={currentItems} />
 				<Pagination
-					items={department as []}
+					items={departments as []}
 					currentItems={currentItems as []}
 					itemOffset={itemOffset}
 					pageCount={pageCount}
