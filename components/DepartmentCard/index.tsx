@@ -54,78 +54,76 @@ const DepartmentCard = ({ department }: IDepartmentData) => {
 		} else handleConfindModal();
 	};
 	return (
-		<div>
-			<a>
-				<tr className="department-card ">
-					<Link href={`${asPath}/${department_name}`} passHref>
-						<td className="relative w-full">
-							<div className="flex flex-col">
-								<h3 className="text-subtitle font-semibold">{department_name}</h3>
-								<div className="flex gap-x-2">
-									<Icon name="Folder" />
-									<p>
-										{(department.topics as unknown as []).length > 1
-											? `${(department.topics as unknown as []).length} topics available`
-											: `${(department.topics as unknown as []).length} topic available`}
-									</p>
-								</div>
+		<tr className="department-card">
+			<Link href={`${asPath}/${department_name}`} passHref>
+				<a className="w-full">
+					<td>
+						<div className="flex flex-col">
+							<h3 className="text-subtitle font-semibold">{department_name}</h3>
+							<div className="flex gap-x-2">
+								<Icon name="Folder" />
+								<p>
+									{(department.topics as unknown as []).length > 1
+										? `${(department.topics as unknown as []).length} topics available`
+										: `${(department.topics as unknown as []).length} topic available`}
+								</p>
 							</div>
-						</td>
-					</Link>
-					<td className="relative hover:z-50">
-						<div className="flex justify-center items-center gap-x-2 z-[1000] ">
-							<Button onClick={handleShowEditDepartmentModal} icon className="btn-secondary ">
-								<Icon name="Edit" size="16" />
-								<p className="sm:hidden">Edit</p>
-							</Button>
-							{showEditDepartmentModal && (
-								<Modal onCancel={handleCloseEditDepartmentModal}>
-									<EditDepartment departments={department} />
-								</Modal>
-							)}
-							<Button onClick={handleShowDeleteModal} icon className="btn-primary">
-								<Icon name="Trash" size="16" />
-								<p className="sm:hidden">Delete</p>
-							</Button>
-							{showDeleteModal && (
-								<Modal onCancel={handleCloseDeleteModal}>
-									<div className="flex flex-col gap-6 justify-center">
-										<p>
-											Are you sure you want to delete this account <span className="font-semi-bold"></span>?
-										</p>
-										<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
-											{/*TODO: Edit delete button box-shadow*/}
-											<Button onClick={handleDeleteDepartment} className="btn-danger w-full">
-												Delete it
-											</Button>
-											{showConfindModal && (
-												<Modal onCancel={handleCloseConfindModal}>
-													<div className="flex flex-col gap-6 justify-center">
-														<p>
-															Are you sure you want to delete this account <span className="font-semi-bold"></span>?
-														</p>
-														<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
-															{/*TODO: Edit delete button box-shadow*/}
-															<Button onClick={handleCloseDeleteModal} className="btn-success  w-full">
-																Ok, got it!
-															</Button>
-														</div>
-													</div>
-												</Modal>
-											)}
-
-											<Button onClick={handleCloseDeleteModal} className="btn-secondary  w-full">
-												Cancel
-											</Button>
-										</div>
-									</div>
-								</Modal>
-							)}
 						</div>
 					</td>
-				</tr>
-			</a>
-		</div>
+				</a>
+			</Link>
+			<td>
+				<div className="flex justify-center items-center gap-x-2 z-[1000] ">
+					<Button onClick={handleShowEditDepartmentModal} icon className="btn-secondary ">
+						<Icon name="Edit" size="16" />
+						<p className="sm:hidden">Edit</p>
+					</Button>
+					{showEditDepartmentModal && (
+						<Modal onCancel={handleCloseEditDepartmentModal}>
+							<EditDepartment departments={department} />
+						</Modal>
+					)}
+					<Button onClick={handleShowDeleteModal} icon className="btn-primary">
+						<Icon name="Trash" size="16" />
+						<p className="sm:hidden">Delete</p>
+					</Button>
+					{showDeleteModal && (
+						<Modal onCancel={handleCloseDeleteModal}>
+							<div className="flex flex-col gap-6 justify-center">
+								<p>
+									Are you sure you want to delete this account <span className="font-semi-bold"></span>?
+								</p>
+								<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
+									{/*TODO: Edit delete button box-shadow*/}
+									<Button onClick={handleDeleteDepartment} className="btn-danger w-full">
+										Delete it
+									</Button>
+									{showConfindModal && (
+										<Modal onCancel={handleCloseConfindModal}>
+											<div className="flex flex-col gap-6 justify-center">
+												<p>
+													Are you sure you want to delete this account <span className="font-semi-bold"></span>?
+												</p>
+												<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
+													{/*TODO: Edit delete button box-shadow*/}
+													<Button onClick={handleCloseDeleteModal} className="btn-success  w-full">
+														Ok, got it!
+													</Button>
+												</div>
+											</div>
+										</Modal>
+									)}
+
+									<Button onClick={handleCloseDeleteModal} className="btn-secondary  w-full">
+										Cancel
+									</Button>
+								</div>
+							</div>
+						</Modal>
+					)}
+				</div>
+			</td>
+		</tr>
 	);
 };
 export default DepartmentCard;

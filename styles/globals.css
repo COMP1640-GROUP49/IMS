@@ -138,6 +138,12 @@
 	td span {
 		@apply lg:hidden block;
 	}
+	.department-card {
+		@apply flex flex-row justify-between items-center bg-white rounded-lg p-4 mt-0 mb-4 shadow-0 lg:shadow-0;
+	}
+	.department-card:hover {
+		@apply cursor-pointer;
+	}
 }
 
 @layer components {
@@ -351,12 +357,6 @@
 
 	.user-card {
 		@apply bg-white rounded-lg p-6 lg:p-0 shadow-0 lg:shadow-none;
-	}
-	.department-card {
-		@apply flex flex-row justify-between items-center bg-white rounded-lg p-4 mt-0 mb-4 shadow-0 lg:shadow-0;
-	}
-	.department-card:hover {
-		@apply cursor-pointer;
 	}
 
 	.user-card:hover {
