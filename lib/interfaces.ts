@@ -1,4 +1,3 @@
-import { ParsedUrlQuery } from 'querystring';
 import { IObjectKeys } from 'lib/objectKeys';
 
 export interface IAccountData extends IObjectKeys {
@@ -27,6 +26,45 @@ export interface IAccountsProps {
 	data: IAccountData[];
 }
 
-export interface IParams extends ParsedUrlQuery {
-	username: string;
+export interface IDepartmentData extends IObjectKeys {
+	department: {
+		department_name: string;
+		department_id: string;
+		topics?: ITopicsProps;
+		accounts?: [];
+	};
+}
+
+export interface IDepartmentsProps {
+	data: IDepartmentData[];
+}
+
+export interface ITopicData extends IObjectKeys {
+	topic: {
+		topic_id: string;
+		topic_name: string;
+		topic_start_date: string;
+		topic_first_closure_date: string;
+		topic_final_closure_date: string;
+		topic_description?: string;
+		department_id: number;
+		category?: ICategoryDataProps;
+	};
+}
+
+export interface ITopicsProps {
+	data: ITopicData[];
+}
+
+export interface ICategoryData extends IObjectKeys {
+	category: {
+		category_id: string;
+		category_name: string;
+		category_description?: string;
+		topic_id: string;
+	};
+}
+
+export interface ICategoryDataProps {
+	data: ICategoryData;
 }

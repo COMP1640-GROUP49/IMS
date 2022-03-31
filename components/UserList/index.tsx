@@ -9,7 +9,7 @@ export const UserList = ({ accounts }: any) => {
 	return (
 		<div className="flex flex-col gap-6 user-list">
 			<div>
-				<p className="text-body font-semi-bold users-list">List Of Users</p>
+				<p className="text-body font-semi-bold users-list">List of users</p>
 			</div>
 			<div className="lg:p-6 lg:shadow-0">
 				<table>

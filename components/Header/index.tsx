@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import React, { useContext, useEffect, useState } from 'react';
 import { Avatar } from 'components/Avatar';
 import { Button } from 'components/Button';
@@ -13,6 +14,7 @@ import { logOut } from 'pages/api/auth';
 export const Header = () => {
 	const [openHamburgerMenu, setOpenHamburgerMenu] = useState(false);
 	const [openProfileMenu, setOpenProfileMenu] = useState(false);
+	const { asPath } = useRouter();
 
 	const user = useContext(UserContext);
 	useEffect(() => {

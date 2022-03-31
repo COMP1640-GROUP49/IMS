@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { useContext } from 'react';
-import { EditProfile } from 'components/Form/form';
+import { EditProfilePage as EditProfileForm } from 'components/Form/form';
 import { Header } from 'components/Header';
 import { MetaTags } from 'components/MetaTags';
 import { UserContext } from 'components/PrivateRoute';
@@ -11,7 +11,7 @@ const EditProfilePage = () => {
 		<>
 			<MetaTags title={`Edit @${user?.user_metadata?.username as string}'s Profile`} />
 			<Header />
-			<EditProfile data={user} />
+			<EditProfileForm data={user} />
 		</>
 	);
 };

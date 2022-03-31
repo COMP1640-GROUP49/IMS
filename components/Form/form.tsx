@@ -20,13 +20,15 @@ import {
 	uploadAvatar,
 } from 'pages/api/admin';
 import { IUserData } from 'pages/api/auth';
+import { createDepartment, getDepartmentList, updateDepartment } from 'pages/api/department';
 import { updateProfile } from 'pages/api/user';
-import { IAccountData } from 'lib/interfaces';
+import { IAccountData, IDepartmentData, IDepartmentsProps } from 'lib/interfaces';
 import { scrollToElement } from 'utils/scrollAnimate';
 
 export const EditUserModal = ({ account }: IAccountData) => {
 	const router = useRouter();
 	const [formData, setFormData] = useState<IAccountData['account']>(account);
+	const [departmentList, setDepartmentList] = useState<IDepartmentsProps>();
 	const [formDataChanges, setFormDataChanges] = useState(false);
 	const [avatar, setAvatar] = useState<File>();
 
@@ -367,6 +369,14 @@ export const EditUserModal = ({ account }: IAccountData) => {
 		}
 	}, [formValidation, isFormValidated, formData, account, avatar]);
 
+	useEffect(() => {
+		const getDepartmentData = async () => {
+			const { data, error } = await getDepartmentList();
+			setDepartmentList(data as unknown as IDepartmentsProps);
+		};
+		void getDepartmentData();
+	}, []);
+
 	return (
 		<>
 			<MetaTags title={`Edit @${account.username} account`} description="Create a new user account" />
@@ -450,11 +460,18 @@ export const EditUserModal = ({ account }: IAccountData) => {
 									<option disabled value={'disabled'}>
 										{"Select account's department"}
 									</option>
-									<option value="0">Admin Department</option>
-									<option value="1">QA Department</option>
-									<option value="2">IT Department</option>
-									<option value="3">Design Department</option>
-									<option value="3">Business Department</option>
+									{departmentList ? (
+										(departmentList as unknown as []).map((department) => (
+											<option
+												key={(department as IDepartmentData['department']).department_id}
+												value={(department as IDepartmentData['department']).department_id}
+											>
+												{(department as IDepartmentData['department']).department_name}
+											</option>
+										))
+									) : (
+										<ClipLoader />
+									)}
 								</Select>
 								{formValidation &&
 									(formValidation['roleValidation'] === 'error' ? (
@@ -584,7 +601,7 @@ export const EditUserModal = ({ account }: IAccountData) => {
 	);
 };
 
-export const EditProfile = ({ data }: any) => {
+export const EditProfilePage = ({ data }: any) => {
 	const router = useRouter();
 	const [formData, setFormData] = useState<IUserData>(data as IUserData);
 	const [formDataChanges, setFormDataChanges] = useState(false);
@@ -896,5 +913,149 @@ export const EditProfile = ({ data }: any) => {
 		</>
 	) : (
 		<ClipLoader />
+	);
+};
+
+export const CreateDepartmentModal = () => {
+	const [isFormValidated, setIsFormValidated] = useState(false);
+	const [formDepartment, setFormDepartment] = useState<IDepartmentData>();
+	const [formValidation, setFormValidation] = useState<IFormValidation>();
+	const router = useRouter();
+	interface IFormValidation {
+		departmentNameValidation: string;
+	}
+	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setFormDepartment({
+			...formDepartment!,
+			[event.target.name]: event.target.value.trim(),
+		});
+		if (event.target.name.trim() !== '') {
+			setFormValidation({
+				...formValidation!,
+				departmentNameValidation: 'success',
+			});
+		}
+	};
+	const handleCreateDepartment = async (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
+		(event as FormEvent<HTMLFormElement>).preventDefault();
+		try {
+			await createDepartment(formDepartment as IDepartmentData);
+			void router.reload();
+		} catch (error) {
+			throw error;
+		}
+	};
+	useEffect(() => {
+		if (formValidation?.departmentNameValidation === 'success') {
+			setIsFormValidated(true);
+		} else {
+			setIsFormValidated(false);
+		}
+	}, [formValidation, isFormValidated]);
+	return (
+		<>
+			<MetaTags title={`Create New Department`} description="Create a new department" />
+			<form onSubmit={handleCreateDepartment} className="flex flex-col gap-6">
+				<div className="flex flex-col gap-4">
+					<div className="flex flex-col gap-2">
+						<Label size="text-normal">Department Name</Label>
+						<Input
+							name="department_name"
+							onChange={handleChange}
+							required
+							placeholder={"Input department's name"}
+							type="text"
+						/>
+					</div>
+					<Button
+						disabled={!isFormValidated}
+						icon={true}
+						className={`${
+							isFormValidated ? `btn-primary` : `btn-disabled`
+						}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+					>
+						<Icon name="PlusSquare" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+						Create department
+					</Button>
+				</div>
+			</form>
+		</>
+	);
+};
+
+export const EditDepartmentModal = ({ department }: any) => {
+	const [editDepartment, setEditDepartment] = useState<IDepartmentData['department']>(
+		department as IDepartmentData['department']
+	);
+	const router = useRouter();
+	const [isFormValidated, setIsFormValidated] = useState(false);
+	const [isFormDataChanges, setIsFormDataChanges] = useState(false);
+	const [formValidation, setFormValidation] = useState<IFormValidation>();
+	interface IFormValidation {
+		departmentName: string;
+	}
+	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setEditDepartment({
+			...editDepartment,
+			[event.target.name]: event.target.value,
+		});
+		if (event.target.name !== '') {
+			setFormValidation({
+				...formValidation!,
+				departmentName: 'success',
+			});
+		}
+	};
+
+	const handleUpdateDepartment = async (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
+		(event as FormEvent<HTMLFormElement>).preventDefault();
+		await updateDepartment(editDepartment?.department_name, editDepartment?.department_id);
+		router.reload();
+	};
+	useEffect(() => {
+		if (formValidation?.departmentName === 'success') {
+			setIsFormValidated(true);
+		} else {
+			setIsFormValidated(false);
+		}
+
+		if (editDepartment?.department_name === (department as IDepartmentData['department'])?.department_name) {
+			setIsFormDataChanges(false);
+		} else {
+			setIsFormDataChanges(true);
+		}
+	}, [formValidation, isFormValidated, editDepartment, department]);
+	return (
+		<>
+			<MetaTags
+				title={`Edit ${(department as IDepartmentData['department']).department_name}`}
+				description="Create a new user account"
+			/>
+			<form onSubmit={handleUpdateDepartment} className="flex flex-col gap-6">
+				<div className="flex flex-col gap-4">
+					<div className="flex flex-col gap-2">
+						<Label size="text-normal">Department Name</Label>
+						<Input
+							value={editDepartment?.department_name}
+							name="department_name"
+							onChange={handleChange}
+							required
+							placeholder={"Input department's name"}
+							type="text"
+						/>
+					</div>
+					<Button
+						disabled={!isFormValidated && !isFormDataChanges}
+						icon={true}
+						className={`${
+							isFormValidated && isFormDataChanges ? `btn-primary` : `btn-disabled`
+						}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+					>
+						<Icon name="Save" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+						Save change
+					</Button>
+				</div>
+			</form>
+		</>
 	);
 };
