@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { useRouter } from 'next/router';
 import React, { FormEvent, useEffect, useState } from 'react';
+import { ClipLoader } from 'react-spinners';
 import AvatarUploader from 'components/AvatarUploader';
 import { Button } from 'components/Button';
 import { Header } from 'components/Header';
@@ -17,11 +18,14 @@ import {
 	keepAdminSession,
 	uploadAvatar,
 } from 'pages/api/admin';
+import { getDepartmentList } from 'pages/api/department';
+import { IDepartmentData, IDepartmentsProps } from 'lib/interfaces';
 import { scrollToElement } from 'utils/scrollAnimate';
 
 const CreateNewUser = () => {
 	const [formData, setFormData] = useState<IFormData>();
 	const [avatar, setAvatar] = useState<File>();
+	const [departmentList, setDepartmentList] = useState<IDepartmentsProps>();
 
 	const router = useRouter();
 
@@ -247,6 +251,12 @@ const CreateNewUser = () => {
 	};
 
 	useEffect(() => {
+		const getDepartmentData = async () => {
+			const { data, error } = await getDepartmentList();
+			setDepartmentList(data as unknown as IDepartmentsProps);
+		};
+		void getDepartmentData();
+
 		if (
 			formValidation?.usernameValidation === 'success' &&
 			formValidation?.passwordValidation === 'success' &&
@@ -333,11 +343,18 @@ const CreateNewUser = () => {
 									<option disabled value={'disabled'}>
 										{"Select account's department"}
 									</option>
-									<option value="0">Admin Department</option>
-									<option value="1">QA Department</option>
-									<option value="2">IT Department</option>
-									<option value="3">Design Department</option>
-									<option value="3">Business Department</option>
+									{departmentList ? (
+										(departmentList as unknown as []).map((department) => (
+											<option
+												key={(department as IDepartmentData['department']).department_id}
+												value={(department as IDepartmentData['department']).department_id}
+											>
+												{(department as IDepartmentData['department']).department_name}
+											</option>
+										))
+									) : (
+										<ClipLoader />
+									)}
 								</Select>
 								{formValidation &&
 									(formValidation['roleValidation'] === 'error' ? (

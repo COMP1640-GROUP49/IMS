@@ -1,7 +1,6 @@
 import { ITopicData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
-import { IFormData } from './admin';
 
 export const getTopicsListByDepartmentId = async (department_id: string, limit?: number) => {
 	const noLimit = 99999;
@@ -14,7 +13,6 @@ export const getTopicsListByDepartmentId = async (department_id: string, limit?:
 };
 
 export const createNewTopic = async (topicForm: ITopicData['topic']) => {
-	console.log(topicForm);
 	const insertNewTopic = async () => {
 		const { data, error } = await supabase.from('topics').insert(topicForm);
 		if (error) {

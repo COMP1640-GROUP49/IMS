@@ -28,8 +28,10 @@ export interface IAccountsProps {
 
 export interface IDepartmentData extends IObjectKeys {
 	department: {
-		department_id: string;
 		department_name: string;
+		department_id: string;
+		topics?: ITopicsProps;
+		accounts?: [];
 	};
 }
 

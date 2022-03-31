@@ -2,7 +2,6 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ParsedUrlQuery } from 'querystring';
-import { Fragment } from 'react';
 import { Avatar } from 'components/Avatar';
 import { Button } from 'components/Button';
 import { Header } from 'components/Header';
