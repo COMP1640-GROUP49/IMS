@@ -32,7 +32,8 @@
 	}
 
 	input,
-	select {
+	select,
+	textarea {
 		@apply px-2 py-3 border border-silver rounded-lg outline-black placeholder-silver font-normal;
 	}
 
@@ -44,6 +45,10 @@
 		@apply h-[50px] box-border bg-white text-black;
 	}
 
+	.form-field {
+		@apply flex flex-col gap-2;
+	}
+
 	/*  Use to add padding to move dropdown icon of select element to right due to limitation of its default
 	select {
 		@apply h-[50px] box-border text-silver border-r-[8px] border-solid border-r-transparent border-0 outline outline-1 outline-silver;
@@ -51,7 +56,8 @@
 	*/
 
 	input:focus,
-	select:focus {
+	select:focus,
+	textarea:focus {
 		@apply outline-1 outline-black;
 	}
 
@@ -170,7 +176,8 @@
 	}
 
 	.btn-google:hover,
-	.btn-danger:hover {
+	.btn-danger:hover,
+	.btn-success:hover {
 		@apply shadow-2;
 	}
 
@@ -180,6 +187,10 @@
 
 	.btn-disabled svg {
 		@apply stroke-silver;
+	}
+
+	.btn-success {
+		@apply px-2 py-4 bg-caribbean-green text-white rounded-lg font-semi-bold self-stretch relative;
 	}
 
 	.btn-danger {
@@ -346,7 +357,8 @@
 		@apply h-[48px];
 	}
 
-	.user-card {
+	.user-card,
+	.topic-card {
 		@apply bg-white rounded-lg p-6 lg:p-0 shadow-0 lg:shadow-none;
 	}
 
@@ -436,6 +448,56 @@
 
 	.profile-content {
 		@apply flex flex-col gap-6;
+	}
+
+	.back-link {
+		@apply flex items-center gap-2 text-footer text-sonic-silver;
+	}
+
+	.back-link:hover {
+		@apply text-black;
+	}
+
+	.card-info {
+		@apply text-footer text-sonic-silver;
+	}
+
+	.card-info svg {
+		@apply stroke-sonic-silver;
+	}
+
+	.topic-card {
+		@apply lg:flex lg:flex-col lg:gap-2 p-4;
+		@apply lg:shadow-0;
+		@apply mb-6;
+	}
+
+	.topic-card:hover {
+		@apply shadow-1;
+	}
+
+	.topic-card:last-child {
+		@apply mb-0;
+	}
+
+	.topic-card td {
+		@apply p-0;
+	}
+
+	.topic-card__info-wrapper {
+		@apply flex flex-col gap-2 lg:flex-row lg:justify-between lg:items-center;
+	}
+
+	.topic-card__info {
+		@apply flex flex-col gap-2;
+	}
+
+	.topic-card__info {
+		@apply flex flex-col gap-2;
+	}
+
+	.topic-card__info td:last-child {
+		@apply m-0;
 	}
 }
 

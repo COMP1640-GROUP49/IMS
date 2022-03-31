@@ -71,7 +71,7 @@ export const UserCard = ({ account }: IAccountData) => {
 			</td>
 			<td>
 				<span>Created</span>
-				{moment(created).format('MMM, DD YYYY')}
+				{moment(created).format('MMM DD, YYYY')}
 			</td>
 			<td>
 				<div className="flex flex-1 flex-wrap justify-between lg:justify-start lg:gap-4">

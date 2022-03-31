@@ -10,6 +10,7 @@ import { Label } from 'components/Label';
 import { MetaTags } from 'components/MetaTags';
 import Modal from 'components/Modal';
 import { Select } from 'components/Select';
+import { TextArea } from 'components/TextArea';
 import {
 	CheckEmailExisted,
 	checkUsernameExisted,
@@ -20,8 +21,10 @@ import {
 	uploadAvatar,
 } from 'pages/api/admin';
 import { IUserData } from 'pages/api/auth';
+import { createNewTopic, updateTopic } from 'pages/api/topic';
 import { updateProfile } from 'pages/api/user';
-import { IAccountData } from 'lib/interfaces';
+import { compareObject } from 'lib/compareObject';
+import { IAccountData, ITopicData } from 'lib/interfaces';
 import { scrollToElement } from 'utils/scrollAnimate';
 
 export const EditUserModal = ({ account }: IAccountData) => {
@@ -896,5 +899,312 @@ export const EditProfile = ({ data }: any) => {
 		</>
 	) : (
 		<ClipLoader />
+	);
+};
+
+export const CreateTopicModal = ({ department_id }: any) => {
+	const router = useRouter();
+	const [formData, setFormData] = useState({});
+
+	interface IFormValidation {
+		topicNameValidation: string;
+	}
+
+	const [formValidation, setFormValidation] = useState<IFormValidation>({
+		topicNameValidation: '',
+	});
+
+	const [isFormValidated, setIsFormValidated] = useState(false);
+
+	const handleChange = (
+		event:
+			| React.ChangeEvent<HTMLInputElement>
+			| React.ChangeEvent<HTMLSelectElement>
+			| React.ChangeEvent<HTMLTextAreaElement>
+	) => {
+		setFormData({
+			...formData,
+			[event.target.name]: event.target.value,
+			department_id: department_id as string,
+		});
+
+		if (event.target.name === 'topic_name') {
+			if (event.target.value === '') {
+				setFormValidation({
+					...formValidation,
+					topicNameValidation: 'error',
+				});
+			} else {
+				setFormValidation({
+					...formValidation,
+					topicNameValidation: 'success',
+				});
+			}
+		}
+	};
+
+	const handleCreateNewTopic = async (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
+		(event as FormEvent<HTMLFormElement>).preventDefault();
+		await createNewTopic(formData as ITopicData['topic']);
+		router.reload();
+	};
+
+	useEffect(() => {
+		if (
+			formValidation.topicNameValidation === 'success' &&
+			typeof (formData as ITopicData['topic'])?.topic_start_date !== 'undefined' &&
+			typeof (formData as ITopicData['topic'])?.topic_first_closure_date !== 'undefined' &&
+			typeof (formData as ITopicData['topic'])?.topic_final_closure_date !== 'undefined'
+		) {
+			setIsFormValidated(true);
+		} else {
+			setIsFormValidated(false);
+		}
+	}, [formValidation, formData]);
+	return (
+		<>
+			<MetaTags title={`Create New Topic`} description="Create a new user account" />
+			<main>
+				<div className="flex flex-col gap-6">
+					<form onSubmit={handleCreateNewTopic} className="flex flex-col gap-6">
+						<div className="flex flex-col gap-4">
+							<div className="form-field">
+								<Label size="text-normal">Topic Name</Label>
+								<Input
+									onChange={handleChange}
+									value={(formData as ITopicData['topic'])?.topic_name}
+									name="topic_name"
+									required={true}
+									placeholder={"Input topics's name"}
+									type="text"
+								/>
+								{formValidation &&
+									(formValidation['topicNameValidation'] === 'success' ? (
+										<div className="label-success">This topic name is valid.</div>
+									) : formValidation['topicNameValidation'] === 'error' ? (
+										<div className="label-warning">Please input the topic name.</div>
+									) : null)}
+							</div>
+							<div className="form-field">
+								<Label size="text-normal">Start Date</Label>
+								<Input
+									onChange={handleChange}
+									value={(formData as ITopicData['topic'])?.topic_start_date}
+									name="topic_start_date"
+									required={true}
+									placeholder={"Input topics's start date"}
+									type="datetime-local"
+								/>
+							</div>
+							<div className="form-field">
+								<Label size="text-normal">First Closure Date</Label>
+								<Input
+									onChange={handleChange}
+									value={(formData as ITopicData['topic'])?.topic_first_closure_date}
+									name="topic_first_closure_date"
+									required={true}
+									placeholder={"Input topics's first closure date"}
+									type="datetime-local"
+								/>
+							</div>
+							<div className="form-field">
+								<Label size="text-normal">Final Closure Date</Label>
+								<Input
+									onChange={handleChange}
+									value={(formData as ITopicData['topic'])?.topic_final_closure_date}
+									name="topic_final_closure_date"
+									required={true}
+									placeholder={"Input topics's final closure date"}
+									type="datetime-local"
+								/>
+							</div>
+							<div className="form-field">
+								<Label optional size="text-normal">
+									Topic Description
+								</Label>
+								<TextArea
+									onChange={handleChange}
+									value={(formData as ITopicData['topic'])?.topic_description}
+									name="topic_description"
+									required={false}
+									placeholder={"Input topics's description"}
+								/>
+							</div>
+							<Button
+								disabled={!isFormValidated}
+								icon={true}
+								className={`${
+									isFormValidated ? `btn-primary` : `btn-disabled`
+								}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+							>
+								<Icon name="FolderPlus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+								Create topic
+							</Button>
+						</div>
+					</form>
+				</div>
+			</main>
+		</>
+	);
+};
+
+export const EditTopicModal = ({ topicData }: any) => {
+	const router = useRouter();
+	const [formData, setFormData] = useState(topicData as ITopicData['topic']);
+	const [formDataChanges, setFormDataChanges] = useState(false);
+	const [isFormValidated, setIsFormValidated] = useState(true);
+
+	interface IFormValidation {
+		topicNameValidation: string;
+	}
+
+	const [formValidation, setFormValidation] = useState<IFormValidation>({
+		topicNameValidation: 'loaded',
+	});
+
+	const handleChange = (
+		event:
+			| React.ChangeEvent<HTMLInputElement>
+			| React.ChangeEvent<HTMLSelectElement>
+			| React.ChangeEvent<HTMLTextAreaElement>
+	) => {
+		setFormData({
+			...formData,
+			[event.target.name]: event.target.value,
+		});
+
+		if (event.target.name === 'topic_name') {
+			if (event.target.value === '') {
+				setFormValidation({
+					...formValidation,
+					topicNameValidation: 'error',
+				});
+			} else {
+				setFormValidation({
+					...formValidation,
+					topicNameValidation: 'success',
+				});
+			}
+		}
+		if (event.target.name === 'topic_description') {
+			if (event.target.value === '') {
+				setFormData({
+					...formData,
+					topic_description: null!,
+				});
+			}
+		}
+	};
+
+	const handleUpdateTopic = async (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
+		if (isFormValidated) {
+			setFormData({
+				...formData,
+			});
+		}
+		(event as FormEvent<HTMLFormElement>).preventDefault();
+		await updateTopic(formData);
+		router.reload();
+	};
+
+	useEffect(() => {
+		if (
+			formValidation.topicNameValidation === 'success' ||
+			(formValidation.topicNameValidation === 'loaded' &&
+				typeof formData?.topic_start_date !== 'undefined' &&
+				typeof formData?.topic_first_closure_date !== 'undefined' &&
+				typeof formData?.topic_final_closure_date !== 'undefined')
+		) {
+			setIsFormValidated(true);
+		} else {
+			setIsFormValidated(false);
+		}
+
+		compareObject(topicData as object, formData) ? setFormDataChanges(false) : setFormDataChanges(true);
+	}, [formValidation, formData, topicData]);
+	return (
+		<>
+			<MetaTags title={`Create New Topic`} description="Create a new user account" />
+			<main>
+				<div className="flex flex-col gap-6">
+					<form onSubmit={handleUpdateTopic} className="flex flex-col gap-6">
+						<div className="flex flex-col gap-4">
+							<div className="form-field">
+								<Label size="text-normal">Topic Name</Label>
+								<Input
+									onChange={handleChange}
+									value={formData?.topic_name}
+									name="topic_name"
+									required={true}
+									placeholder={"Input topics's name"}
+									type="text"
+								/>
+								{formValidation &&
+									(formValidation['topicNameValidation'] === 'success' ? (
+										<div className="label-success">This topic name is valid.</div>
+									) : formValidation['topicNameValidation'] === 'error' ? (
+										<div className="label-warning">Please input the topic name.</div>
+									) : null)}
+							</div>
+							<div className="form-field">
+								<Label size="text-normal">Start Date</Label>
+								<Input
+									onChange={handleChange}
+									value={formData?.topic_start_date}
+									name="topic_start_date"
+									required={true}
+									placeholder={"Input topics's start date"}
+									type="datetime-local"
+								/>
+							</div>
+							<div className="form-field">
+								<Label size="text-normal">First Closure Date</Label>
+								<Input
+									onChange={handleChange}
+									value={formData?.topic_first_closure_date}
+									name="topic_first_closure_date"
+									required={true}
+									placeholder={"Input topics's first closure date"}
+									type="datetime-local"
+								/>
+							</div>
+							<div className="form-field">
+								<Label size="text-normal">Final Closure Date</Label>
+								<Input
+									onChange={handleChange}
+									value={formData?.topic_final_closure_date}
+									name="topic_final_closure_date"
+									required={true}
+									placeholder={"Input topics's final closure date"}
+									type="datetime-local"
+								/>
+							</div>
+							<div className="form-field">
+								<Label optional size="text-normal">
+									Topic Description
+								</Label>
+								<TextArea
+									onChange={handleChange}
+									value={formData?.topic_description || ''}
+									name="topic_description"
+									required={false}
+									placeholder={"Input topics's description"}
+								/>
+							</div>
+							<Button
+								disabled={!isFormValidated && !formDataChanges}
+								icon={true}
+								className={`${
+									isFormValidated && formDataChanges ? `btn-primary` : `btn-disabled`
+								}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+							>
+								<Icon name="Save" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+								Save changes
+							</Button>
+						</div>
+					</form>
+				</div>
+			</main>
+		</>
 	);
 };

@@ -1,6 +1,7 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { ParsedUrlQuery } from 'querystring';
 import { Fragment } from 'react';
 import { Avatar } from 'components/Avatar';
 import { Button } from 'components/Button';
@@ -8,7 +9,11 @@ import { Header } from 'components/Header';
 import { Icon } from 'components/Icon';
 import { MetaTags } from 'components/MetaTags';
 import { getAccountData, getUsersList } from 'pages/api/admin';
-import { IAccountData, IParams } from 'lib/interfaces';
+import { IAccountData } from 'lib/interfaces';
+
+interface IParams extends ParsedUrlQuery {
+	username: string;
+}
 
 export const getStaticPaths: GetStaticPaths = async () => {
 	const { data } = await getUsersList();
