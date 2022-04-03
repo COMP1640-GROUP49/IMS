@@ -510,7 +510,7 @@
 	}
 
 	.topic-card__info {
-		@apply flex flex-col gap-2;
+		@apply flex flex-col gap-2 w-full;
 	}
 
 	.topic-card__info td:last-child {

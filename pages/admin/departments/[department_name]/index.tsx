@@ -1,18 +1,21 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { GetServerSideProps, NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ParsedUrlQuery } from 'querystring';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from 'components/Button';
 import { CreateTopicModal } from 'components/Form/form';
 import { Header } from 'components/Header';
 import { Icon } from 'components/Icon';
 import { MetaTags } from 'components/MetaTags';
 import Modal from 'components/Modal';
+import Pagination from 'components/Pagination';
 import { getDepartmentByName } from 'pages/api/department';
 import { getTopicsListByDepartmentId } from 'pages/api/topic';
-import { ITopicsProps } from 'lib/interfaces';
+import { ITopicData, ITopicsProps } from 'lib/interfaces';
+import { scrollToElementByClassName } from 'utils/scrollAnimate';
 import { TopicList } from '../../../../components/TopicList/TopicList';
 
 interface IParams extends ParsedUrlQuery {
@@ -62,6 +65,25 @@ const DepartmentPage: NextPage<ITopicsProps, IDepartmentProps> = (props) => {
 		setShowCreateTopicModal(!showCreateTopicModal);
 	}, [showCreateTopicModal]);
 
+	const limit = 5;
+	const [currentItems, setCurrentItems] = useState<ITopicData[]>();
+	const [pageCount, setPageCount] = useState(0);
+	const [itemOffset, setItemOffset] = useState(0);
+
+	useEffect(() => {
+		const endOffset = itemOffset + limit;
+		setCurrentItems(topics.slice(itemOffset, endOffset));
+		setPageCount(Math.ceil(topics.length / limit));
+	}, [itemOffset, topics, limit]);
+
+	const handlePageClick = (event: any) => {
+		const newOffset = (event.selected * limit) % topics.length;
+		setItemOffset(newOffset);
+	};
+
+	const handlePaginationClick = () => {
+		scrollToElementByClassName('scrollPos');
+	};
 	return (
 		<>
 			<MetaTags title={`${department_name as string} Department`} />
@@ -91,7 +113,15 @@ const DepartmentPage: NextPage<ITopicsProps, IDepartmentProps> = (props) => {
 						</Modal>
 					)}
 				</div>
-				<TopicList topics={topics} />
+				<TopicList topics={currentItems} />
+				<Pagination
+					items={topics as []}
+					currentItems={currentItems as []}
+					itemOffset={itemOffset}
+					pageCount={pageCount}
+					handlePaginationClick={handlePaginationClick}
+					handlePageClick={handlePageClick}
+				/>
 			</main>
 		</>
 	);

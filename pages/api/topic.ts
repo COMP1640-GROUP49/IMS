@@ -58,3 +58,16 @@ export const deleteTopic = async (topic_id: string, topic_name: string) => {
 		`Topic named ${topic_name} has been deleted.`
 	);
 };
+
+let topicData: ITopicData;
+export const getTopicByName = async (topic_name: string) => {
+	const { data, error } = await supabase
+		.from('topics')
+		.select('topic_id')
+		.ilike('topic_name', `${topic_name.split('-').join(' ')}`);
+	if (data && (data as []).length !== 0) {
+		topicData = data[0] as ITopicData;
+	}
+	const { topic_id } = topicData;
+	return { topic_id, error };
+};

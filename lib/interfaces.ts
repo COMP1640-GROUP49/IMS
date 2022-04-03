@@ -62,9 +62,27 @@ export interface ICategoryData extends IObjectKeys {
 		category_name: string;
 		category_description?: string;
 		topic_id: string;
+		ideas?: IIdeas[];
 	};
 }
 
 export interface ICategoriesProps {
 	data: ICategoryData[];
+}
+
+export interface IIdeas extends IObjectKeys {
+	idea: {
+		idea_id: string;
+		idea_title: string;
+		idea_view: string;
+		idea_content: string;
+		idea_file_url: string;
+		idea_created: string;
+		idea_updated: string;
+		category_id: string;
+	};
+}
+
+export interface IIdeasProps {
+	data: IIdeas[];
 }
