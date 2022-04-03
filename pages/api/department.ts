@@ -32,6 +32,15 @@ export const getDepartmentByName = async (department_name: string) => {
 	return { department_id, error };
 };
 
+export const getDepartmentNameById = async (id: string) => {
+	const { data, error } = await supabase.from('departments').select('department_name').match({ department_id: id });
+	if (data && (data as []).length !== 0) {
+		departmentData = data[0] as unknown as IDepartmentData;
+	}
+	const { department_name } = departmentData;
+	return { department_name, error };
+};
+
 export const getDepartmentList = async (limit?: number) => {
 	const noLimit = 99999;
 	const { data, error } = await supabase

@@ -2,15 +2,17 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useCallback, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import { Button } from 'components/Button';
 import { EditDepartmentModal } from 'components/Form/form';
 import { Icon } from 'components/Icon';
 import Modal from 'components/Modal';
+import { UserContext } from 'components/PrivateRoute';
 import { deleteDepartment } from 'pages/api/department';
 import { IDepartmentData } from 'lib/interfaces';
 
 const DepartmentCard = ({ department }: IDepartmentData) => {
+	const user = useContext(UserContext);
 	const { department_name, department_id } = department;
 	const { asPath } = useRouter();
 	const router = useRouter();
@@ -77,14 +79,17 @@ const DepartmentCard = ({ department }: IDepartmentData) => {
 					<td>
 						<div className="flex flex-col gap-2">
 							<h3 className="text-subtitle font-semi-bold">{department_name}</h3>
-							<div className="flex flex-row gap-1 items-center card-info">
-								<Icon name="Users" size="16" />
-								<p>
-									{(department.accounts as unknown as []).length > 1
-										? `${(department.accounts as unknown as []).length} user accounts `
-										: `${(department.accounts as unknown as []).length} user account`}
-								</p>
-							</div>
+							{user?.user_metadata?.role === 0 && (
+								<div className="flex flex-row gap-1 items-center card-info">
+									<Icon name="Users" size="16" />
+									<p>
+										{(department.accounts as unknown as []).length > 1
+											? `${(department.accounts as unknown as []).length} user accounts `
+											: `${(department.accounts as unknown as []).length} user account`}
+									</p>
+								</div>
+							)}
+
 							<div className="flex flex-row gap-1 items-center card-info">
 								<Icon name="Folder" size="16" />
 								<p>

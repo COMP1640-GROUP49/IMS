@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import moment from 'moment';
 import { useRouter } from 'next/router';
-import { useCallback, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import { Button } from 'components/Button';
 import { EditTopicModal } from 'components/Form/form';
 import { Icon } from 'components/Icon';
 import Modal from 'components/Modal';
+import { UserContext } from 'components/PrivateRoute';
 import { deleteTopic } from 'pages/api/topic';
 import { ITopicData } from 'lib/interfaces';
 
 export const TopicCard = ({ topic }: ITopicData) => {
+	const user = useContext(UserContext);
 	const router = useRouter();
 	const [showEditTopicModal, setShowEditTopicModal] = useState(false);
 	const handleCloseEditTopicModal = useCallback(() => {
@@ -84,62 +86,65 @@ export const TopicCard = ({ topic }: ITopicData) => {
 						</span>
 					</td>
 				</div>
-				<div className="topic-card__action">
-					<td>
-						<div className="flex flex-1 flex-wrap justify-between lg:justify-start lg:gap-4">
-							<Button onClick={handleShowEditTopicModal} icon className="btn-secondary">
-								<Icon name="Edit" size="16" />
-								Edit
-							</Button>
-							{showEditTopicModal && (
-								<Modal onCancel={handleCloseEditTopicModal} headerText={`Edit ${topic.topic_name} Topic`}>
-									<EditTopicModal topicData={topic} />
-								</Modal>
-							)}
+				{user?.user_metadata?.role === '0' ||
+					(user?.user_metadata?.role === '1' && (
+						<div className="topic-card__action">
+							<td>
+								<div className="flex flex-1 flex-wrap justify-between lg:justify-start lg:gap-4">
+									<Button onClick={handleShowEditTopicModal} icon className="btn-secondary">
+										<Icon name="Edit" size="16" />
+										Edit
+									</Button>
+									{showEditTopicModal && (
+										<Modal onCancel={handleCloseEditTopicModal} headerText={`Edit ${topic.topic_name} Topic`}>
+											<EditTopicModal topicData={topic} />
+										</Modal>
+									)}
 
-							<Button onClick={handleShowDeleteModal} icon className="btn-primary">
-								<Icon name="Trash" size="16" />
-								Delete
-							</Button>
-							{showDeleteModal && (
-								<Modal onCancel={handleCloseDeleteModal}>
-									<div className="flex flex-col gap-6 justify-center">
-										<p>
-											Are you sure you want to delete this topic{' '}
-											<span className="font-semi-bold">{topic.topic_name}</span>?
-										</p>
-										<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
-											{/*TODO: Edit delete button box-shadow*/}
-											<Button onClick={handleShowDeleteConfirmationModal} className="btn-danger w-full">
-												Delete it
-											</Button>
-											{showDeleteConfirmationModal && (
-												<Modal onCancel={handleCloseDeleteConfirmationModal}>
-													<div className="flex flex-col gap-6 justify-center">
-														<p>
-															Please remove all idea categories inside{' '}
-															<span className="font-semi-bold">{topic.topic_name}</span> before deleting it!
-														</p>
-														<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
-															{/*TODO: Edit delete button box-shadow*/}
-															<Button onClick={handleCloseDeleteConfirmationModal} className="btn-success w-full">
-																Ok, got it!{' '}
-															</Button>
-														</div>
-													</div>
-												</Modal>
-											)}
+									<Button onClick={handleShowDeleteModal} icon className="btn-primary">
+										<Icon name="Trash" size="16" />
+										Delete
+									</Button>
+									{showDeleteModal && (
+										<Modal onCancel={handleCloseDeleteModal}>
+											<div className="flex flex-col gap-6 justify-center">
+												<p>
+													Are you sure you want to delete this topic{' '}
+													<span className="font-semi-bold">{topic.topic_name}</span>?
+												</p>
+												<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
+													{/*TODO: Edit delete button box-shadow*/}
+													<Button onClick={handleShowDeleteConfirmationModal} className="btn-danger w-full">
+														Delete it
+													</Button>
+													{showDeleteConfirmationModal && (
+														<Modal onCancel={handleCloseDeleteConfirmationModal}>
+															<div className="flex flex-col gap-6 justify-center">
+																<p>
+																	Please remove all idea categories inside{' '}
+																	<span className="font-semi-bold">{topic.topic_name}</span> before deleting it!
+																</p>
+																<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
+																	{/*TODO: Edit delete button box-shadow*/}
+																	<Button onClick={handleCloseDeleteConfirmationModal} className="btn-success w-full">
+																		Ok, got it!{' '}
+																	</Button>
+																</div>
+															</div>
+														</Modal>
+													)}
 
-											<Button onClick={handleCloseDeleteModal} className="btn-secondary w-full">
-												Cancel
-											</Button>
-										</div>
-									</div>
-								</Modal>
-							)}
+													<Button onClick={handleCloseDeleteModal} className="btn-secondary w-full">
+														Cancel
+													</Button>
+												</div>
+											</div>
+										</Modal>
+									)}
+								</div>
+							</td>
 						</div>
-					</td>
-				</div>
+					))}
 			</div>
 		</tr>
 	);
