@@ -10,10 +10,11 @@ import Modal from 'components/Modal';
 import { deleteCategory } from 'pages/api/category';
 import { ICategoryData } from 'lib/interfaces';
 
-export const CategoriesCard = ({ category }: ICategoryData) => {
+export const CategoryCard = ({ category }: ICategoryData) => {
 	const [showEditCategoryModal, setShowEditCategoryModal] = useState(false);
 	const { category_id, category_name, category_description } = category;
 	const router = useRouter();
+	const { asPath } = useRouter();
 	const handleShowEditCategoryModal = useCallback(() => {
 		setShowEditCategoryModal(!showEditCategoryModal);
 	}, [showEditCategoryModal]);
@@ -53,32 +54,34 @@ export const CategoriesCard = ({ category }: ICategoryData) => {
 	};
 
 	return (
-		<tr className="topic-card">
-			<td>
-				<p className="text-subtitle font-semi-bold">{category_name}</p>
-			</td>
-			<div className="topic-card__info-wrapper">
-				<Link href="/" passHref>
-					<a className="topic-card__info">
-						<td>
-							<span className="flex items-center gap-1 card-info">
-								<Icon size="16" name="File" />
-								<p>
-									{(category.ideas as unknown as []).length > 1
-										? `${(category.ideas as unknown as []).length} ideas available `
-										: `${(category.ideas as unknown as []).length} ideas available`}
-								</p>
-							</span>
-						</td>
-						<td>
-							<span className="flex items-center gap-1 card-info">
-								<Icon size="16" name="Info" />
-								<p>{category_description}</p>
-							</span>
-						</td>
+		<tr className="category-card">
+			<div className="category-card__info-wrapper">
+				<Link href={`${asPath}/${category.category_name.toLowerCase().replace(/ /g, `-`)}`} passHref>
+					<a>
+						<div className="category-card__info">
+							<td>
+								<p className="text-subtitle font-semi-bold">{category_name}</p>
+							</td>
+							<td>
+								<span className="flex items-center gap-1 card-info">
+									<Icon size="16" name="File" />
+									<p>
+										{(category.ideas as unknown as []).length > 1
+											? `${(category.ideas as unknown as []).length} ideas available `
+											: `${(category.ideas as unknown as []).length} ideas available`}
+									</p>
+								</span>
+							</td>
+							<td>
+								<span className="flex items-center gap-1 card-info">
+									<Icon size="16" name="Info" />
+									<p>{category_description}</p>
+								</span>
+							</td>
+						</div>
 					</a>
 				</Link>
-				<div className="topic-card__action">
+				<div className="category-card__action">
 					<td>
 						<div className="flex flex-1 justify-between lg:justify-start lg:gap-4">
 							<Button onClick={handleShowEditCategoryModal} icon className="btn-secondary">
@@ -87,7 +90,7 @@ export const CategoriesCard = ({ category }: ICategoryData) => {
 							</Button>
 							{showEditCategoryModal && (
 								<Modal onCancel={handleCloseEditCategoryModal} headerText={`Edit ${category.category_name}`}>
-									<EditCategoryModal categotyData={category} />
+									<EditCategoryModal categoryData={category} />
 								</Modal>
 							)}
 

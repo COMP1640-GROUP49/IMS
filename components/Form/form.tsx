@@ -25,8 +25,8 @@ import { createNewCategory, updateCategory } from 'pages/api/category';
 import { createDepartment, getDepartmentList, updateDepartment } from 'pages/api/department';
 import { createNewTopic, updateTopic } from 'pages/api/topic';
 import { updateProfile } from 'pages/api/user';
-import { compareObject } from 'lib/compareObject';
 import { ITopicData, IAccountData, IDepartmentData, IDepartmentsProps, ICategoryData } from 'lib/interfaces';
+import { compareObject } from 'utils/compareObject';
 import { scrollToElement } from 'utils/scrollAnimate';
 
 export const EditUserModal = ({ account }: IAccountData) => {
@@ -1371,7 +1371,7 @@ export const EditTopicModal = ({ topicData }: any) => {
 	);
 };
 
-export const CareateCategoryModal = ({ topic_id }: any) => {
+export const CreateCategoryModal = () => {
 	const [formData, setFormData] = useState({});
 	const router = useRouter();
 
@@ -1391,13 +1391,19 @@ export const CareateCategoryModal = ({ topic_id }: any) => {
 		setFormData({
 			...formData,
 			[event.target.name]: event.target.value,
-			topic_id: topic_id as string,
 		});
-		if (event.target.name.trim() !== '') {
-			setFormValidation({
-				...formValidation!,
-				categoryNameValidation: 'success',
-			});
+		if (event.target.name === 'category_name') {
+			if (event.target.value.trim() !== '') {
+				setFormValidation({
+					...formValidation!,
+					categoryNameValidation: 'success',
+				});
+			} else {
+				setFormValidation({
+					...formValidation!,
+					categoryNameValidation: 'error',
+				});
+			}
 		}
 	};
 	useEffect(() => {
@@ -1415,7 +1421,7 @@ export const CareateCategoryModal = ({ topic_id }: any) => {
 	return (
 		<>
 			<>
-				<MetaTags title={`Create New Topic`} description="Create a new user account" />
+				<MetaTags title={`Create New Category`} description="Create a new category" />
 				<main>
 					<div className="flex flex-col gap-6">
 						<form onSubmit={handleCreateNewCategory} className="flex flex-col gap-6">
@@ -1429,6 +1435,12 @@ export const CareateCategoryModal = ({ topic_id }: any) => {
 										placeholder={"Input topics's name"}
 										type="text"
 									/>
+									{formValidation &&
+										(formValidation['categoryNameValidation'] === 'success' ? (
+											<div className="label-success">This category name is valid.</div>
+										) : formValidation['categoryNameValidation'] === 'error' ? (
+											<div className="label-warning">Please input the category name.</div>
+										) : null)}
 								</div>
 								<div className="form-field">
 									<Label optional size="text-normal">
@@ -1449,7 +1461,7 @@ export const CareateCategoryModal = ({ topic_id }: any) => {
 									}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
 								>
 									<Icon name="FolderPlus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
-									Create categry
+									Create category
 								</Button>
 							</div>
 						</form>
@@ -1460,8 +1472,8 @@ export const CareateCategoryModal = ({ topic_id }: any) => {
 	);
 };
 
-export const EditCategoryModal = ({ categotyData }: any) => {
-	const [formData, setFormData] = useState<ICategoryData['category']>(categotyData as ICategoryData['category']);
+export const EditCategoryModal = ({ categoryData }: any) => {
+	const [formData, setFormData] = useState<ICategoryData['category']>(categoryData as ICategoryData['category']);
 	const router = useRouter();
 	interface IFormValidation {
 		categoryNameValidation: string;
@@ -1480,11 +1492,18 @@ export const EditCategoryModal = ({ categotyData }: any) => {
 			...formData,
 			[event.target.name]: event.target.value,
 		});
-		if (event.target.name.trim() !== '') {
-			setFormValidation({
-				...formValidation!,
-				categoryNameValidation: 'success',
-			});
+		if (event.target.name === 'category_name') {
+			if (event.target.value.trim() !== '') {
+				setFormValidation({
+					...formValidation!,
+					categoryNameValidation: 'success',
+				});
+			} else {
+				setFormValidation({
+					...formValidation!,
+					categoryNameValidation: 'error',
+				});
+			}
 		}
 	};
 	useEffect(() => {
@@ -1493,12 +1512,12 @@ export const EditCategoryModal = ({ categotyData }: any) => {
 		} else {
 			setIsFormValidated(false);
 		}
-		if (formData?.category_name === (categotyData as ICategoryData['category'])?.category_name) {
+		if (compareObject(formData, categoryData as object)) {
 			setIsFormDataChanges(false);
 		} else {
 			setIsFormDataChanges(true);
 		}
-	}, [formValidation, isFormValidated, formData, categotyData]);
+	}, [formValidation, isFormValidated, formData, categoryData]);
 	const handleCreateNewCategory = async (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
 		(event as FormEvent<HTMLFormElement>).preventDefault();
 		await updateCategory(formData);
@@ -1521,6 +1540,12 @@ export const EditCategoryModal = ({ categotyData }: any) => {
 									placeholder={"Input topics's name"}
 									type="text"
 								/>
+								{formValidation &&
+									(formValidation['categoryNameValidation'] === 'success' ? (
+										<div className="label-success">This category name is valid.</div>
+									) : formValidation['categoryNameValidation'] === 'error' ? (
+										<div className="label-warning">Please input the category name.</div>
+									) : null)}
 							</div>
 							<div className="form-field">
 								<Label optional size="text-normal">

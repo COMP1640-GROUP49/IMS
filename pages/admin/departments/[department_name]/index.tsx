@@ -16,7 +16,7 @@ import { getDepartmentByName } from 'pages/api/department';
 import { getTopicsListByDepartmentId } from 'pages/api/topic';
 import { ITopicData, ITopicsProps } from 'lib/interfaces';
 import { scrollToElementByClassName } from 'utils/scrollAnimate';
-import { TopicList } from '../../../../components/TopicList/TopicList';
+import { TopicList } from '../../../../components/TopicList';
 
 interface IParams extends ParsedUrlQuery {
 	department_name: string | string[] | undefined;
