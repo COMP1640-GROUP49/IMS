@@ -12,6 +12,16 @@ export const getTopicsListByDepartmentId = async (department_id: string, limit?:
 	return { data, error };
 };
 
+export const getTopicById = async (topic_id: string, limit?: number) => {
+	const noLimit = 99999;
+	const { data, error } = await supabase
+		.from('topics')
+		.select()
+		.match({ topic_id: topic_id })
+		.limit(limit || noLimit);
+	return { data, error };
+};
+
 export const createNewTopic = async (topicForm: ITopicData['topic']) => {
 	const insertNewTopic = async () => {
 		const { data, error } = await supabase.from('topics').insert(topicForm);
@@ -57,4 +67,16 @@ export const deleteTopic = async (topic_id: string, topic_name: string) => {
 		`Deleting topic named ${topic_name}.`,
 		`Topic named ${topic_name} has been deleted.`
 	);
+};
+
+let topicData: ITopicData;
+export const getTopicByName = async (topicName: string) => {
+	const { data, error } = await supabase
+		.from('topics')
+		.select()
+		.ilike('topic_name', `${topicName.split('-').join(' ')}`);
+	if (data && (data as []).length !== 0) {
+		topicData = data[0] as ITopicData;
+	}
+	return { topicData, error };
 };

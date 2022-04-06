@@ -75,7 +75,7 @@ const DepartmentCard = ({ department }: IDepartmentData) => {
 				}
 				passHref
 			>
-				<a className="w-full">
+				<a>
 					<td>
 						<div className="flex flex-col gap-2">
 							<h3 className="text-subtitle font-semi-bold">{department_name}</h3>

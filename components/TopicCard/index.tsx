@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import moment from 'moment';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useCallback, useContext, useState } from 'react';
 import { Button } from 'components/Button';
@@ -12,6 +13,7 @@ import { ITopicData } from 'lib/interfaces';
 
 export const TopicCard = ({ topic }: ITopicData) => {
 	const user = useContext(UserContext);
+	const { asPath } = useRouter();
 	const router = useRouter();
 	const [showEditTopicModal, setShowEditTopicModal] = useState(false);
 	const handleCloseEditTopicModal = useCallback(() => {
@@ -48,44 +50,48 @@ export const TopicCard = ({ topic }: ITopicData) => {
 
 	return (
 		<tr className="topic-card">
-			<td>
-				<p className="text-subtitle font-semi-bold">{topic.topic_name}</p>
-			</td>
 			<div className="topic-card__info-wrapper">
-				<div className="topic-card__info">
-					<td>
-						<span className="flex items-center gap-1 card-info">
-							<Icon size="16" name="Calendar" />
-							<p>
-								{moment(topic.topic_start_date).format('MMM DD, YYYY')} -{' '}
-								{moment(topic.topic_first_closure_date).format('MMM DD, YYYY')} /{' '}
-								{moment(topic.topic_final_closure_date).format('MMM DD, YYYY')}
-							</p>
-						</span>
-					</td>
-					<td>
-						<span className="flex items-center gap-1 card-info">
-							<Icon size="16" name="Grid" />
-							<p>
-								{(topic.categories as unknown as []).length > 1
-									? `${(topic.categories as unknown as []).length} categories available`
-									: `${(topic.categories as unknown as []).length} category available`}
-							</p>
-						</span>
-					</td>
-					<td>
-						<span className="flex items-center gap-1 card-info">
-							<Icon size="16" name="File" />
-							<p>99 ideas available</p>
-						</span>
-					</td>
-					<td>
-						<span className="flex items-center gap-1 card-info">
-							<Icon size="16" name="Info" />
-							<p className={!topic.topic_description ? 'italic' : ''}>{topic.topic_description || `Blank`}</p>
-						</span>
-					</td>
-				</div>
+				<Link href={`${asPath}/${topic.topic_name.toLowerCase().replace(/ /g, `-`)}`} passHref>
+					<a>
+						<div className="topic-card__info">
+							<td>
+								<p className="text-subtitle font-semi-bold">{topic.topic_name}</p>
+							</td>
+							<td>
+								<span className="flex items-center gap-1 card-info">
+									<Icon size="16" name="Calendar" />
+									<p>
+										{moment(topic.topic_start_date).format('MMM DD, YYYY')} -{' '}
+										{moment(topic.topic_first_closure_date).format('MMM DD, YYYY')} /{' '}
+										{moment(topic.topic_final_closure_date).format('MMM DD, YYYY')}
+									</p>
+								</span>
+							</td>
+							<td>
+								<span className="flex items-center gap-1 card-info">
+									<Icon size="16" name="Grid" />
+									<p>
+										{(topic.categories as unknown as []).length > 1
+											? `${(topic.categories as unknown as []).length} categories available`
+											: `${(topic.categories as unknown as []).length} category available`}
+									</p>
+								</span>
+							</td>
+							<td>
+								<span className="flex items-center gap-1 card-info">
+									<Icon size="16" name="File" />
+									<p>99 ideas available</p>
+								</span>
+							</td>
+							<td>
+								<span className="flex items-center gap-1 card-info">
+									<Icon size="16" name="Info" />
+									<p className={!topic.topic_description ? 'italic' : ''}>{topic.topic_description || `Blank`}</p>
+								</span>
+							</td>
+						</div>
+					</a>
+				</Link>
 				{(user?.user_metadata?.role === '0' || user?.user_metadata?.role === '1') && (
 					<div className="topic-card__action">
 						<td>

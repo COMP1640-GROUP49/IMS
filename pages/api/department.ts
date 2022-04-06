@@ -1,4 +1,4 @@
-import { IDepartmentData } from 'lib/interfaces';
+import { IDepartmentData, ITopicData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
 
@@ -122,12 +122,14 @@ export const deleteDepartment = async (department_id: string, department_name: s
 // 	return data!.length !== 0;
 // };
 
-// export const getDepartmentData = async (department_name: string) => {
+// export const getDepartmentData = async (topic_name: string) => {
 // 	const noLimit = 99999;
 // 	const { data, error } = await supabase
 // 		.from<IDepartmentData>('topics')
-// 		.select(`*`)
-// 		.match({ department_name: department_name })
+// 		.select(`*, categories(topic_id)`)
+// 		.match({ topic_name: topic_name })
 // 		.single();
 // 	return { data, error };
 // };
+
+// export const getTopicList =

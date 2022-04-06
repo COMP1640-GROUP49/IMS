@@ -1,5 +1,5 @@
 import { ClipLoader } from 'react-spinners';
-import { TopicCard } from '../TopicCard/TopicCard';
+import { TopicCard } from '../TopicCard';
 
 export const TopicList = ({ topics }: any) => {
 	return (
