@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import type { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { ClipLoader } from 'react-spinners';
 import { Button } from 'components/Button';
 import { DepartmentList } from 'components/DepartmentList';
@@ -13,7 +13,7 @@ import { MetaTags } from 'components/MetaTags';
 import Modal from 'components/Modal';
 import Pagination from 'components/Pagination';
 import { UserContext } from 'components/PrivateRoute';
-import { TopicList } from 'components/TopicList/TopicList';
+import { TopicList } from 'components/TopicList/';
 import { getDepartmentNameById, getDepartmentTopics } from 'pages/api/department';
 import { IDepartmentData, IDepartmentsProps, ITopicsProps } from 'lib/interfaces';
 import { scrollToElementByClassName } from 'utils/scrollAnimate';
