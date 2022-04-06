@@ -1371,7 +1371,7 @@ export const EditTopicModal = ({ topicData }: any) => {
 	);
 };
 
-export const CreateCategoryModal = () => {
+export const CreateCategoryModal = ({ topic_id }: any) => {
 	const [formData, setFormData] = useState({});
 	const router = useRouter();
 
@@ -1391,6 +1391,7 @@ export const CreateCategoryModal = () => {
 		setFormData({
 			...formData,
 			[event.target.name]: event.target.value,
+			topic_id: topic_id as string,
 		});
 		if (event.target.name === 'category_name') {
 			if (event.target.value.trim() !== '') {

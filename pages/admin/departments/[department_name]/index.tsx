@@ -12,11 +12,11 @@ import { Icon } from 'components/Icon';
 import { MetaTags } from 'components/MetaTags';
 import Modal from 'components/Modal';
 import Pagination from 'components/Pagination';
+import { TopicList } from 'components/TopicList';
 import { getDepartmentByName } from 'pages/api/department';
 import { getTopicsListByDepartmentId } from 'pages/api/topic';
 import { ITopicData, ITopicsProps } from 'lib/interfaces';
 import { scrollToElementByClassName } from 'utils/scrollAnimate';
-import { TopicList } from '../../../../components/TopicList';
 
 interface IParams extends ParsedUrlQuery {
 	department_name: string | string[] | undefined;

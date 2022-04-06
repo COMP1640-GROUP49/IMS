@@ -1,6 +1,6 @@
+import { ICategoryData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
-import { ICategoryData } from './../../lib/interfaces';
 
 export const getCategoriesListByTopicsId = async (topic_id: string, limit?: number) => {
 	const noLimit = 99999;
@@ -8,7 +8,10 @@ export const getCategoriesListByTopicsId = async (topic_id: string, limit?: numb
 		.from('categories')
 		.select('*,ideas(category_id)')
 		.match({ topic_id: topic_id })
-		.limit(limit || noLimit);
+		.limit(limit || noLimit)
+		.order('category_name', {
+			ascending: true,
+		});
 	return { data, error };
 };
 
