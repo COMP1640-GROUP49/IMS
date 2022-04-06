@@ -86,65 +86,64 @@ export const TopicCard = ({ topic }: ITopicData) => {
 						</span>
 					</td>
 				</div>
-				{user?.user_metadata?.role === '0' ||
-					(user?.user_metadata?.role === '1' && (
-						<div className="topic-card__action">
-							<td>
-								<div className="flex flex-1 flex-wrap justify-between lg:justify-start lg:gap-4">
-									<Button onClick={handleShowEditTopicModal} icon className="btn-secondary">
-										<Icon name="Edit" size="16" />
-										Edit
-									</Button>
-									{showEditTopicModal && (
-										<Modal onCancel={handleCloseEditTopicModal} headerText={`Edit ${topic.topic_name} Topic`}>
-											<EditTopicModal topicData={topic} />
-										</Modal>
-									)}
+				{(user?.user_metadata?.role === '0' || user?.user_metadata?.role === '1') && (
+					<div className="topic-card__action">
+						<td>
+							<div className="flex flex-1 flex-wrap justify-between lg:justify-start lg:gap-4">
+								<Button onClick={handleShowEditTopicModal} icon className="btn-secondary">
+									<Icon name="Edit" size="16" />
+									Edit
+								</Button>
+								{showEditTopicModal && (
+									<Modal onCancel={handleCloseEditTopicModal} headerText={`Edit ${topic.topic_name} Topic`}>
+										<EditTopicModal topicData={topic} />
+									</Modal>
+								)}
 
-									<Button onClick={handleShowDeleteModal} icon className="btn-primary">
-										<Icon name="Trash" size="16" />
-										Delete
-									</Button>
-									{showDeleteModal && (
-										<Modal onCancel={handleCloseDeleteModal}>
-											<div className="flex flex-col gap-6 justify-center">
-												<p>
-													Are you sure you want to delete this topic{' '}
-													<span className="font-semi-bold">{topic.topic_name}</span>?
-												</p>
-												<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
-													{/*TODO: Edit delete button box-shadow*/}
-													<Button onClick={handleShowDeleteConfirmationModal} className="btn-danger w-full">
-														Delete it
-													</Button>
-													{showDeleteConfirmationModal && (
-														<Modal onCancel={handleCloseDeleteConfirmationModal}>
-															<div className="flex flex-col gap-6 justify-center">
-																<p>
-																	Please remove all idea categories inside{' '}
-																	<span className="font-semi-bold">{topic.topic_name}</span> before deleting it!
-																</p>
-																<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
-																	{/*TODO: Edit delete button box-shadow*/}
-																	<Button onClick={handleCloseDeleteConfirmationModal} className="btn-success w-full">
-																		Ok, got it!{' '}
-																	</Button>
-																</div>
+								<Button onClick={handleShowDeleteModal} icon className="btn-primary">
+									<Icon name="Trash" size="16" />
+									Delete
+								</Button>
+								{showDeleteModal && (
+									<Modal onCancel={handleCloseDeleteModal}>
+										<div className="flex flex-col gap-6 justify-center">
+											<p>
+												Are you sure you want to delete this topic{' '}
+												<span className="font-semi-bold">{topic.topic_name}</span>?
+											</p>
+											<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
+												{/*TODO: Edit delete button box-shadow*/}
+												<Button onClick={handleShowDeleteConfirmationModal} className="btn-danger w-full">
+													Delete it
+												</Button>
+												{showDeleteConfirmationModal && (
+													<Modal onCancel={handleCloseDeleteConfirmationModal}>
+														<div className="flex flex-col gap-6 justify-center">
+															<p>
+																Please remove all idea categories inside{' '}
+																<span className="font-semi-bold">{topic.topic_name}</span> before deleting it!
+															</p>
+															<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
+																{/*TODO: Edit delete button box-shadow*/}
+																<Button onClick={handleCloseDeleteConfirmationModal} className="btn-success w-full">
+																	Ok, got it!{' '}
+																</Button>
 															</div>
-														</Modal>
-													)}
+														</div>
+													</Modal>
+												)}
 
-													<Button onClick={handleCloseDeleteModal} className="btn-secondary w-full">
-														Cancel
-													</Button>
-												</div>
+												<Button onClick={handleCloseDeleteModal} className="btn-secondary w-full">
+													Cancel
+												</Button>
 											</div>
-										</Modal>
-									)}
-								</div>
-							</td>
-						</div>
-					))}
+										</div>
+									</Modal>
+								)}
+							</div>
+						</td>
+					</div>
+				)}
 			</div>
 		</tr>
 	);
