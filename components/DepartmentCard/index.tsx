@@ -79,7 +79,7 @@ const DepartmentCard = ({ department }: IDepartmentData) => {
 					<td>
 						<div className="flex flex-col gap-2">
 							<h3 className="text-subtitle font-semi-bold">{department_name}</h3>
-							{user?.user_metadata?.role === 0 && (
+							{+user?.user_metadata?.role === 0 && (
 								<div className="flex flex-row gap-1 items-center card-info">
 									<Icon name="Users" size="16" />
 									<p>

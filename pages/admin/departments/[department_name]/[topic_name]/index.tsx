@@ -100,10 +100,20 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 							<span className="font-semi-bold">{moment(topic.topic_final_closure_date).format('MMM DD, YYYY')}</span>
 						</p>
 					</div>
-					<Button onClick={handleShowCreateCategoryModal} icon className="btn-primary self-start sm:self-stretch">
-						<Icon name="PlusCircle" size="16" />
-						Create new category
-					</Button>
+					<div className="flex flex-col md:flex-row gap-4  md:justify-between justify-center">
+						<Button
+							onClick={handleShowCreateCategoryModal}
+							icon
+							className="btn-primary lg:w-full self-start sm:self-stretch"
+						>
+							<Icon name="PlusCircle" size="16" />
+							Create new category
+						</Button>
+						<Button icon className="btn-secondary self-start sm:self-stretch">
+							<Icon name="Download" size="16" />
+							Download all ideas as CSV
+						</Button>
+					</div>
 					{showCreateCategoriesModal && (
 						<Modal onCancel={handleCloseEditDepartmentModal} headerText={`Create New Category`}>
 							<CreateCategoryModal topic_id={topic.topic_id} />

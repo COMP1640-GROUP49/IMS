@@ -92,7 +92,7 @@ export const TopicCard = ({ topic }: ITopicData) => {
 						</div>
 					</a>
 				</Link>
-				{(user?.user_metadata?.role === '0' || user?.user_metadata?.role === '1') && (
+				{(+user?.user_metadata?.role === 0 || +user?.user_metadata?.role === 1) && (
 					<div className="topic-card__action">
 						<td>
 							<div className="flex flex-1 flex-wrap justify-between lg:justify-start lg:gap-4">

@@ -20,8 +20,8 @@ const PrivateRoute = ({ children }: any) => {
 
 	useEffect(() => {
 		if (user) {
-			switch (user?.user_metadata?.role) {
-				case '0':
+			switch (+user?.user_metadata?.role) {
+				case 0:
 					if (asPath === '/login' || asPath === '/') {
 						void router.push('/admin');
 					}

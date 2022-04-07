@@ -1,11 +1,17 @@
+import Link from 'next/link';
 import { ClipLoader } from 'react-spinners';
 import { CategoryCard } from 'components/CategoryCard';
 
 export const CategoryList = ({ categories }: any) => {
 	return (
 		<div className="flex flex-col gap-6 user-list">
-			<div>
+			<div className="flex justify-between">
 				<p className="text-body font-semi-bold users-list">List of categories</p>
+				<Link href="/">
+					<a>
+						<p className="font-semibold text-base text-sonic-silver">View all ideas</p>
+					</a>
+				</Link>
 			</div>
 			<div className="lg:p-6 lg:shadow-0">
 				<table>

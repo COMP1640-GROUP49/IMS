@@ -43,8 +43,8 @@ const Login: NextPage = (props: any) => {
 			} else {
 				setHasError(false);
 				if (data?.user) {
-					switch (data?.user?.user_metadata?.role) {
-						case '0':
+					switch (+data?.user?.user_metadata?.role) {
+						case 0:
 							void router.push('/admin');
 							break;
 						default:

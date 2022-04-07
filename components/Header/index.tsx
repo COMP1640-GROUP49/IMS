@@ -29,7 +29,7 @@ export const Header = () => {
 		window.addEventListener('resize', handleResize);
 	}, [openHamburgerMenu]);
 
-	return user?.user_metadata?.role === '0' ? (
+	return +user?.user_metadata?.role === 0 ? (
 		<nav className="navigation-bar">
 			<div className="hamburger-menu">
 				{openHamburgerMenu ? (

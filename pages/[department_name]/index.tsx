@@ -10,7 +10,7 @@ import { Header } from 'components/Header';
 import { Icon } from 'components/Icon';
 import { MetaTags } from 'components/MetaTags';
 import Modal from 'components/Modal';
-import { TopicList } from 'components/TopicList/TopicList';
+import { TopicList } from 'components/TopicList';
 import { getDepartmentByName } from 'pages/api/department';
 import { getTopicsListByDepartmentId } from 'pages/api/topic';
 import { ITopicsProps } from 'lib/interfaces';

@@ -44,9 +44,9 @@ const Home: NextPage<IDepartmentsProps> = ({ data: departments }) => {
 
 	useEffect(() => {
 		const loadTopics = async () => {
-			const { data } = await getTopicsListByDepartmentId(user?.user_metadata?.role as string);
+			const { data } = await getTopicsListByDepartmentId(user?.user_metadata?.department as string);
 			setTopics(data as unknown as ITopicsProps);
-			const { department_name: name } = await getDepartmentNameById(user?.user_metadata?.role as string);
+			const { department_name: name } = await getDepartmentNameById(user?.user_metadata?.department as string);
 			setDepartmentName(name as string);
 		};
 
@@ -56,7 +56,6 @@ const Home: NextPage<IDepartmentsProps> = ({ data: departments }) => {
 		setCurrentItems(departments.slice(itemOffset, endOffset));
 		setPageCount(Math.ceil(departments.length / limit));
 	}, [itemOffset, departments, limit, user]);
-
 	const handlePageClick = (event: any) => {
 		const newOffset = (event.selected * limit) % departments.length;
 		setItemOffset(newOffset);
@@ -80,7 +79,7 @@ const Home: NextPage<IDepartmentsProps> = ({ data: departments }) => {
 		<>
 			<MetaTags title="IMS" />
 			<Header />
-			{user?.user_metadata?.role === '1' ? (
+			{+user?.user_metadata?.role === 1 ? (
 				<>
 					<MetaTags title="Departments Management" description="Manage departments of IMS" />
 					<Header />
@@ -108,7 +107,7 @@ const Home: NextPage<IDepartmentsProps> = ({ data: departments }) => {
 						/>
 					</main>
 				</>
-			) : user?.user_metadata?.role === '2' ? (
+			) : +user?.user_metadata?.role === 2 ? (
 				<main className="body-container flex flex-col gap-6 below-navigation-bar">
 					<div className="flex lg:flex-row lg:justify-between lg:items-center flex-col gap-6">
 						<div className="flex flex-col gap-2">
@@ -117,8 +116,15 @@ const Home: NextPage<IDepartmentsProps> = ({ data: departments }) => {
 					</div>
 					<TopicList topics={topics} />
 				</main>
-			) : user?.user_metadata?.role === '3' ? (
-				<div className="below-navigation-bar"> Staff</div>
+			) : +user?.user_metadata?.role === 3 ? (
+				<main className="body-container flex flex-col gap-6 below-navigation-bar">
+					<div className="flex lg:flex-row lg:justify-between lg:items-center flex-col gap-6">
+						<div className="flex flex-col gap-2">
+							{department_name !== '' ? <h1>{`${department_name}`}</h1> : <ClipLoader />}
+						</div>
+					</div>
+					<TopicList topics={topics} />
+				</main>
 			) : (
 				<ClipLoader />
 			)}
