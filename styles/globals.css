@@ -600,6 +600,10 @@
 		@apply z-50;
 	}
 
+	.idea-content {
+		@apply text-ellipsis whitespace-nowrap overflow-hidden sm:max-w-[30ch] max-w-[50ch];
+	}
+
 	.rich-text-editor {
 		@apply border border-silver rounded-lg outline-black placeholder-silver font-normal;
 	}

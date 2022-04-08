@@ -1,3 +1,5 @@
+import { IIdeaData } from 'lib/interfaces';
+import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
 
 export const getIdeasListByCategoryId = async (category_id: string, limit?: number) => {
@@ -69,4 +71,25 @@ export const uploadAttachment = async (
 	} catch (error) {
 		throw new Error('Bucket does not exists on the db!');
 	}
+};
+
+export const createNewIdea = async (ideaForm: IIdeaData['idea']) => {
+	let data: any;
+	const insertNewTopic = async () => {
+		const { data: newIdeaData, error } = await supabase.from('ideas').insert(ideaForm);
+		if (newIdeaData) {
+			data = newIdeaData[0] as IIdeaData['idea'];
+		}
+
+		if (error) {
+			throw error;
+		}
+	};
+
+	await notifyToast(
+		insertNewTopic(),
+		`Creating new idea with title ${ideaForm.idea_title}.`,
+		`Idea ${ideaForm.idea_title} has been created.`
+	);
+	return data as IIdeaData['idea'];
 };
