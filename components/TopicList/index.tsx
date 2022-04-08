@@ -1,5 +1,6 @@
 import { ClipLoader } from 'react-spinners';
 import { TopicCard } from 'components/TopicCard';
+import { ICategoryData, ITopicData, ITopicsProps } from 'lib/interfaces';
 
 export const TopicList = ({ topics }: any) => {
 	return (

@@ -2,11 +2,11 @@ import { ICategoryData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
 
-export const getCategoriesListByTopicsId = async (topic_id: string, limit?: number) => {
+export const getCategoriesListByTopicId = async (topic_id: string, limit?: number) => {
 	const noLimit = 99999;
 	const { data, error } = await supabase
 		.from('categories')
-		.select('*,ideas(category_id)')
+		.select('*, ideas(category_id)')
 		.match({ topic_id: topic_id })
 		.limit(limit || noLimit)
 		.order('category_name', {
@@ -61,4 +61,27 @@ export const deleteCategory = async (category_id: string, category_name: string)
 		`Delete category named ${category_name}.`,
 		`Category named ${category_name} has been delete`
 	);
+};
+
+let categoryData: ICategoryData;
+export const getCategoryByName = async (categoryName: string) => {
+	const { data, error } = await supabase
+		.from('categories')
+		.select()
+		.ilike('category_name', `${categoryName.split('-').join(' ')}`);
+	if (data && (data as []).length !== 0) {
+		categoryData = data[0] as ICategoryData;
+	}
+	return { categoryData, error };
+};
+
+export const getCategoryListByTopicId = async (topicId: string, limit?: number) => {
+	const noLimit = 99999;
+	const { data, error } = await supabase
+		.from('categories')
+		.select()
+		.match({ topic_id: topicId })
+		.order('category_name', { ascending: true })
+		.limit(limit || noLimit);
+	return { data, error };
 };

@@ -1,14 +1,17 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { useRouter } from 'next/router';
-import { FormEvent, useCallback, useEffect, useState } from 'react';
+import React, { FormEvent, useCallback, useEffect, useState } from 'react';
 import { ClipLoader } from 'react-spinners';
+import AttachmentUploader from 'components/AttachmentUploader';
 import AvatarUploader from 'components/AvatarUploader';
 import { Button } from 'components/Button';
+import { Checkbox } from 'components/Checkbox';
 import { Icon } from 'components/Icon';
 import { Input } from 'components/Input';
 import { Label } from 'components/Label';
 import { MetaTags } from 'components/MetaTags';
 import Modal from 'components/Modal';
+import RichTextEditor from 'components/RichTextEditor';
 import { Select } from 'components/Select';
 import { TextArea } from 'components/TextArea';
 import {
@@ -21,11 +24,20 @@ import {
 	uploadAvatar,
 } from 'pages/api/admin';
 import { IUserData } from 'pages/api/auth';
-import { createNewCategory, updateCategory } from 'pages/api/category';
-import { createDepartment, getDepartmentList, updateDepartment } from 'pages/api/department';
+import { createNewCategory, getCategoryListByTopicId, updateCategory } from 'pages/api/category';
+import { createDepartment, getDepartmentFromTopicId, getDepartmentList, updateDepartment } from 'pages/api/department';
+import { uploadAttachment } from 'pages/api/idea';
 import { createNewTopic, updateTopic } from 'pages/api/topic';
 import { updateProfile } from 'pages/api/user';
-import { ITopicData, IAccountData, IDepartmentData, IDepartmentsProps, ICategoryData } from 'lib/interfaces';
+import {
+	ITopicData,
+	IAccountData,
+	IDepartmentData,
+	IDepartmentsProps,
+	ICategoryData,
+	ICategoriesProps,
+	IIdeaData,
+} from 'lib/interfaces';
 import { compareObject } from 'utils/compareObject';
 import { scrollToElement } from 'utils/scrollAnimate';
 
@@ -1574,6 +1586,261 @@ export const EditCategoryModal = ({ categoryData }: any) => {
 					</form>
 				</div>
 			</main>
+		</>
+	);
+};
+
+export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
+	const [formData, setFormData] = useState<IIdeaData['idea']>();
+	const router = useRouter();
+
+	const [categoryList, setCategoryList] = useState<ICategoriesProps>();
+
+	const [attachment, setAttachment] = useState<File>();
+
+	interface IFormValidation {
+		ideaTitleValidation: string;
+		ideaCategoryValidation: string;
+		termsConditionsValidation: string;
+	}
+
+	const [formValidation, setFormValidation] = useState<IFormValidation>();
+
+	const [isFormValidated, setIsFormValidated] = useState(false);
+
+	const handleTermsConditionsCheck = (event: React.ChangeEvent<HTMLInputElement>) => {
+		if ((event.target as HTMLInputElement).checked) {
+			setFormValidation({
+				...formValidation!,
+				termsConditionsValidation: 'success',
+			});
+		} else {
+			setFormValidation({
+				...formValidation!,
+				termsConditionsValidation: 'error',
+			});
+		}
+	};
+
+	const handleEditorChange = (data: string) => {
+		setFormData({
+			...(formData as IIdeaData['idea']),
+			idea_content: data,
+		});
+	};
+
+	const handleChange = (
+		event:
+			| React.ChangeEvent<HTMLInputElement>
+			| React.ChangeEvent<HTMLSelectElement>
+			| React.ChangeEvent<HTMLTextAreaElement>
+	) => {
+		event.target.style.color = 'black';
+
+		setFormData({
+			...(formData as IIdeaData['idea']),
+			[event.target.name]: event.target.value,
+			account_id: account_id as string,
+		});
+		if (event.target.name === 'idea_title') {
+			if (event.target.value.trim() !== '') {
+				setFormValidation({
+					...formValidation!,
+					ideaTitleValidation: 'success',
+				});
+			} else {
+				setFormValidation({
+					...formValidation!,
+					ideaTitleValidation: 'error',
+				});
+			}
+		}
+		if (event.target.name === 'category_id') {
+			if (event.target.value.trim() !== 'disabled') {
+				setFormValidation({
+					...formValidation!,
+					ideaCategoryValidation: 'success',
+				});
+			} else {
+				setFormValidation({
+					...formValidation!,
+					ideaCategoryValidation: 'error',
+				});
+			}
+		}
+
+		if (event.target.name === 'anonymous_posting') {
+			setFormData({
+				...(formData as IIdeaData['idea']),
+				anonymous_posting: (event.target as HTMLInputElement).checked,
+			});
+		}
+	};
+
+	const fileUpdate = (data: File) => {
+		setAttachment(data);
+		return attachment;
+	};
+
+	const fileUpload = async () => {
+		if (attachment && formData?.idea_title) {
+			try {
+				const { department_name } = await getDepartmentFromTopicId(topic_id as string);
+				const attachmentUrl = await uploadAttachment(
+					attachment,
+					department_name as string,
+					topic_id as string,
+					formData.idea_title,
+					formData.account_id,
+					attachment.name
+				);
+				formData.idea_file_url = attachmentUrl;
+				console.log('🚀 ~ file: form.tsx ~ line 1696 ~ fileUpload ~ formData.idea_file_url', formData.idea_file_url);
+			} catch (error) {
+				throw new Error('Attachment upload error!');
+			}
+		} else {
+			formData!.idea_file_url = '';
+		}
+	};
+
+	useEffect(() => {
+		const getCategoryData = async () => {
+			const { data } = await getCategoryListByTopicId(topic_id as string);
+			setCategoryList(data as unknown as ICategoriesProps);
+		};
+		void getCategoryData();
+
+		if (
+			formValidation?.termsConditionsValidation === 'success' &&
+			formValidation.ideaTitleValidation === 'success' &&
+			formValidation.ideaCategoryValidation === 'success'
+		) {
+			setIsFormValidated(true);
+		} else {
+			setIsFormValidated(false);
+		}
+	}, [formValidation, isFormValidated, formData]);
+
+	const handleCreateNewIdea = async (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
+		(event as FormEvent<HTMLFormElement>).preventDefault();
+		await fileUpload();
+		// Check form validate before submit form
+		if (formData?.category_id === undefined) {
+			setFormValidation({
+				...formValidation!,
+				ideaCategoryValidation: 'error',
+			});
+
+			scrollToElement('select-category');
+		} else {
+			try {
+				// const { newUserData, adminSession } = await createNewAccount(formData);
+				// if (newUserData) {
+				// 	await keepAdminSession(adminSession?.refresh_token as string);
+				// TODO: Push to idea page
+				console.log(formData);
+				// void router.reload();
+				// }
+			} catch (error) {
+				throw error;
+			}
+		}
+		// router.reload();
+	};
+
+	return (
+		<>
+			<>
+				<MetaTags title={`Create New Idea`} description="Submit new idea" />
+				<main>
+					<div className="flex flex-col gap-6">
+						<form onSubmit={handleCreateNewIdea} className="flex flex-col gap-6">
+							<div className="flex flex-col gap-4">
+								<div className="form-field">
+									<Label size="text-normal">Title</Label>
+									<Input
+										onChange={handleChange}
+										name="idea_title"
+										required={true}
+										placeholder={"Input idea's title"}
+										type="text"
+									/>
+									{formValidation &&
+										(formValidation['ideaTitleValidation'] === 'success' ? (
+											<div className="label-success">This title name is valid.</div>
+										) : formValidation['ideaTitleValidation'] === 'error' ? (
+											<div className="label-warning">Please input the title of idea.</div>
+										) : null)}
+								</div>
+								{/* TODO: onChange & value */}
+								<div className="form-field">
+									<Label optional size="text-normal">
+										Content
+									</Label>
+									<RichTextEditor
+										value={formData?.idea_content as string}
+										handleEditorChange={handleEditorChange}
+										placeholder={`Input idea's content`}
+									/>
+								</div>
+								<div id="select-category" className="form-field">
+									<Label size="text-normal">Category</Label>
+									<Select defaultValue={'disabled'} name="category_id" required onChange={handleChange}>
+										<option disabled value={'disabled'}>
+											{"Select idea's category"}
+										</option>
+										{categoryList ? (
+											(categoryList as unknown as []).map((category) => (
+												<option
+													key={(category as ICategoryData['category']).category_id}
+													value={(category as ICategoryData['category']).category_id}
+												>
+													{(category as ICategoryData['category']).category_name}
+												</option>
+											))
+										) : (
+											<ClipLoader />
+										)}
+									</Select>
+									{formValidation &&
+										(formValidation['ideaCategoryValidation'] === 'error' ? (
+											<div className="label-warning">Please select category for idea.</div>
+										) : null)}
+								</div>
+
+								<div className="form-field">
+									<Label optional size="text-normal">
+										Attach Document
+									</Label>
+									<AttachmentUploader fileUpdate={fileUpdate} />
+								</div>
+								<Checkbox onChange={handleChange} name="anonymous_posting">
+									<label htmlFor="anonymous_posting">
+										Post as <span className="font-semi-bold">anonymous</span>
+									</label>
+								</Checkbox>
+								<Checkbox onChange={handleTermsConditionsCheck} name="terms-conditions">
+									<label htmlFor="terms-conditions">
+										I agree to <span className="font-semi-bold">Terms and Conditions</span>
+									</label>
+								</Checkbox>
+
+								<Button
+									disabled={!isFormValidated}
+									icon={true}
+									className={`${
+										isFormValidated ? `btn-primary` : `btn-disabled`
+									}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+								>
+									<Icon name="FilePlus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+									Submit idea
+								</Button>
+							</div>
+						</form>
+					</div>
+				</main>
+			</>
 		</>
 	);
 };

@@ -6,12 +6,13 @@ export const getTopicsListByDepartmentId = async (department_id: string, limit?:
 	const noLimit = 99999;
 	const { data, error } = await supabase
 		.from('topics')
-		.select(`*, categories(topic_id)`)
+		.select(`*, categories(topic_id, ideas(category_id))`)
 		.match({ department_id: department_id })
 		.limit(limit || noLimit);
 	return { data, error };
 };
 
+let topic: ITopicData;
 export const getTopicById = async (topic_id: string, limit?: number) => {
 	const noLimit = 99999;
 	const { data, error } = await supabase
@@ -19,7 +20,11 @@ export const getTopicById = async (topic_id: string, limit?: number) => {
 		.select()
 		.match({ topic_id: topic_id })
 		.limit(limit || noLimit);
-	return { data, error };
+
+	if (data) {
+		topic = data[0] as ITopicData;
+	}
+	return { data: topic, error };
 };
 
 export const createNewTopic = async (topicForm: ITopicData['topic']) => {

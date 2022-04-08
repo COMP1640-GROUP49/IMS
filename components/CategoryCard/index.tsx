@@ -68,7 +68,7 @@ export const CategoryCard = ({ category }: ICategoryData) => {
 									<p>
 										{(category.ideas as unknown as []).length > 1
 											? `${(category.ideas as unknown as []).length} ideas available `
-											: `${(category.ideas as unknown as []).length} ideas available`}
+											: `${(category.ideas as unknown as []).length} idea available`}
 									</p>
 								</span>
 							</td>

@@ -62,7 +62,7 @@ export interface ICategoryData extends IObjectKeys {
 		category_name: string;
 		category_description?: string;
 		topic_id: string;
-		ideas?: IIdeas[];
+		ideas?: [];
 	};
 }
 
@@ -70,19 +70,69 @@ export interface ICategoriesProps {
 	data: ICategoryData[];
 }
 
-export interface IIdeas extends IObjectKeys {
+export interface IIdeaData extends IObjectKeys {
 	idea: {
 		idea_id: string;
 		idea_title: string;
-		idea_view: string;
+		idea_view: number;
 		idea_content: string;
 		idea_file_url: string;
 		idea_created: string;
 		idea_updated: string;
+		account_id: string;
 		category_id: string;
+		anonymous_posting: boolean;
+		reaction: IReactionProps;
+		comments: ICommentsProps;
 	};
 }
 
 export interface IIdeasProps {
-	data: IIdeas[];
+	data: IIdeaData[];
+}
+
+export interface IReactionData extends IObjectKeys {
+	reaction: {
+		reaction_id: string;
+		reaction_type: string;
+		reaction_created: string;
+		account_id: string;
+		idea_id: string;
+	};
+}
+
+export interface IReactionProps {
+	data: IReactionData[];
+}
+export interface ICommentData extends IObjectKeys {
+	comment: {
+		comment_id: string;
+		comment_content: string;
+		comment_file_url: string;
+		comment_created: string;
+		comment_updated: string;
+		account_id: string;
+		idea_id: string;
+		parent_comment_id: string;
+		anonymous_posting: string;
+		comments_reaction: [];
+	};
+}
+
+export interface ICommentsProps {
+	data: ICommentData[];
+}
+
+export interface ICommentReactionData extends IObjectKeys {
+	comment: {
+		comment_reaction_id: string;
+		comment_reaction_type: string;
+		comment_reaction_created: string;
+		account_id: string;
+		idea_id: string;
+	};
+}
+
+export interface ICommentsReactionProps {
+	data: ICommentReactionData[];
 }

@@ -33,8 +33,17 @@
 
 	input,
 	select,
-	textarea {
+	textarea,
+	.checkbox {
 		@apply px-2 py-3 border border-silver rounded-lg outline-black placeholder-silver font-normal;
+	}
+
+	.checkbox {
+		@apply flex items-center gap-2;
+	}
+
+	.checkbox input {
+		@apply w-4 h-4;
 	}
 
 	select {
@@ -249,6 +258,45 @@
 		@apply rounded-full border-dashed bg-platinum;
 	}
 
+	.attachment-uploader {
+		@apply w-full rounded-lg border-dashed bg-white h-16;
+		@apply text-transparent bg-avatar-upload-pattern bg-center bg-no-repeat;
+	}
+
+	.attachment-uploader:hover {
+		@apply cursor-pointer;
+		@apply rounded-lg border-dashed bg-platinum !important;
+	}
+
+	.attachment-uploader-wrapper {
+		@apply flex flex-auto flex-col gap-2;
+	}
+	.file-info-wrapper {
+		@apply flex flex-col;
+	}
+
+	.btn__remove-file {
+		@apply text-footer font-normal text-sonic-silver self-start h-auto;
+	}
+
+	.btn__remove-file:hover {
+		@apply text-black;
+	}
+
+	.file-info {
+		@apply absolute top-1/4 -translate-y-1/4 ml-4;
+		@apply flex flex-auto flex-row gap-2 items-center;
+		@apply text-footer;
+	}
+
+	.file-info .file-name {
+		@apply text-sonic-silver font-medium;
+	}
+
+	.file-info .file-size {
+		@apply text-sonic-silver font-thin;
+	}
+
 	.divider {
 		@apply text-center relative;
 	}
@@ -377,7 +425,8 @@
 
 	.user-card,
 	.topic-card,
-	.category-card {
+	.category-card,
+	.idea-card {
 		@apply bg-white rounded-lg p-6 lg:p-0 shadow-0 lg:shadow-none;
 	}
 
@@ -494,7 +543,8 @@
 	}
 
 	.topic-card,
-	.category-card {
+	.category-card,
+	.idea-card {
 		@apply lg:flex lg:flex-col lg:gap-2 p-4;
 		@apply lg:shadow-0;
 		@apply mb-6;
@@ -502,44 +552,81 @@
 	}
 
 	.topic-card a,
-	.category-card a {
+	.category-card a,
+	.idea-card a {
 		@apply flex flex-auto;
 	}
 
 	.topic-card:hover,
-	.category-card:hover {
+	.category-card:hover,
+	.idea-card:hover {
 		@apply shadow-1;
 	}
 
 	.topic-card:last-child,
-	.category-card:last-child {
+	.category-card:last-child,
+	.idea-card:last-child {
 		@apply mb-0;
 	}
 
 	.topic-card td,
-	.category-card td {
+	.category-card td,
+	.idea-card td {
 		@apply p-0;
 	}
 
 	.topic-card__info-wrapper,
-	.category-card__info-wrapper {
+	.category-card__info-wrapper,
+	.idea-card__info-wrapper {
 		@apply flex flex-col gap-6 lg:flex-row lg:justify-between lg:items-center;
 	}
 
 	.topic-card__info,
-	.category-card__info {
+	.category-card__info,
+	.idea-card__info {
 		@apply flex flex-col gap-2;
 	}
 
 	.topic-card__info td:last-child,
-	.category-card__info td:last-child {
+	.category-card__info td:last-child,
+	.idea-card__info td:last-child {
 		@apply m-0;
 	}
 
 	.topic-card__action td,
-	.category-card__action td {
+	.category-card__action td,
+	.idea-card__action td {
 		@apply flex flex-row justify-between;
 		@apply z-50;
+	}
+
+	.rich-text-editor {
+		@apply border border-silver rounded-lg outline-black placeholder-silver font-normal;
+	}
+
+	.rich-text-editor:hover {
+		@apply outline-black;
+	}
+
+	.rich-text-editor .ql-picker-label,
+	.rich-text-editor .ql-formats button {
+		@apply outline-black !important;
+	}
+
+	.rich-text-editor .ql-toolbar {
+		@apply border-b-[1px] border-t-0 border-l-0 border-r-0  border-silver !important;
+	}
+
+	.rich-text-editor .ql-container.ql-snow {
+		@apply border-0 !important;
+	}
+
+	.rich-text-editor .ql-editor {
+		@apply min-h-[10vh];
+		@apply font-sans text-body;
+	}
+	.rich-text-editor > .ql-container > .ql-editor.ql-blank::before {
+		@apply text-silver not-italic;
 	}
 }
 
@@ -548,7 +635,8 @@
 		@apply md:px-[10%] lg:px-[25%];
 	}
 
-	.avatar-uploader::-webkit-file-upload-button {
+	.avatar-uploader::-webkit-file-upload-button,
+	.attachment-uploader::-webkit-file-upload-button {
 		@apply hidden;
 	}
 	.below-navigation-bar {
