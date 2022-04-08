@@ -114,22 +114,14 @@ export const deleteDepartment = async (department_id: string, department_name: s
 	);
 };
 
-// export const checkDepartmentExisted = async (department_name: string) => {
-// 	const { data } = await supabase.from('departments').select('department_name').match({
-// 		department_name: department_name,
-// 	});
+export const getDepartmentFromTopicId = async (topic_id: string) => {
+	const { data } = await supabase.from('topics').select('department_id').match({ topic_id: topic_id });
+	if (data && (data as []).length !== 0) {
+		departmentData = data[0] as IDepartmentData;
+	}
+	const { department_id } = departmentData;
 
-// 	return data!.length !== 0;
-// };
-
-// export const getDepartmentData = async (topic_name: string) => {
-// 	const noLimit = 99999;
-// 	const { data, error } = await supabase
-// 		.from<IDepartmentData>('topics')
-// 		.select(`*, categories(topic_id)`)
-// 		.match({ topic_name: topic_name })
-// 		.single();
-// 	return { data, error };
-// };
-
-// export const getTopicList =
+	const { department_name, error } = await getDepartmentNameById(department_id as string);
+	return { department_name };
+	// console.log('🚀 ~ file: department.ts ~ line 125 ~ getDepartmentFromTopicId ~ department_name', department_name);
+};

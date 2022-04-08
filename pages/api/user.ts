@@ -1,3 +1,4 @@
+import { IAccountData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
 
@@ -25,4 +26,13 @@ export const updateProfile = async (
 		`Update profile data for user @${username}.`,
 		`Profile data of @${username} has been updated.`
 	);
+};
+
+let userData: IAccountData;
+export const getAccountByAccountId = async (account_id: string) => {
+	const { data, error } = await supabase.from('accounts').select().match({ account_id: account_id });
+	if (data && (data as []).length !== 0) {
+		userData = data[0] as IAccountData;
+	}
+	return { userData, error };
 };

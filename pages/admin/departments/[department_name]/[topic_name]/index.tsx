@@ -13,7 +13,7 @@ import { Icon } from 'components/Icon';
 import { MetaTags } from 'components/MetaTags';
 import Modal from 'components/Modal';
 import Pagination from 'components/Pagination';
-import { getCategoriesListByTopicsId } from 'pages/api/category';
+import { getCategoriesListByTopicId } from 'pages/api/category';
 import { getTopicByName } from 'pages/api/topic';
 import { ICategoriesProps, ICategoryData, ITopicData } from 'lib/interfaces';
 import { scrollToElementByClassName } from 'utils/scrollAnimate';
@@ -25,7 +25,7 @@ interface IParams extends ParsedUrlQuery {
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 	const { topic_name: slug } = params as IParams;
 	const { topicData } = await getTopicByName(slug as string);
-	const { data } = await getCategoriesListByTopicsId(
+	const { data } = await getCategoriesListByTopicId(
 		(topicData as unknown as ITopicData['topic']).topic_id as unknown as string
 	);
 
@@ -68,7 +68,7 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 	const handleShowCreateCategoryModal = useCallback(() => {
 		setShowCreateCategoriesModal(!showCreateCategoriesModal);
 	}, [showCreateCategoriesModal]);
-	const handleCloseEditDepartmentModal = useCallback(() => {
+	const handleCloseCreateCategoriesModal = useCallback(() => {
 		setShowCreateCategoriesModal(false);
 	}, []);
 
@@ -115,7 +115,7 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 						</Button>
 					</div>
 					{showCreateCategoriesModal && (
-						<Modal onCancel={handleCloseEditDepartmentModal} headerText={`Create New Category`}>
+						<Modal onCancel={handleCloseCreateCategoriesModal} headerText={`Create New Category`}>
 							<CreateCategoryModal topic_id={topic.topic_id} />
 						</Modal>
 					)}

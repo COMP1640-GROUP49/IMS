@@ -9,7 +9,7 @@ import { Icon } from 'components/Icon';
 import Modal from 'components/Modal';
 import { UserContext } from 'components/PrivateRoute';
 import { deleteTopic } from 'pages/api/topic';
-import { ITopicData } from 'lib/interfaces';
+import { ICategoryData, ITopicData } from 'lib/interfaces';
 
 export const TopicCard = ({ topic }: ITopicData) => {
 	const user = useContext(UserContext);
@@ -80,7 +80,21 @@ export const TopicCard = ({ topic }: ITopicData) => {
 							<td>
 								<span className="flex items-center gap-1 card-info">
 									<Icon size="16" name="File" />
-									<p>99 ideas available</p>
+									<p>
+										{(topic.categories as unknown as []).filter(
+											(category: ICategoryData['category']) => category.ideas?.length
+										).length > 1
+											? `${
+													(topic.categories as unknown as []).filter(
+														(category: ICategoryData['category']) => category.ideas?.length
+													).length
+											  } ideas available`
+											: `${
+													(topic.categories as unknown as []).filter(
+														(category: ICategoryData['category']) => category.ideas?.length
+													).length
+											  } idea available`}
+									</p>
 								</span>
 							</td>
 							<td>
