@@ -62,7 +62,7 @@ export interface ICategoryData extends IObjectKeys {
 		category_name: string;
 		category_description?: string;
 		topic_id: string;
-		ideas?: IIdeas[];
+		ideas?: [];
 	};
 }
 
@@ -70,19 +70,23 @@ export interface ICategoriesProps {
 	data: ICategoryData[];
 }
 
-export interface IIdeas extends IObjectKeys {
+export interface IIdeaData extends IObjectKeys {
 	idea: {
 		idea_id: string;
 		idea_title: string;
-		idea_view: string;
+		idea_view: number;
 		idea_content: string;
 		idea_file_url: string;
 		idea_created: string;
 		idea_updated: string;
+		account_id: string;
 		category_id: string;
+		anonymous_posting: boolean;
+		reaction_list: [];
+		// comments_list: ICommentsProps;
 	};
 }
 
 export interface IIdeasProps {
-	data: IIdeas[];
+	data: IIdeaData[];
 }

@@ -6,7 +6,7 @@ export const getTopicsListByDepartmentId = async (department_id: string, limit?:
 	const noLimit = 99999;
 	const { data, error } = await supabase
 		.from('topics')
-		.select(`*, categories(topic_id)`)
+		.select(`*, categories(*,ideas(*))`)
 		.match({ department_id: department_id })
 		.limit(limit || noLimit);
 	return { data, error };
