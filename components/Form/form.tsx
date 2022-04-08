@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
+import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { FormEvent, useCallback, useEffect, useState } from 'react';
 import { ClipLoader } from 'react-spinners';
@@ -26,7 +27,7 @@ import {
 import { IUserData } from 'pages/api/auth';
 import { createNewCategory, getCategoryListByTopicId, updateCategory } from 'pages/api/category';
 import { createDepartment, getDepartmentFromTopicId, getDepartmentList, updateDepartment } from 'pages/api/department';
-import { uploadAttachment } from 'pages/api/idea';
+import { createNewIdea, uploadAttachment } from 'pages/api/idea';
 import { createNewTopic, updateTopic } from 'pages/api/topic';
 import { updateProfile } from 'pages/api/user';
 import {
@@ -1593,6 +1594,7 @@ export const EditCategoryModal = ({ categoryData }: any) => {
 export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 	const [formData, setFormData] = useState<IIdeaData['idea']>();
 	const router = useRouter();
+	const { asPath } = useRouter();
 
 	const [categoryList, setCategoryList] = useState<ICategoriesProps>();
 
@@ -1641,6 +1643,7 @@ export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 			...(formData as IIdeaData['idea']),
 			[event.target.name]: event.target.value,
 			account_id: account_id as string,
+			anonymous_posting: false,
 		});
 		if (event.target.name === 'idea_title') {
 			if (event.target.value.trim() !== '') {
@@ -1695,7 +1698,6 @@ export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 					attachment.name
 				);
 				formData.idea_file_url = attachmentUrl;
-				console.log('🚀 ~ file: form.tsx ~ line 1696 ~ fileUpload ~ formData.idea_file_url', formData.idea_file_url);
 			} catch (error) {
 				throw new Error('Attachment upload error!');
 			}
@@ -1731,22 +1733,18 @@ export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 				...formValidation!,
 				ideaCategoryValidation: 'error',
 			});
-
 			scrollToElement('select-category');
 		} else {
 			try {
-				// const { newUserData, adminSession } = await createNewAccount(formData);
-				// if (newUserData) {
-				// 	await keepAdminSession(adminSession?.refresh_token as string);
-				// TODO: Push to idea page
-				console.log(formData);
+				const data = await createNewIdea(formData);
+				console.log('🚀 ~ file: form.tsx ~ line 1739 ~ handleCreateNewIdea ~ data', data);
+				// TODO: Go to the new idea page
+				void router.push(`${asPath}/${data.idea_id}`);
 				// void router.reload();
-				// }
 			} catch (error) {
 				throw error;
 			}
 		}
-		// router.reload();
 	};
 
 	return (

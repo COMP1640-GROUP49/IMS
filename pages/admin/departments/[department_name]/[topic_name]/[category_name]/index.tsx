@@ -28,6 +28,7 @@ interface IParams extends ParsedUrlQuery {
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 	const { category_name: slug } = params as IParams;
 	const { categoryData } = await getCategoryByName(slug as string);
+
 	const { data } = await getIdeasListByCategoryId(
 		(categoryData as unknown as ICategoryData['category']).category_id as unknown as string
 	);

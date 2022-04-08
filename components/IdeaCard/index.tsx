@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-misused-promises */
+import { convert } from 'html-to-text';
 import moment from 'moment';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -8,6 +10,7 @@ import { Avatar } from 'components/Avatar';
 import { Button } from 'components/Button';
 import { Icon } from 'components/Icon';
 import Modal from 'components/Modal';
+import { getCategoryById, getCategoryByName } from 'pages/api/category';
 import { getAccountByAccountId } from 'pages/api/user';
 import { IIdeaData, IReactionData } from 'lib/interfaces';
 
@@ -16,6 +19,7 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 
 	const [avatarUrl, setAvatarUrl] = useState('');
 	const [username, setUsername] = useState('');
+	const [categoryName, setCategoryName] = useState('');
 
 	const router = useRouter();
 	const { asPath } = useRouter();
@@ -59,13 +63,16 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 	};
 
 	useEffect(() => {
-		const getAvatar = async () => {
+		const getAdditionalInfo = async () => {
 			const { userData } = await getAccountByAccountId(idea.account_id);
 			setAvatarUrl(userData?.avatar_url as string);
 			setUsername(userData?.username as string);
+
+			const { categoryData } = await getCategoryById(idea.category_id);
+			setCategoryName(categoryData?.category_name as string);
 		};
 
-		void getAvatar();
+		void getAdditionalInfo();
 	}, [idea]);
 
 	return (
@@ -79,85 +86,103 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 							</td>
 							<td>
 								<span className="flex items-center gap-1 card-info">
-									<Icon size="16" name="Eye" />
-									<p>{idea.idea_view > 1 ? `${idea.idea_view} views` : `${idea.idea_view} view`}</p>
+									<Icon size="16" name="Hash" />
+									<p>{`${categoryName}`}</p>
 								</span>
 							</td>
-							<div className="flex gap-2">
+							<div className="lg:flex lg:flex-row lg:gap-6 flex flex-col gap-2">
 								<td>
 									<span className="flex items-center gap-1 card-info">
-										<Icon size="16" name="ThumbsUp" />
-										<p>
-											{
-												(idea.reaction as unknown as []).filter(
-													(reaction: IReactionData['reaction']) => reaction.reaction_type === 'like'
-												).length
-											}
-										</p>
+										<Icon size="16" name="Eye" />
+										<p>{idea.idea_view > 1 ? `${idea.idea_view} views` : `${idea.idea_view} view`}</p>
 									</span>
 								</td>
+								<div className="flex gap-2 lg:gap-6">
+									<td>
+										<span className="flex items-center gap-1 card-info">
+											<Icon size="16" name="ThumbsUp" />
+											<p>
+												{
+													(idea.reaction as unknown as []).filter(
+														(reaction: IReactionData['reaction']) => reaction.reaction_type === 'like'
+													).length
+												}
+											</p>
+										</span>
+									</td>
+									<td>
+										<span className="flex items-center gap-1 card-info">
+											<Icon size="16" name="ThumbsDown" />
+											<p>
+												{
+													(idea.reaction as unknown as []).filter(
+														(reaction: IReactionData['reaction']) => reaction.reaction_type === 'dislike'
+													).length
+												}
+											</p>
+										</span>
+									</td>
+								</div>
 								<td>
 									<span className="flex items-center gap-1 card-info">
-										<Icon size="16" name="ThumbsDown" />
+										<Icon size="16" name="MessageSquare" />
 										<p>
-											{
-												(idea.reaction as unknown as []).filter(
-													(reaction: IReactionData['reaction']) => reaction.reaction_type === 'dislike'
-												).length
-											}
+											{(idea.comments as unknown as []).length > 1
+												? `${(idea.comments as unknown as []).length} comments`
+												: `${(idea.comments as unknown as []).length} comment`}
 										</p>
 									</span>
 								</td>
 							</div>
-							<td>
-								<span className="flex items-center gap-1 card-info">
-									<Icon size="16" name="MessageSquare" />
-									<p>
-										{(idea.comments as unknown as []).length > 1
-											? `${(idea.comments as unknown as []).length} comments`
-											: `${(idea.comments as unknown as []).length} comment`}
-									</p>
-								</span>
-							</td>
+
 							<td>
 								<span className="flex items-center gap-1 card-info">
 									<Icon size="16" name="File" />
-									<p className={!idea.idea_content ? 'italic' : ''}>{idea.idea_content || `Blank`}</p>
+									<p className={!idea.idea_content ? 'italic' : 'idea-content'}>
+										{convert(idea.idea_content, { wordwrap: 50, whitespaceCharacters: '\t\r\n\f\u200b' }) || `Blank`}
+									</p>
 								</span>
 							</td>
-							{idea.idea_file_url !== null && (
+							<div className="lg:flex lg:flex-row lg:gap-6 flex flex-col gap-2">
+								{idea.idea_file_url !== '' && idea.idea_file_url !== null && (
+									<td>
+										<span className="flex items-center gap-1 card-info">
+											<Icon size="16" name="Download" />
+											<p>File attached</p>
+										</span>
+									</td>
+								)}
+								<td>
+									<div className="flex gap-1 items-center card-info">
+										{avatarUrl && !idea.anonymous_posting ? (
+											<Avatar src={`${avatarUrl}`} size="16" className="rounded-full" alt={`{}'s avatar`} />
+										) : (
+											<Avatar src={'/default-avatar.png'} size="16" className="rounded-full" alt={`{}'s avatar`} />
+										)}
+										{/* TODO: Link to user's profile page */}
+										<p>
+											Submitted by{' '}
+											<span className="inline font-semi-bold text-black">
+												{!idea.anonymous_posting ? `@${username}` : `anonymous`}
+											</span>
+										</p>
+									</div>
+								</td>
+							</div>
+							<div className="lg:flex lg:flex-row lg:gap-6 flex flex-col gap-2">
 								<td>
 									<span className="flex items-center gap-1 card-info">
-										<Icon size="16" name="Download" />
-										<p>File attached</p>
+										<Icon size="16" name="Clock" />
+										<p>Submitted {moment(idea.idea_created).fromNow()} </p>
 									</span>
 								</td>
-							)}
-							<td>
-								<div className="flex gap-1 items-center card-info">
-									{avatarUrl ? (
-										<Avatar src={`${avatarUrl}`} size="16" className="rounded-full" alt={`{}'s avatar`} />
-									) : (
-										<Avatar src={'/default-avatar.png'} size="16" className="rounded-full" alt={`{}'s avatar`} />
-									)}
-									{/* TODO: Link to user's profile page */}
-									<p>
-										Submitted by <span className="inline font-semi-bold text-black">@{username}</span>
-									</p>
-								</div>
-							</td>
-							<td>
-								<span className="flex items-center gap-1 card-info">
-									<Icon size="16" name="Clock" />
-									<p>Submitted {moment(idea.idea_created).fromNow()} </p>
-								</span>
-							</td>
-							<td>
-								<span className="flex items-center gap-1 card-info">
-									<Icon size="16" name="Check" />
-									<p>Last edited {moment(idea.idea_updated).fromNow()} </p>
-								</span>
-							</td>
+								<td>
+									<span className="flex items-center gap-1 card-info">
+										<Icon size="16" name="Check" />
+										<p>Last edited {moment(idea.idea_updated).fromNow()} </p>
+									</span>
+								</td>
+							</div>
 						</div>
 					</a>
 				</Link>
