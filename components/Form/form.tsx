@@ -27,7 +27,7 @@ import {
 import { IUserData } from 'pages/api/auth';
 import { createNewCategory, getCategoryListByTopicId, updateCategory } from 'pages/api/category';
 import { createDepartment, getDepartmentFromTopicId, getDepartmentList, updateDepartment } from 'pages/api/department';
-import { createNewIdea, updateIdea, uploadAttachment } from 'pages/api/idea';
+import { createNewIdea, removeIdeaAttachment, updateIdea, uploadAttachment } from 'pages/api/idea';
 import { createNewTopic, updateTopic } from 'pages/api/topic';
 import { updateProfile } from 'pages/api/user';
 import {
@@ -1924,7 +1924,6 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 
 	const fileUpdate = (data: File) => {
 		if (!data) {
-			console.log('remove file');
 			setFormData({
 				...formData,
 				idea_updated: moment().format(),
@@ -1949,7 +1948,13 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 					topic_id as string,
 					formData.idea_title,
 					formData.account_id,
-					attachment.name
+					attachment.name,
+					(ideaData as IIdeaData['idea']).idea_title
+						.split('/')
+						.pop()
+						?.replaceAll(`${(ideaData as IIdeaData['idea']).idea_title}_`, '')
+						.replaceAll(`_${formData.account_id}`, ''),
+					(ideaData as IIdeaData['idea']).idea_title
 				);
 				formData.idea_file_url = attachmentUrl;
 			} catch (error) {
@@ -1957,13 +1962,20 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 			}
 		} else {
 			formData.idea_file_url = '';
+			const { department_name } = await getDepartmentFromTopicId(topic_id as string);
+			await removeIdeaAttachment(
+				(ideaData as IIdeaData['idea']).idea_title,
+				department_name as string,
+				topic_id as string,
+				formData.account_id
+			);
 		}
 	};
 
 	useEffect(() => {
 		const getCategoryData = async () => {
 			const { data } = await getCategoryListByTopicId(topic_id as string);
-			setCategoryList(data as unknown as ICategoriesProps);
+			data && setCategoryList(data as unknown as ICategoriesProps);
 		};
 		void getCategoryData();
 		if (

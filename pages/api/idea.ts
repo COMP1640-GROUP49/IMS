@@ -1,4 +1,4 @@
-import { IIdeaData } from 'lib/interfaces';
+import { IFileData, IIdeaData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
 
@@ -18,17 +18,37 @@ export const uploadAttachment = async (
 	department_name: string,
 	topic_id: string,
 	idea_title: string,
-	username: string,
-	file_name: string
+	account_id: string,
+	file_name: string,
+	server_file_name?: string,
+	old_idea_title?: string
 ) => {
+	let fileData: IFileData;
 	const updateAttachment = async () => {
+		const { data } = await supabase.storage.from('departments').list(`${department_name}/topics/${topic_id}`);
+		if (data && (data as []).length > 0) {
+			const filterData = (data as []).filter(
+				(file: IFileData) =>
+					file.name.includes(old_idea_title as string) &&
+					file.name.includes(server_file_name as string) &&
+					file.name.includes(account_id)
+			);
+			fileData = filterData[0];
+		}
+
+		// Remove old file on server
+		if (data) {
+			await supabase.storage.from('departments').remove([`${department_name}/topics/${topic_id}/${fileData?.name}`]);
+		}
+
+		// Update new file after removing old file
 		const { error } = await supabase.storage
 			.from('departments')
-			.upload(`${department_name}/topics/${topic_id}/${idea_title}_${file_name}_${username}`, attachmentFile);
+			.upload(`${department_name}/topics/${topic_id}/${idea_title}_${file_name}_${account_id}`, attachmentFile);
 		if (error) {
 			await supabase.storage
 				.from('departments')
-				.update(`${department_name}/topics/${topic_id}/${idea_title}_${file_name}_${username}`, attachmentFile, {
+				.update(`${department_name}/topics/${topic_id}/${idea_title}_${file_name}_${account_id}`, attachmentFile, {
 					cacheControl: '3600',
 					upsert: false,
 				});
@@ -39,7 +59,7 @@ export const uploadAttachment = async (
 	const getAttachmentFileUrl = async () => {
 		const { signedURL, error } = await supabase.storage
 			.from('departments')
-			.createSignedUrl(`${department_name}/topics/${topic_id}/${idea_title}_${file_name}_${username}`, 999999999999); // Expired time of signed URL of avatar
+			.createSignedUrl(`${department_name}/topics/${topic_id}/${idea_title}_${file_name}_${account_id}`, 999999999999); // Expired time of signed URL of avatar
 		if (signedURL) {
 			const url = signedURL;
 			return url;
@@ -121,4 +141,37 @@ export const updateIdea = async (ideaForm: IIdeaData['idea']) => {
 		`Idea ${ideaForm.idea_title} has been updated.`
 	);
 	return data as IIdeaData['idea'];
+};
+
+let fileData: IFileData;
+export const removeIdeaAttachment = async (
+	idea_title: string,
+	department_name: string,
+	topic_id: string,
+	account_id: string
+) => {
+	const { data } = await supabase.storage.from('departments').list(`${department_name}/topics/${topic_id}`);
+	if (data && (data as []).length > 0) {
+		const filterData = (data as []).filter(
+			(file: IFileData) => file.name.includes(idea_title) && file.name.includes(account_id)
+		);
+		fileData = filterData[0];
+	}
+
+	// Remove old file on server
+	if (data) {
+		await supabase.storage.from('departments').remove([`${department_name}/topics/${topic_id}/${fileData?.name}`]);
+	}
+};
+
+export const deleteIdea = async (idea_id: string, idea_title: string) => {
+	const deleteIdeaData = async () => {
+		const { data, error } = await supabase.from('ideas').delete().match({
+			idea_id: idea_id,
+		});
+		if (error) {
+			throw error;
+		}
+	};
+	await notifyToast(deleteIdeaData(), `Deleting idea ${idea_title}.`, `Topic named ${idea_title} has been deleted.`);
 };

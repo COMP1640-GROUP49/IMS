@@ -29,6 +29,7 @@ const AttachmentUploader = ({ fileUpdate, value, idea_title, account_id }: Attac
 					.replaceAll(`_${account_id as string}`, '')
 					.split('?token')[0] as string;
 
+				// REFACTOR: Can get size by calling storage-js api to get [metadata][size]
 				const getFileSize = async () => {
 					const data = await getFileSizeFromUrl(loadAttachment);
 					setFileSize(data as number);
