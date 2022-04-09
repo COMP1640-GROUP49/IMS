@@ -2094,3 +2094,42 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 		</>
 	);
 };
+
+export const CommentForm = ({ userData }: any) => {
+	return (
+		<>
+			<main>
+				<div className="flex flex-col gap-6">
+					<form>
+						<div className="flex flex-col gap-4">
+							<div className="form-field">
+								<RichTextEditor placeholder={`Input idea's content`} />
+							</div>
+							<Checkbox name="terms-conditions" className="self-start sm:self-stretch">
+								<label htmlFor="terms-conditions ">
+									I agree to <span className="font-semi-bold">Terms and Conditions</span>
+								</label>
+							</Checkbox>
+							<div className="flex justify-between items-center">
+								<Button
+									icon={true}
+									className={' h-12 btn-secondary md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2'}
+								>
+									<Icon name="Upload" size="16" />
+									Upload File
+								</Button>
+								<Button
+									icon={true}
+									className={'h-12 btn-primary md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2'}
+								>
+									<Icon name="Send" size="16" />
+									Post
+								</Button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</main>
+		</>
+	);
+};

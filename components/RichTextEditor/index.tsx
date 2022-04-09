@@ -6,11 +6,12 @@ const ReactQuill = typeof window === 'object' ? require('react-quill') : () => f
 
 type RichTextEditorProps = {
 	placeholder?: string;
-	handleEditorChange: (data: string) => void;
-	value: string;
+	handleEditorChange?: (data: string) => void;
+	value?: string;
+	readOnly?: boolean;
 };
 
-const RichTextEditor = ({ placeholder, handleEditorChange, value }: RichTextEditorProps) => {
+const RichTextEditor = ({ placeholder, handleEditorChange, value, readOnly }: RichTextEditorProps) => {
 	return (
 		<ReactQuill
 			placeholder={placeholder}
@@ -18,6 +19,7 @@ const RichTextEditor = ({ placeholder, handleEditorChange, value }: RichTextEdit
 			theme="snow"
 			value={value || ''}
 			onChange={handleEditorChange}
+			readOnly={readOnly}
 		/>
 	);
 };

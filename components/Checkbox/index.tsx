@@ -2,7 +2,7 @@ type CheckboxProps = {
 	children: React.ReactNode;
 	name: string;
 	className?: string;
-	onChange: React.ChangeEventHandler<HTMLInputElement>;
+	onChange?: React.ChangeEventHandler<HTMLInputElement>;
 };
 
 export const Checkbox = ({ name, children, className, onChange }: CheckboxProps) => {

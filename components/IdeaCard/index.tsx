@@ -84,7 +84,7 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 	return (
 		<tr className="idea-card">
 			<div className="idea-card__info-wrapper">
-				<Link href={`${asPath}/${idea.idea_id}`} passHref>
+				<Link href={`${asPath}/${idea.idea_id.toLowerCase().replace(/ /g, `-`)}`} passHref>
 					<a>
 						<div className="idea-card__info">
 							<td>

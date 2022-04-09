@@ -3,7 +3,7 @@ import { formatBytes } from 'utils/formatBytes';
 import { getFileSizeFromUrl } from 'utils/getFileSizeFromUrl';
 
 type AttachmentUploaderProps = {
-	fileUpdate: (data: File) => void;
+	fileUpdate?: (data: File) => void;
 	value?: string;
 	idea_title?: string;
 	account_id?: string;

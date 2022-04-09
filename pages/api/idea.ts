@@ -122,3 +122,15 @@ export const updateIdea = async (ideaForm: IIdeaData['idea']) => {
 	);
 	return data as IIdeaData['idea'];
 };
+
+let ideaData: IIdeaData;
+export const getIdeaById = async (ideaId: string) => {
+	const { data, error } = await supabase
+		.from('ideas')
+		.select('*, comments!comments_idea_id_fkey(*), reaction(*)')
+		.match({ idea_id: ideaId });
+	if (data) {
+		ideaData = data[0] as IIdeaData;
+	}
+	return { ideaData, error };
+};
