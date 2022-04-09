@@ -28,7 +28,7 @@ import { IUserData } from 'pages/api/auth';
 import { createNewCategory, getCategoryListByTopicId, updateCategory } from 'pages/api/category';
 import { createDepartment, getDepartmentFromTopicId, getDepartmentList, updateDepartment } from 'pages/api/department';
 import { createNewIdea, removeIdeaAttachment, updateIdea, uploadAttachment } from 'pages/api/idea';
-import { createNewTopic, updateTopic } from 'pages/api/topic';
+import { createNewTopic, getTopicIdByCategoryId, updateTopic } from 'pages/api/topic';
 import { updateProfile } from 'pages/api/user';
 import {
 	ITopicData,
@@ -1851,6 +1851,8 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 	const { asPath } = useRouter();
 
 	const [categoryList, setCategoryList] = useState<ICategoriesProps>();
+	const [departmentName, setDepartmentName] = useState('');
+	const [topicId, setTopicId] = useState('');
 
 	const [attachment, setAttachment] = useState<File>();
 
@@ -1978,6 +1980,16 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 			data && setCategoryList(data as unknown as ICategoriesProps);
 		};
 		void getCategoryData();
+
+		const getDepartmentNameAndTopicId = async () => {
+			const { topicId } = await getTopicIdByCategoryId((ideaData as IIdeaData['idea']).category_id);
+			topicId && setTopicId(topicId);
+
+			const { department_name } = await getDepartmentFromTopicId(topicId);
+			department_name && setDepartmentName(department_name as string);
+		};
+		void getDepartmentNameAndTopicId();
+
 		if (
 			((formValidation?.ideaTitleValidation === 'success' || formValidation?.ideaTitleValidation === 'loaded') &&
 				formValidation?.ideaCategoryValidation === 'success') ||
@@ -2085,6 +2097,7 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 										account_id={(ideaData as IIdeaData['idea']).account_id}
 										value={formData?.idea_file_url}
 										fileUpdate={fileUpdate}
+										moreOptions={{ department_name: departmentName, topic_id: topicId }}
 									/>
 								</div>
 

@@ -6,6 +6,7 @@ export interface IFileData {
 	last_accessed_at: string;
 	metadata: {
 		[key: string]: any;
+		size: number;
 	};
 	name: string;
 	updated_at: string;

@@ -7,9 +7,13 @@ type AttachmentUploaderProps = {
 	value?: string;
 	idea_title?: string;
 	account_id?: string;
+	moreOptions?: {
+		department_name: string;
+		topic_id: string;
+	};
 };
 
-const AttachmentUploader = ({ fileUpdate, value, idea_title, account_id }: AttachmentUploaderProps) => {
+const AttachmentUploader = ({ fileUpdate, value, idea_title, account_id, moreOptions }: AttachmentUploaderProps) => {
 	const [uploadTimes, setUploadTimes] = useState(0);
 	const [loadAttachment, setLoadAttachment] = useState(value);
 	const [fileSize, setFileSize] = useState(0);
@@ -31,7 +35,8 @@ const AttachmentUploader = ({ fileUpdate, value, idea_title, account_id }: Attac
 
 				// REFACTOR: Can get size by calling storage-js api to get [metadata][size]
 				const getFileSize = async () => {
-					const data = await getFileSizeFromUrl(loadAttachment);
+					const data = await getFileSizeFromUrl(loadAttachment, moreOptions);
+					!data && console.log('here');
 					setFileSize(data as number);
 				};
 
@@ -60,7 +65,6 @@ const AttachmentUploader = ({ fileUpdate, value, idea_title, account_id }: Attac
 
 					const fileInfoEl = document.getElementsByClassName('file-info')[0] as HTMLElement;
 					const btnRemoveFileEl = document.getElementsByClassName('btn__remove-file')[0] as HTMLElement;
-
 					if (!fileInfoEl && !btnRemoveFileEl && fileSize > 0) {
 						removeFileButtonElement.onclick = (event: any) => {
 							(event as React.FormEvent).preventDefault();
@@ -79,7 +83,6 @@ const AttachmentUploader = ({ fileUpdate, value, idea_title, account_id }: Attac
 							}
 							fileUpdate(undefined!);
 						};
-
 						attachmentUploaderEl.parentNode?.appendChild(fileInfoElement);
 						attachmentUploaderEl.parentNode?.appendChild(removeFileButtonElement);
 					}
