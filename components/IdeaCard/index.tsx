@@ -8,9 +8,11 @@ import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
 import { Avatar } from 'components/Avatar';
 import { Button } from 'components/Button';
+import { EditIdeaModal } from 'components/Form/form';
 import { Icon } from 'components/Icon';
 import Modal from 'components/Modal';
 import { getCategoryById, getCategoryByName } from 'pages/api/category';
+import { getTopicIdByCategoryId } from 'pages/api/topic';
 import { getAccountByAccountId } from 'pages/api/user';
 import { IIdeaData, IReactionData } from 'lib/interfaces';
 
@@ -20,6 +22,7 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 	const [avatarUrl, setAvatarUrl] = useState('');
 	const [username, setUsername] = useState('');
 	const [categoryName, setCategoryName] = useState('');
+	const [topicId, setTopicId] = useState('');
 
 	const router = useRouter();
 	const { asPath } = useRouter();
@@ -70,6 +73,9 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 
 			const { categoryData } = await getCategoryById(idea.category_id);
 			setCategoryName(categoryData?.category_name as string);
+
+			const { topicId } = await getTopicIdByCategoryId(idea.category_id);
+			setTopicId(topicId);
 		};
 
 		void getAdditionalInfo();
@@ -193,13 +199,11 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 								<Icon name="Edit" size="16" />
 								Edit
 							</Button>
-							{/*
 							{showEditIdeaModal && (
-								<Modal onCancel={handleCloseEditIdeaModal} headerText={`Edit ${idea.idea_name}`}>
-									<EditIdeaModal ideaData={idea} />
+								<Modal onCancel={handleCloseEditIdeaModal} headerText={`Edit ${idea.idea_title}`}>
+									<EditIdeaModal topic_id={topicId} ideaData={idea} />
 								</Modal>
 							)}
-							*/}
 
 							<Button onClick={handleShowDeleteIdeaModal} icon className="btn-primary">
 								<Icon name="Trash" size="16" />

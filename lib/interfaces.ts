@@ -82,8 +82,8 @@ export interface IIdeaData extends IObjectKeys {
 		account_id: string;
 		category_id: string;
 		anonymous_posting: boolean;
-		reaction: IReactionProps;
-		comments: ICommentsProps;
+		reaction?: IReactionProps;
+		comments?: ICommentsProps;
 	};
 }
 

@@ -27,7 +27,7 @@ import {
 import { IUserData } from 'pages/api/auth';
 import { createNewCategory, getCategoryListByTopicId, updateCategory } from 'pages/api/category';
 import { createDepartment, getDepartmentFromTopicId, getDepartmentList, updateDepartment } from 'pages/api/department';
-import { createNewIdea, uploadAttachment } from 'pages/api/idea';
+import { createNewIdea, updateIdea, uploadAttachment } from 'pages/api/idea';
 import { createNewTopic, updateTopic } from 'pages/api/topic';
 import { updateProfile } from 'pages/api/user';
 import {
@@ -1593,6 +1593,7 @@ export const EditCategoryModal = ({ categoryData }: any) => {
 
 export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 	const [formData, setFormData] = useState<IIdeaData['idea']>();
+
 	const router = useRouter();
 	const { asPath } = useRouter();
 
@@ -1737,7 +1738,6 @@ export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 		} else {
 			try {
 				const data = await createNewIdea(formData);
-				console.log('🚀 ~ file: form.tsx ~ line 1739 ~ handleCreateNewIdea ~ data', data);
 				// TODO: Go to the new idea page
 				void router.push(`${asPath}/${data.idea_id}`);
 				// void router.reload();
@@ -1833,6 +1833,258 @@ export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 								>
 									<Icon name="FilePlus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
 									Submit idea
+								</Button>
+							</div>
+						</form>
+					</div>
+				</main>
+			</>
+		</>
+	);
+};
+
+export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
+	const [formData, setFormData] = useState<IIdeaData['idea']>(ideaData as IIdeaData['idea']);
+	const [hasFormDataChanged, setHasFormDataChanged] = useState(false);
+
+	const router = useRouter();
+	const { asPath } = useRouter();
+
+	const [categoryList, setCategoryList] = useState<ICategoriesProps>();
+
+	const [attachment, setAttachment] = useState<File>();
+
+	interface IFormValidation {
+		ideaTitleValidation: string;
+		ideaCategoryValidation: string;
+	}
+
+	const [formValidation, setFormValidation] = useState<IFormValidation>({
+		ideaTitleValidation: 'loaded',
+		ideaCategoryValidation: 'loaded',
+	});
+
+	const [isFormValidated, setIsFormValidated] = useState(false);
+
+	const handleEditorChange = (data: string) => {
+		setFormData({
+			...formData,
+			idea_content: data,
+			idea_updated: moment().format(),
+		});
+	};
+
+	const handleChange = (
+		event:
+			| React.ChangeEvent<HTMLInputElement>
+			| React.ChangeEvent<HTMLSelectElement>
+			| React.ChangeEvent<HTMLTextAreaElement>
+	) => {
+		event.target.style.color = 'black';
+
+		setFormData({
+			...formData,
+			[event.target.name]: event.target.value,
+			idea_updated: moment().format(),
+		});
+		if (event.target.name === 'idea_title') {
+			if (event.target.value.trim() !== '') {
+				setFormValidation({
+					...formValidation,
+					ideaTitleValidation: 'success',
+				});
+			} else {
+				setFormValidation({
+					...formValidation,
+					ideaTitleValidation: 'error',
+				});
+			}
+		}
+		if (event.target.name === 'category_id') {
+			if (event.target.value.trim() !== 'disabled') {
+				setFormValidation({
+					...formValidation,
+					ideaCategoryValidation: 'success',
+				});
+			} else {
+				setFormValidation({
+					...formValidation,
+					ideaCategoryValidation: 'error',
+				});
+			}
+		}
+
+		if (event.target.name === 'anonymous_posting') {
+			setFormData({
+				...formData,
+				anonymous_posting: (event.target as HTMLInputElement).checked,
+			});
+		}
+	};
+
+	const fileUpdate = (data: File) => {
+		if (!data) {
+			console.log('remove file');
+			setFormData({
+				...formData,
+				idea_updated: moment().format(),
+			});
+		} else {
+			setAttachment(data);
+			setFormData({
+				...formData,
+				idea_updated: moment().format(),
+			});
+		}
+		return attachment;
+	};
+
+	const fileUpload = async () => {
+		if (attachment && formData?.idea_title) {
+			try {
+				const { department_name } = await getDepartmentFromTopicId(topic_id as string);
+				const attachmentUrl = await uploadAttachment(
+					attachment,
+					department_name as string,
+					topic_id as string,
+					formData.idea_title,
+					formData.account_id,
+					attachment.name
+				);
+				formData.idea_file_url = attachmentUrl;
+			} catch (error) {
+				throw new Error('Attachment upload error!');
+			}
+		} else {
+			formData.idea_file_url = '';
+		}
+	};
+
+	useEffect(() => {
+		const getCategoryData = async () => {
+			const { data } = await getCategoryListByTopicId(topic_id as string);
+			setCategoryList(data as unknown as ICategoriesProps);
+		};
+		void getCategoryData();
+		if (
+			((formValidation?.ideaTitleValidation === 'success' || formValidation?.ideaTitleValidation === 'loaded') &&
+				formValidation?.ideaCategoryValidation === 'success') ||
+			formValidation?.ideaCategoryValidation === 'loaded'
+		) {
+			setIsFormValidated(true);
+		} else {
+			setIsFormValidated(false);
+		}
+
+		if (compareObject(formData, ideaData as object)) {
+			setHasFormDataChanged(false);
+		} else {
+			setHasFormDataChanged(true);
+		}
+	}, [formValidation, isFormValidated, formData, attachment]);
+
+	const handleUpdateIdea = async (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
+		(event as FormEvent<HTMLFormElement>).preventDefault();
+		await fileUpload();
+		// Check form validate before submit form
+		if (formData?.category_id === undefined) {
+			setFormValidation({
+				...formValidation,
+				ideaCategoryValidation: 'error',
+			});
+			scrollToElement('select-category');
+		} else {
+			try {
+				await updateIdea(formData);
+				router.reload();
+			} catch (error) {
+				throw error;
+			}
+		}
+	};
+
+	return (
+		<>
+			<>
+				<MetaTags title={`Create New Idea`} description="Submit new idea" />
+				<main>
+					<div className="flex flex-col gap-6">
+						<form onSubmit={handleUpdateIdea} className="form-edit flex flex-col gap-6">
+							<div className="flex flex-col gap-4">
+								<div className="form-field">
+									<Label size="text-normal">Title</Label>
+									<Input
+										value={formData?.idea_title}
+										onChange={handleChange}
+										name="idea_title"
+										required={true}
+										placeholder={"Input idea's title"}
+										type="text"
+									/>
+									{formValidation &&
+										(formValidation['ideaTitleValidation'] === 'success' ? (
+											<div className="label-success">This title name is valid.</div>
+										) : formValidation['ideaTitleValidation'] === 'error' ? (
+											<div className="label-warning">Please input the title of idea.</div>
+										) : null)}
+								</div>
+								{/* TODO: onChange & value */}
+								<div className="form-field">
+									<Label optional size="text-normal">
+										Content
+									</Label>
+									<RichTextEditor
+										value={formData?.idea_content}
+										handleEditorChange={handleEditorChange}
+										placeholder={`Input idea's content`}
+									/>
+								</div>
+								<div id="select-category" className="form-field">
+									<Label size="text-normal">Category</Label>
+									<Select value={formData?.category_id} name="category_id" required onChange={handleChange}>
+										<option disabled value={'disabled'}>
+											{"Select idea's category"}
+										</option>
+										{categoryList ? (
+											(categoryList as unknown as []).map((category) => (
+												<option
+													key={(category as ICategoryData['category']).category_id}
+													value={(category as ICategoryData['category']).category_id}
+												>
+													{(category as ICategoryData['category']).category_name}
+												</option>
+											))
+										) : (
+											<ClipLoader />
+										)}
+									</Select>
+									{formValidation &&
+										(formValidation['ideaCategoryValidation'] === 'error' ? (
+											<div className="label-warning">Please select category for idea.</div>
+										) : null)}
+								</div>
+
+								<div className="form-field">
+									<Label optional size="text-normal">
+										Attach Document
+									</Label>
+									<AttachmentUploader
+										idea_title={(ideaData as IIdeaData['idea']).idea_title}
+										account_id={(ideaData as IIdeaData['idea']).account_id}
+										value={formData?.idea_file_url}
+										fileUpdate={fileUpdate}
+									/>
+								</div>
+
+								<Button
+									disabled={!isFormValidated && !hasFormDataChanged}
+									icon={true}
+									className={`${
+										isFormValidated && hasFormDataChanged ? `btn-primary` : `btn-disabled`
+									}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+								>
+									<Icon name="Save" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+									Save changes
 								</Button>
 							</div>
 						</form>

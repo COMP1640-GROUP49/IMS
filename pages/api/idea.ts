@@ -24,11 +24,11 @@ export const uploadAttachment = async (
 	const updateAttachment = async () => {
 		const { error } = await supabase.storage
 			.from('departments')
-			.upload(`${department_name}/topics/${topic_id}/${file_name}-${idea_title}-${username}`, attachmentFile);
+			.upload(`${department_name}/topics/${topic_id}/${idea_title}_${file_name}_${username}`, attachmentFile);
 		if (error) {
 			await supabase.storage
 				.from('departments')
-				.update(`${department_name}/topics/${topic_id}/${file_name}-${idea_title}-${username}`, attachmentFile, {
+				.update(`${department_name}/topics/${topic_id}/${idea_title}_${file_name}_${username}`, attachmentFile, {
 					cacheControl: '3600',
 					upsert: false,
 				});
@@ -39,7 +39,7 @@ export const uploadAttachment = async (
 	const getAttachmentFileUrl = async () => {
 		const { signedURL, error } = await supabase.storage
 			.from('departments')
-			.createSignedUrl(`${department_name}/topics/${topic_id}/${file_name}-${idea_title}-${username}`, 999999999999); // Expired time of signed URL of avatar
+			.createSignedUrl(`${department_name}/topics/${topic_id}/${idea_title}_${file_name}_${username}`, 999999999999); // Expired time of signed URL of avatar
 		if (signedURL) {
 			const url = signedURL;
 			return url;
@@ -90,6 +90,35 @@ export const createNewIdea = async (ideaForm: IIdeaData['idea']) => {
 		insertNewTopic(),
 		`Creating new idea with title ${ideaForm.idea_title}.`,
 		`Idea ${ideaForm.idea_title} has been created.`
+	);
+	return data as IIdeaData['idea'];
+};
+
+export const updateIdea = async (ideaForm: IIdeaData['idea']) => {
+	let data: any;
+	const updateIdeaData = async () => {
+		if (ideaForm?.comments && ideaForm?.reaction) {
+			delete ideaForm?.comments;
+			delete ideaForm.reaction;
+		}
+
+		const { data: updateIdeaData, error } = await supabase
+			.from('ideas')
+			.update(ideaForm)
+			.match({ idea_id: ideaForm.idea_id });
+		if (updateIdeaData) {
+			data = updateIdeaData[0] as IIdeaData['idea'];
+		}
+
+		if (error) {
+			throw error;
+		}
+	};
+
+	await notifyToast(
+		updateIdeaData(),
+		`Updating idea ${ideaForm.idea_title}.`,
+		`Idea ${ideaForm.idea_title} has been updated.`
 	);
 	return data as IIdeaData['idea'];
 };
