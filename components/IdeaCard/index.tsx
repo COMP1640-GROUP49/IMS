@@ -11,7 +11,8 @@ import { Button } from 'components/Button';
 import { EditIdeaModal } from 'components/Form/form';
 import { Icon } from 'components/Icon';
 import Modal from 'components/Modal';
-import { getCategoryById, getCategoryByName } from 'pages/api/category';
+import { getCategoryById } from 'pages/api/category';
+import { deleteIdea } from 'pages/api/idea';
 import { getTopicIdByCategoryId } from 'pages/api/topic';
 import { getAccountByAccountId } from 'pages/api/user';
 import { IIdeaData, IReactionData } from 'lib/interfaces';
@@ -37,7 +38,7 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 
 	const [showDeleteIdeaModal, setShowDeleteIdeaModal] = useState(false);
 	const handleShowDeleteIdeaModal = useCallback(() => {
-		setShowConfirmIdeaModal(false);
+		// setShowConfirmIdeaModal(false);
 		setShowDeleteIdeaModal(!showDeleteIdeaModal);
 	}, [showDeleteIdeaModal]);
 
@@ -45,24 +46,18 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 		setShowDeleteIdeaModal(false);
 	}, []);
 
-	const [showConfirmIdeaModal, setShowConfirmIdeaModal] = useState(false);
-	const handleConfirmModal = useCallback(() => {
-		setShowConfirmIdeaModal(!showConfirmIdeaModal);
-	}, [showConfirmIdeaModal]);
+	// const [showConfirmIdeaModal, setShowConfirmIdeaModal] = useState(false);
+	// const handleConfirmModal = useCallback(() => {
+	// 	setShowConfirmIdeaModal(!showConfirmIdeaModal);
+	// }, [showConfirmIdeaModal]);
 
-	const handleCloseConfirmModal = useCallback(() => {
-		setShowConfirmIdeaModal(false);
-		setShowDeleteIdeaModal(false);
-	}, []);
+	// const handleCloseConfirmModal = useCallback(() => {
+	// 	setShowConfirmIdeaModal(false);
+	// 	setShowDeleteIdeaModal(false);
+	// }, []);
 	const handleDeleteIdeaModal = async () => {
-		// if ((category.ideas as unknown as []).length === 0) {
-		// 	if (category.ideas?.length !== 0) {
-		// 		handleConfirmModal();
-		// 	} else {
-		// 		await deleteCategory(category_id, category_name);
-		// 		router.reload();
-		// 	}
-		// } else handleConfirmModal();
+		await deleteIdea(idea.idea_id, idea.idea_title);
+		router.reload();
 	};
 
 	useEffect(() => {
@@ -221,7 +216,7 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 											<Button onClick={handleDeleteIdeaModal} className="btn-danger w-full">
 												Delete it
 											</Button>
-											{showConfirmIdeaModal && (
+											{/* showConfirmIdeaModal && (
 												<Modal onCancel={handleCloseConfirmModal}>
 													<div className="flex flex-col gap-6 justify-center">
 														<p>
@@ -229,14 +224,13 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 															before deleting it!
 														</p>
 														<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
-															{/*TODO: Edit delete button box-shadow*/}
 															<Button onClick={handleCloseConfirmModal} className="btn-success w-full">
 																Ok, got it!{' '}
 															</Button>
 														</div>
 													</div>
 												</Modal>
-											)}
+											) */}
 											<Button onClick={handleCloseDeleteModal} className="btn-secondary  w-full">
 												Cancel
 											</Button>

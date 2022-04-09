@@ -123,5 +123,4 @@ export const getDepartmentFromTopicId = async (topic_id: string) => {
 
 	const { department_name, error } = await getDepartmentNameById(department_id as string);
 	return { department_name };
-	// console.log('🚀 ~ file: department.ts ~ line 125 ~ getDepartmentFromTopicId ~ department_name', department_name);
 };
