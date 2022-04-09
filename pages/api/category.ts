@@ -76,7 +76,6 @@ export const getCategoryByName = async (categoryName: string) => {
 };
 
 export const getCategoryById = async (categoryId: string) => {
-	console.log('🚀 ~ file: category.ts ~ line 79 ~ getCategoryById ~ categoryId', categoryId);
 	const { data, error } = await supabase.from('categories').select().match({ category_id: categoryId });
 	if (data && (data as []).length !== 0) {
 		categoryData = data[0] as ICategoryData;

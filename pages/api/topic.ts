@@ -85,3 +85,12 @@ export const getTopicByName = async (topicName: string) => {
 	}
 	return { topicData, error };
 };
+
+let topicId: string;
+export const getTopicIdByCategoryId = async (category_id: string) => {
+	const { data, error } = await supabase.from('categories').select('topic_id').match({ category_id: category_id });
+	if (data && (data as []).length !== 0) {
+		topicId = (data[0] as ITopicData['topic']).topic_id;
+	}
+	return { topicId, error };
+};
