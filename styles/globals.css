@@ -539,6 +539,10 @@
 		@apply flex bg-white absolute top-[32px] right-0 shadow-1 rounded-lg z-30;
 	}
 
+	.menu-content button {
+		@apply self-stretch text-left;
+	}
+
 	.btn-menu {
 		@apply rounded-lg p-4 font-normal h-auto whitespace-nowrap;
 	}
@@ -727,6 +731,14 @@
 		@apply h-12;
 	}
 
+	.btn-reaction__enabled {
+		@apply bg-black text-white;
+	}
+
+	.btn-reaction__enabled svg {
+		@apply stroke-white;
+	}
+
 	.comment-content {
 		@apply relative flex flex-col;
 	}
@@ -759,6 +771,13 @@
 		@apply mb-6;
 	}
 
+	.comment-reply-card .comment-reply-input {
+		@apply mt-6;
+	}
+	.comment-reply-card .avatar {
+		@apply z-10;
+	}
+
 	.comment-editor .ql-toolbar.ql-snow,
 	.comment-input .ql-toolbar.ql-snow,
 	.comment-reply-input .ql-toolbar.ql-snow {
@@ -771,6 +790,10 @@
 
 	.comment-editor {
 		@apply ml-[calc(48px+8px)] mt-4 mb-4;
+	}
+
+	.absolute-btn-download {
+		@apply absolute top-0 left-0 right-0 bottom-0;
 	}
 }
 

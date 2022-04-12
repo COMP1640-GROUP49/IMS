@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { ClipLoader } from 'react-spinners';
 import { Avatar } from 'components/Avatar';
 import { Button } from 'components/Button';
@@ -10,9 +10,13 @@ import { ReplyCommentEditor } from 'components/ReplyCommentEditor';
 import RichTextEditor from 'components/RichTextEditor';
 import { IUserData } from 'pages/api/auth';
 import { deleteComment, getAllCommentsByIdeaId, getReplyComments, updateComment } from 'pages/api/comment';
+import {
+	addCommentReactionToComment,
+	getCommentReactionStateOfUserInComment,
+	removeCommentReactionFromComment,
+} from 'pages/api/comment_reaction';
 import { getAccountByAccountId } from 'pages/api/user';
 import { IAccountData, ICommentData, ICommentReactionData, ICommentsProps } from 'lib/interfaces';
-
 
 type ReplyCommentCardProps = {
 	comment: ICommentData['comment'];
@@ -28,6 +32,7 @@ export const ReplyCommentCard = ({ comment, loadCommentData, currentUser }: Repl
 	const [hasDataChanged, setHasDataChanged] = useState(false);
 	const [showMoreMenu, setShowMoreMenu] = useState(false);
 	const [showReplyEditor, setShowReplyEditor] = useState(false);
+	const [commentReactionState, setCommentReactionState] = useState<ICommentReactionData['comment_reaction']>();
 
 	const handleCloseMoreMenu = () => {
 		setShowMoreMenu(false);
@@ -56,22 +61,27 @@ export const ReplyCommentCard = ({ comment, loadCommentData, currentUser }: Repl
 		setShowReplyEditor(false);
 	};
 
+	const handleLikeComment = async () => {
+		if (commentReactionState?.comment_reaction_type === 'like') {
+			const { newCommentReactionState } = await removeCommentReactionFromComment(
+				comment.comment_id,
+				currentUser.id,
+				'like'
+			);
+			setCommentReactionState(newCommentReactionState);
+		} else {
+			const { newCommentReactionState } = await addCommentReactionToComment(comment.comment_id, currentUser.id, 'like');
+			setCommentReactionState(newCommentReactionState);
+		}
+		const data = await getAllCommentsByIdeaId(comment.idea_id, 'comment_created', false);
+		loadCommentData(data as unknown as ICommentsProps);
+	};
+
 	const handleDeleteComment = async () => {
 		await deleteComment(comment.comment_id);
 		const data = await getAllCommentsByIdeaId(comment.idea_id, 'comment_created', false);
 		loadCommentData(data as unknown as ICommentsProps);
 	};
-
-	useEffect(() => {
-		const getReplyCommentData = async () => {
-			const { replyCommentsList } = await getReplyComments(comment?.comment_id);
-
-			replyCommentsList ? setReplyCommentsList(replyCommentsList) : setReplyCommentsList(null!);
-		};
-
-		void getReplyCommentData();
-		commentContent !== comment.comment_content ? setHasDataChanged(true) : setHasDataChanged(false);
-	}, [comment, commentContent]);
 
 	const [user, setUser] = useState<IAccountData['account']>();
 	const [avatarUrl, setAvatarUrl] = useState('');
@@ -81,10 +91,23 @@ export const ReplyCommentCard = ({ comment, loadCommentData, currentUser }: Repl
 			const { userData } = await getAccountByAccountId(comment.account_id);
 			setAvatarUrl(userData?.avatar_url as string);
 			setUser(userData);
+
+			const { commentReactionState } = await getCommentReactionStateOfUserInComment(currentUser.id, comment.comment_id);
+			setCommentReactionState(commentReactionState);
 		};
 
 		void getAdditionalData();
-	}, [comment]);
+
+		const getReplyCommentData = async () => {
+			const { replyCommentsList } = await getReplyComments(comment?.comment_id);
+
+			replyCommentsList ? setReplyCommentsList(replyCommentsList) : setReplyCommentsList(null!);
+		};
+
+		void getReplyCommentData();
+
+		commentContent !== comment.comment_content ? setHasDataChanged(true) : setHasDataChanged(false);
+	}, [comment, currentUser, commentContent, hasDataChanged]);
 	return (
 		<>
 			{avatarUrl && user ? (
@@ -155,13 +178,20 @@ export const ReplyCommentCard = ({ comment, loadCommentData, currentUser }: Repl
 							</div>
 						) : (
 							<div className={`${replyCommentsList ? '' : 'mb-6'} comment-reaction`}>
-								<Button type="button" icon={true} className={`btn-secondary btn-reaction`}>
+								<Button
+									type="button"
+									onClick={handleLikeComment}
+									icon
+									className={`${
+										commentReactionState?.comment_reaction_type === 'like' ? 'btn-reaction__enabled' : ''
+									}  btn-secondary btn-reaction`}
+								>
 									<Icon name="ThumbsUp" size="16" />
 									<p>
 										{
 											(comment.comments_reaction as unknown as []).filter(
 												(comment_reaction: ICommentReactionData['comment_reaction']) =>
-													comment_reaction.comment_reaction_created === 'like'
+													comment_reaction.comment_reaction_type === 'like'
 											).length
 										}
 									</p>
@@ -189,7 +219,7 @@ export const ReplyCommentCard = ({ comment, loadCommentData, currentUser }: Repl
 									{showReply ? `Hide replies` : `Show replies`}
 								</Button>
 								{(replyCommentsList as unknown as []).map((comment: ICommentData['comment']) => (
-									<>
+									<div key={comment.comment_id}>
 										{showReply && (
 											<ReplyCommentCard
 												currentUser={currentUser}
@@ -198,12 +228,13 @@ export const ReplyCommentCard = ({ comment, loadCommentData, currentUser }: Repl
 												comment={comment}
 											/>
 										)}
-									</>
+									</div>
 								))}
 							</>
 						)}
 						{showReplyEditor && (
 							<ReplyCommentEditor
+								setShowReply={setShowReply}
 								handleCloseReplyEditor={handleCloseReplyEditor}
 								loadCommentData={loadCommentData}
 								parent_comment={comment}

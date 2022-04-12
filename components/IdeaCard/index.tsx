@@ -12,7 +12,7 @@ import { EditIdeaModal } from 'components/Form/form';
 import { Icon } from 'components/Icon';
 import Modal from 'components/Modal';
 import { getCategoryById } from 'pages/api/category';
-import { getDepartmentIdByName, getDepartmentNameFromTopicId } from 'pages/api/department';
+import { getDepartmentNameFromTopicId } from 'pages/api/department';
 import { deleteIdea } from 'pages/api/idea';
 import { getTopicIdByCategoryId } from 'pages/api/topic';
 import { getAccountByAccountId } from 'pages/api/user';

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import Attachment from 'components/Attachment';
@@ -8,7 +9,8 @@ import { CommentList } from 'components/CommentList';
 import { Icon } from 'components/Icon';
 import { UserContext } from 'components/PrivateRoute';
 import RichTextEditor from 'components/RichTextEditor';
-import { increaseViewCountBy1 } from 'pages/api/idea';
+import { getIdeaById, increaseViewCountBy1 } from 'pages/api/idea';
+import { addReactionToIdea, getReactionStateOfUserInIdea, removeReactionFromIdea } from 'pages/api/reaction';
 import { getAccountByAccountId } from 'pages/api/user';
 import { IAccountData, ICommentsProps, IIdeaData, IReactionData } from 'lib/interfaces';
 
@@ -16,6 +18,7 @@ const IdeaDetail = ({ idea: ideaData }: IIdeaData) => {
 	const [idea, setIdea] = useState<IIdeaData['idea']>(ideaData);
 	const [avatarUrl, setAvatarUrl] = useState('');
 	const [user, setUser] = useState<IAccountData['account']>();
+	const [reactionState, setReactionState] = useState<IReactionData['reaction']>();
 	const currentUser = useContext(UserContext);
 
 	const loadCommentData = (comments: ICommentsProps) => {
@@ -25,16 +28,48 @@ const IdeaDetail = ({ idea: ideaData }: IIdeaData) => {
 		});
 	};
 
+	const reloadIdeaData = async () => {
+		const { ideaData } = await getIdeaById(idea.idea_id, 'comment_created', false);
+		setIdea(ideaData as unknown as IIdeaData['idea']);
+	};
+
+	const handleLikeIdea = async () => {
+		if (reactionState?.reaction_type === 'like') {
+			const { newReactionState } = await removeReactionFromIdea(idea.idea_id, currentUser.id, 'like');
+			setReactionState(newReactionState);
+		} else {
+			const { newReactionState: removeDislike } = await removeReactionFromIdea(idea.idea_id, currentUser.id, 'dislike');
+			const { newReactionState } = await addReactionToIdea(idea.idea_id, currentUser.id, 'like');
+			setReactionState(newReactionState);
+		}
+		void reloadIdeaData();
+	};
+
+	const handleDislikeIdea = async () => {
+		if (reactionState?.reaction_type === 'dislike') {
+			const { newReactionState } = await removeReactionFromIdea(idea.idea_id, currentUser.id, 'dislike');
+			setReactionState(newReactionState);
+		} else {
+			const { newReactionState: removeLike } = await removeReactionFromIdea(idea.idea_id, currentUser.id, 'like');
+			const { newReactionState } = await addReactionToIdea(idea.idea_id, currentUser.id, 'dislike');
+			setReactionState(newReactionState);
+		}
+		void reloadIdeaData();
+	};
+
 	useEffect(() => {
 		void increaseViewCountBy1(idea.idea_id, idea.idea_view);
 		const getAdditionalInfo = async () => {
 			const { userData } = await getAccountByAccountId(idea.account_id);
 			setAvatarUrl(userData?.avatar_url as string);
 			setUser(userData);
+
+			const { reactionState } = await getReactionStateOfUserInIdea(currentUser.id, idea.idea_id);
+			setReactionState(reactionState);
 		};
 
 		void getAdditionalInfo();
-	}, [idea]);
+	}, [idea, currentUser]);
 	return (
 		<>
 			<div className="flex flex-col gap-6 justify-between">
@@ -74,7 +109,13 @@ const IdeaDetail = ({ idea: ideaData }: IIdeaData) => {
 				)}
 
 				<div className="flex flex-row gap-2">
-					<Button icon className={`btn-secondary btn-reaction`}>
+					<Button
+						onClick={handleLikeIdea}
+						icon
+						className={`${
+							reactionState?.reaction_type === 'like' ? 'btn-reaction__enabled' : ''
+						}  btn-secondary btn-reaction`}
+					>
 						<Icon name="ThumbsUp" size="16" />
 						<p>
 							{
@@ -84,7 +125,13 @@ const IdeaDetail = ({ idea: ideaData }: IIdeaData) => {
 							}
 						</p>
 					</Button>
-					<Button icon className={`btn-secondary btn-reaction`}>
+					<Button
+						onClick={handleDislikeIdea}
+						icon
+						className={`${
+							reactionState?.reaction_type === 'dislike' ? 'btn-reaction__enabled' : ''
+						}  btn-secondary btn-reaction`}
+					>
 						<Icon name="ThumbsDown" size="16" />
 						<p>
 							{

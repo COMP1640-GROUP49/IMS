@@ -111,7 +111,7 @@ export const CommentInput = ({ idea, user, loadCommentData }: CommentInputProps)
 									placeholder={`What are your thoughts?`}
 								/>
 							</div>
-							<div className="flex gap-4 sm:flex-col md:justify-between">
+							<div className="flex gap-4 sm:flex-col md:justify-between lg:justify-between">
 								<Checkbox
 									onChange={handleChange}
 									name="anonymous_posting"

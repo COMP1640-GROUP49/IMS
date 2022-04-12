@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import moment from 'moment';
-import { FormEvent, useEffect, useState } from 'react';
+import { Dispatch, FormEvent, SetStateAction, useEffect, useState } from 'react';
 import { Button } from 'components/Button';
 import { Checkbox } from 'components/Checkbox';
 import { Icon } from 'components/Icon';
@@ -16,6 +16,7 @@ type ReplyCommentProps = {
 	loadCommentData: (comments: ICommentsProps) => void;
 	handleCloseReplyEditor: () => void;
 	initialValue?: string;
+	setShowReply: Dispatch<SetStateAction<boolean>>;
 };
 
 export const ReplyCommentEditor = ({
@@ -24,6 +25,7 @@ export const ReplyCommentEditor = ({
 	loadCommentData,
 	handleCloseReplyEditor,
 	initialValue,
+	setShowReply,
 }: ReplyCommentProps) => {
 	interface IFormValidation {
 		commentValidation: string;
@@ -109,6 +111,7 @@ export const ReplyCommentEditor = ({
 					true
 				);
 				loadCommentData(data);
+				setShowReply(true);
 				// Reset comment input
 			} catch (error) {
 				throw error;
@@ -134,28 +137,26 @@ export const ReplyCommentEditor = ({
 							placeholder={`What are your thoughts?`}
 						/>
 					</div>
-					<div className="flex gap-4 sm:flex-col md:justify-between">
-						<div className="flex flex-row justify-between">
-							<Checkbox
-								onChange={handleChange}
-								name="anonymous_posting"
-								className="anonymous-posting self-start sm:self-stretch h-[48px]"
-							>
-								<label htmlFor="anonymous_posting">
-									Post as <span className="font-semi-bold">anonymous</span>
-								</label>
-							</Checkbox>
-							{/* TODO: Upload attachment for comment (future version) */}
-							{/* <AttachmentUploader fileUpdate={fileUpdate} /> */}
-							<Button
-								disabled={!isFormValidated}
-								icon={true}
-								className={`${isFormValidated ? `btn-primary` : 'btn-disabled'} sm:h-[48px]`}
-							>
-								<Icon name="Send" size="16" />
-								Post
-							</Button>
-						</div>
+					<div className="flex flex-row justify-between">
+						<Checkbox
+							onChange={handleChange}
+							name="anonymous_posting"
+							className="anonymous-posting self-start sm:self-stretch h-[48px]"
+						>
+							<label htmlFor="anonymous_posting">
+								Post as <span className="font-semi-bold">anonymous</span>
+							</label>
+						</Checkbox>
+						{/* TODO: Upload attachment for comment (future version) */}
+						{/* <AttachmentUploader fileUpdate={fileUpdate} /> */}
+						<Button
+							disabled={!isFormValidated}
+							icon={true}
+							className={`${isFormValidated ? `btn-primary` : 'btn-disabled'} h-[48px]`}
+						>
+							<Icon name="Send" size="16" />
+							Post
+						</Button>
 					</div>
 				</div>
 			</form>

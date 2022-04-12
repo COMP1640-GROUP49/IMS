@@ -25,7 +25,7 @@ import {
 	uploadAvatar,
 } from 'pages/api/admin';
 import { IUserData } from 'pages/api/auth';
-import { createNewCategory, getCategoryListByTopicId, updateCategory } from 'pages/api/category';
+import { createNewCategory, getCategoryById, getCategoryListByTopicId, updateCategory } from 'pages/api/category';
 import {
 	createDepartment,
 	getDepartmentNameFromTopicId,
@@ -33,7 +33,7 @@ import {
 	updateDepartment,
 } from 'pages/api/department';
 import { createNewIdea, removeIdeaAttachment, updateIdea, uploadAttachment } from 'pages/api/idea';
-import { createNewTopic, getTopicIdByCategoryId, updateTopic } from 'pages/api/topic';
+import { createNewTopic, getTopicById, getTopicIdByCategoryId, updateTopic } from 'pages/api/topic';
 import { updateProfile } from 'pages/api/user';
 import {
 	ITopicData,
@@ -2032,7 +2032,28 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 		} else {
 			try {
 				await updateIdea(formData);
-				router.reload();
+				const { data } = await getTopicById(topicId);
+				const topicName = (data as unknown as ITopicData['topic']).topic_name;
+				const { categoryData } = await getCategoryById(formData.category_id);
+				const categoryName = (categoryData as unknown as ICategoryData['category']).category_name;
+
+				// await router.replace(
+				// 	`admin/departments/${
+				// 		departmentName.includes('Departments')
+				// 			? `${asPath}/${departmentName.replace(` Departments`, ``).toLowerCase()}`
+				// 			: departmentName.includes('departments')
+				// 			? `${asPath}/${departmentName.replace(` departments`, ``).toLowerCase()}`
+				// 			: departmentName.includes('Department')
+				// 			? `${asPath}/${departmentName.replace(` Department`, ``).toLowerCase()}`
+				// 			: departmentName.includes('department')
+				// 			? `${asPath}/${departmentName.replace(` department`, ``).toLowerCase()}`
+				// 			: `${asPath}/${departmentName.trim().toLowerCase()}`
+				// 	}/${topicName.toLowerCase().replace(/ /g, `-`)}/${categoryName.toLowerCase().replace(/ /g, `-`)}/${
+				// 		(ideaData as IIdeaData['idea']).idea_id
+				// 	}`
+				// );
+
+				router.back();
 			} catch (error) {
 				throw error;
 			}

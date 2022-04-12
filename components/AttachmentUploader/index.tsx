@@ -13,6 +13,7 @@ type AttachmentUploaderProps = {
 	};
 
 	className?: string;
+	duplicate?: boolean;
 };
 
 const AttachmentUploader = ({
@@ -47,7 +48,6 @@ const AttachmentUploader = ({
 					const data = await getFileSizeFromUrl(loadAttachment, moreOptions);
 					setFileSize(data as number);
 				};
-
 				void getFileSize();
 
 				const fileInfoElementHtml = `
@@ -71,7 +71,9 @@ const AttachmentUploader = ({
 					removeFileButtonElement.innerHTML = removeFileButtonHtml;
 					removeFileButtonElement.classList.add('btn__remove-file');
 
-					const fileInfoEl = document.getElementsByClassName('file-info')[0] as HTMLElement;
+					const fileInfoEl = document.getElementsByClassName(
+						'idea-content__disabled-editor file-info'
+					)[0] as HTMLElement;
 					const btnRemoveFileEl = document.getElementsByClassName('btn__remove-file')[0] as HTMLElement;
 					if (!fileInfoEl && !btnRemoveFileEl && fileSize > 0) {
 						removeFileButtonElement.onclick = (event: any) => {

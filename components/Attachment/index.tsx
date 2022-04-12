@@ -62,6 +62,13 @@ const Attachment = ({ value, idea_title, account_id, moreOptions }: AttachmentPr
 		}
 	}, 1);
 
+	const handleDownloadFile = () => {
+		console.log('here');
+		if (typeof window !== 'undefined') {
+			window.open(value, '_blank');
+		}
+	};
+
 	return (
 		<div className={`relative attachment-wrapper`}>
 			<input
@@ -72,6 +79,7 @@ const Attachment = ({ value, idea_title, account_id, moreOptions }: AttachmentPr
 				accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint,
                 text/plain, application/pdf"
 			/>
+			<button className="absolute-btn-download" onClick={handleDownloadFile} />
 		</div>
 	);
 };

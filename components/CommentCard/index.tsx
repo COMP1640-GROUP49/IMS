@@ -11,6 +11,11 @@ import { ReplyCommentCard } from 'components/ReplyCommentCard';
 import { ReplyCommentEditor } from 'components/ReplyCommentEditor';
 import RichTextEditor from 'components/RichTextEditor';
 import { deleteComment, getAllCommentsByIdeaId, getReplyComments, updateComment } from 'pages/api/comment';
+import {
+	addCommentReactionToComment,
+	getCommentReactionStateOfUserInComment,
+	removeCommentReactionFromComment,
+} from 'pages/api/comment_reaction';
 import { getAccountByAccountId } from 'pages/api/user';
 import { IAccountData, ICommentData, ICommentReactionData, ICommentsProps } from 'lib/interfaces';
 
@@ -24,17 +29,8 @@ export const CommentCard = ({ comment, loadCommentData }: CommentCardProps) => {
 	const [avatarUrl, setAvatarUrl] = useState('');
 	const currentUser = useContext(UserContext);
 	const [commentContent, setCommentContent] = useState(comment.comment_content);
+	const [commentReactionState, setCommentReactionState] = useState<ICommentReactionData['comment_reaction']>();
 	const [showReplyEditor, setShowReplyEditor] = useState(false);
-
-	useEffect(() => {
-		const getAdditionalData = async () => {
-			const { userData } = await getAccountByAccountId(comment.account_id);
-			setAvatarUrl(userData?.avatar_url as string);
-			setUser(userData);
-		};
-
-		void getAdditionalData();
-	}, [comment]);
 
 	const [showMoreMenu, setShowMoreMenu] = useState(false);
 	const [replyCommentsList, setReplyCommentsList] = useState<ICommentsProps>();
@@ -77,10 +73,36 @@ export const CommentCard = ({ comment, loadCommentData }: CommentCardProps) => {
 		loadCommentData(data as unknown as ICommentsProps);
 	};
 
+	const handleLikeComment = async () => {
+		if (commentReactionState?.comment_reaction_type === 'like') {
+			const { newCommentReactionState } = await removeCommentReactionFromComment(
+				comment.comment_id,
+				currentUser.id,
+				'like'
+			);
+			setCommentReactionState(newCommentReactionState);
+		} else {
+			const { newCommentReactionState } = await addCommentReactionToComment(comment.comment_id, currentUser.id, 'like');
+			setCommentReactionState(newCommentReactionState);
+		}
+		const data = await getAllCommentsByIdeaId(comment.idea_id, 'comment_created', false);
+		loadCommentData(data as unknown as ICommentsProps);
+	};
+
 	useEffect(() => {
+		const getAdditionalData = async () => {
+			const { userData } = await getAccountByAccountId(comment.account_id);
+			setAvatarUrl(userData?.avatar_url as string);
+			setUser(userData);
+
+			const { commentReactionState } = await getCommentReactionStateOfUserInComment(currentUser.id, comment.comment_id);
+			setCommentReactionState(commentReactionState);
+		};
+
+		void getAdditionalData();
+
 		const getReplyCommentData = async () => {
 			const { replyCommentsList } = await getReplyComments(comment?.comment_id);
-			console.log('🚀 ~ file: index.tsx ~ line 83 ~ getReplyCommentData ~ replyCommentsList', replyCommentsList);
 
 			replyCommentsList ? setReplyCommentsList(replyCommentsList) : setReplyCommentsList(null!);
 		};
@@ -88,7 +110,7 @@ export const CommentCard = ({ comment, loadCommentData }: CommentCardProps) => {
 		void getReplyCommentData();
 
 		commentContent !== comment.comment_content ? setHasDataChanged(true) : setHasDataChanged(false);
-	}, [comment, commentContent, hasDataChanged]);
+	}, [comment, currentUser, commentContent, hasDataChanged]);
 
 	return (
 		<>
@@ -165,13 +187,20 @@ export const CommentCard = ({ comment, loadCommentData }: CommentCardProps) => {
 								</div>
 							) : (
 								<div className={`${replyCommentsList ? '' : 'mb-6'} comment-reaction`}>
-									<Button type="button" icon={true} className={`btn-secondary btn-reaction`}>
+									<Button
+										type="button"
+										onClick={handleLikeComment}
+										icon
+										className={`${
+											commentReactionState?.comment_reaction_type === 'like' ? 'btn-reaction__enabled' : ''
+										}  btn-secondary btn-reaction`}
+									>
 										<Icon name="ThumbsUp" size="16" />
 										<p>
 											{
 												(comment.comments_reaction as unknown as []).filter(
 													(comment_reaction: ICommentReactionData['comment_reaction']) =>
-														comment_reaction.comment_reaction_created === 'like'
+														comment_reaction.comment_reaction_type === 'like'
 												).length
 											}
 										</p>
@@ -197,7 +226,6 @@ export const CommentCard = ({ comment, loadCommentData }: CommentCardProps) => {
 											className={`${showReply ? '' : 'mb-6'} btn__show-reply`}
 											onClick={() => {
 												setShowReply(!showReply);
-												console.log('🚀 ~ file: index.tsx ~ line 200 ~ CommentCard ~ comment', comment);
 											}}
 										>
 											{showReply ? `Hide replies` : `Show replies`}
@@ -205,7 +233,7 @@ export const CommentCard = ({ comment, loadCommentData }: CommentCardProps) => {
 									)}
 
 									{(replyCommentsList as unknown as []).map((comment: ICommentData['comment']) => (
-										<>
+										<div className="reply-comment-card" key={comment.comment_id}>
 											{(replyCommentsList as unknown as []).length > 0 && (
 												<>
 													{showReply && (
@@ -218,12 +246,13 @@ export const CommentCard = ({ comment, loadCommentData }: CommentCardProps) => {
 													)}
 												</>
 											)}
-										</>
+										</div>
 									))}
 								</>
 							)}
 							{showReplyEditor && (
 								<ReplyCommentEditor
+									setShowReply={setShowReply}
 									handleCloseReplyEditor={handleCloseReplyEditor}
 									loadCommentData={loadCommentData}
 									parent_comment={comment}
