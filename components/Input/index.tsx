@@ -6,12 +6,17 @@ type InputProps = {
 	name?: string;
 	onChange: React.ChangeEventHandler<HTMLInputElement>;
 	pattern?: string;
+	autocomplete?: string;
 };
 
-export const Input = ({ type, required, placeholder, value, name, onChange, pattern }: InputProps) => {
+export const Input = ({ type, required, placeholder, value, name, onChange, pattern, autocomplete }: InputProps) => {
 	return (
 		<input
 			value={value}
+			/**
+			 * https://www.chromium.org/developers/design-documents/create-amazing-password-forms/
+			 */
+			autoComplete={autocomplete}
 			name={name}
 			onChange={onChange}
 			required={required}

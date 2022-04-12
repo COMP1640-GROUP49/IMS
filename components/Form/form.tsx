@@ -26,7 +26,12 @@ import {
 } from 'pages/api/admin';
 import { IUserData } from 'pages/api/auth';
 import { createNewCategory, getCategoryListByTopicId, updateCategory } from 'pages/api/category';
-import { createDepartment, getDepartmentFromTopicId, getDepartmentList, updateDepartment } from 'pages/api/department';
+import {
+	createDepartment,
+	getDepartmentNameFromTopicId,
+	getDepartmentList,
+	updateDepartment,
+} from 'pages/api/department';
 import { createNewIdea, removeIdeaAttachment, updateIdea, uploadAttachment } from 'pages/api/idea';
 import { createNewTopic, getTopicIdByCategoryId, updateTopic } from 'pages/api/topic';
 import { updateProfile } from 'pages/api/user';
@@ -1644,7 +1649,7 @@ export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 			...(formData as IIdeaData['idea']),
 			[event.target.name]: event.target.value,
 			account_id: account_id as string,
-			anonymous_posting: false,
+			anonymous_posting: formData?.anonymous_posting || false,
 		});
 		if (event.target.name === 'idea_title') {
 			if (event.target.value.trim() !== '') {
@@ -1689,10 +1694,10 @@ export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 	const fileUpload = async () => {
 		if (attachment && formData?.idea_title) {
 			try {
-				const { department_name } = await getDepartmentFromTopicId(topic_id as string);
+				const { department_name } = await getDepartmentNameFromTopicId(topic_id as string);
 				const attachmentUrl = await uploadAttachment(
 					attachment,
-					department_name as string,
+					department_name,
 					topic_id as string,
 					formData.idea_title,
 					formData.account_id,
@@ -1827,9 +1832,7 @@ export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 								<Button
 									disabled={!isFormValidated}
 									icon={true}
-									className={`${
-										isFormValidated ? `btn-primary` : `btn-disabled`
-									}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+									className={`${isFormValidated ? `btn-primary` : `btn-disabled`}  self-start sm:self-stretch`}
 								>
 									<Icon name="FilePlus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
 									Submit idea
@@ -1924,12 +1927,20 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 		}
 	};
 
-	const fileUpdate = (data: File) => {
+	const fileUpdate = (data: File, remove?: boolean) => {
 		if (!data) {
-			setFormData({
-				...formData,
-				idea_updated: moment().format(),
-			});
+			if (remove) {
+				setFormData({
+					...formData,
+					idea_file_url: '',
+					idea_updated: moment().format(),
+				});
+			} else {
+				setFormData({
+					...formData,
+					idea_updated: moment().format(),
+				});
+			}
 		} else {
 			setAttachment(data);
 			setFormData({
@@ -1943,10 +1954,10 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 	const fileUpload = async () => {
 		if (attachment && formData?.idea_title) {
 			try {
-				const { department_name } = await getDepartmentFromTopicId(topic_id as string);
+				const { department_name } = await getDepartmentNameFromTopicId(topic_id as string);
 				const attachmentUrl = await uploadAttachment(
 					attachment,
-					department_name as string,
+					department_name,
 					topic_id as string,
 					formData.idea_title,
 					formData.account_id,
@@ -1963,14 +1974,15 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 				throw new Error('Attachment upload error!');
 			}
 		} else {
-			formData.idea_file_url = '';
-			const { department_name } = await getDepartmentFromTopicId(topic_id as string);
-			await removeIdeaAttachment(
-				(ideaData as IIdeaData['idea']).idea_title,
-				department_name as string,
-				topic_id as string,
-				formData.account_id
-			);
+			if (!formData.idea_file_url) {
+				const { department_name } = await getDepartmentNameFromTopicId(topic_id as string);
+				await removeIdeaAttachment(
+					(ideaData as IIdeaData['idea']).idea_title,
+					department_name,
+					topic_id as string,
+					formData.account_id
+				);
+			}
 		}
 	};
 
@@ -1985,8 +1997,8 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 			const { topicId } = await getTopicIdByCategoryId((ideaData as IIdeaData['idea']).category_id);
 			topicId && setTopicId(topicId);
 
-			const { department_name } = await getDepartmentFromTopicId(topicId);
-			department_name && setDepartmentName(department_name as string);
+			const { department_name } = await getDepartmentNameFromTopicId(topicId);
+			department_name && setDepartmentName(department_name);
 		};
 		void getDepartmentNameAndTopicId();
 
@@ -2106,7 +2118,7 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 									icon={true}
 									className={`${
 										isFormValidated && hasFormDataChanged ? `btn-primary` : `btn-disabled`
-									}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+									}  self-start sm:self-stretch`}
 								>
 									<Icon name="Save" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
 									Save changes

@@ -47,10 +47,10 @@ const Home: NextPage<IDepartmentsProps> = ({ data: departments }) => {
 			const { data } = await getTopicsListByDepartmentId(user?.user_metadata?.department as string);
 			setTopics(data as unknown as ITopicsProps);
 			const { department_name: name } = await getDepartmentNameById(user?.user_metadata?.department as string);
-			setDepartmentName(name as string);
+			setDepartmentName(name);
 		};
 
-		user && void loadTopics();
+		user && user.user_metadata.role !== 0 && user.user_metadata.role !== 1 && void loadTopics();
 
 		const endOffset = itemOffset + limit;
 		setCurrentItems(departments.slice(itemOffset, endOffset));

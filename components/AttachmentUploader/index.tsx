@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { formatBytes } from 'utils/formatBytes';
 import { getFileSizeFromUrl } from 'utils/getFileSizeFromUrl';
 
 type AttachmentUploaderProps = {
-	fileUpdate: (data: File) => void;
+	fileUpdate?: (data: File, remove?: boolean) => void;
 	value?: string;
 	idea_title?: string;
 	account_id?: string;
@@ -11,9 +11,18 @@ type AttachmentUploaderProps = {
 		department_name: string;
 		topic_id: string;
 	};
+
+	className?: string;
 };
 
-const AttachmentUploader = ({ fileUpdate, value, idea_title, account_id, moreOptions }: AttachmentUploaderProps) => {
+const AttachmentUploader = ({
+	fileUpdate,
+	value,
+	idea_title,
+	account_id,
+	moreOptions,
+	className,
+}: AttachmentUploaderProps) => {
 	const [uploadTimes, setUploadTimes] = useState(0);
 	const [loadAttachment, setLoadAttachment] = useState(value);
 	const [fileSize, setFileSize] = useState(0);
@@ -80,7 +89,7 @@ const AttachmentUploader = ({ fileUpdate, value, idea_title, account_id, moreOpt
 									'important'
 								);
 							}
-							fileUpdate(undefined!);
+							fileUpdate && fileUpdate(undefined!, true);
 						};
 						attachmentUploaderEl.parentNode?.appendChild(fileInfoElement);
 						attachmentUploaderEl.parentNode?.appendChild(removeFileButtonElement);
@@ -171,7 +180,7 @@ const AttachmentUploader = ({ fileUpdate, value, idea_title, account_id, moreOpt
 						'important'
 					);
 
-					fileUpdate(undefined!);
+					fileUpdate && fileUpdate(undefined!, true);
 				};
 			}
 		};
@@ -181,7 +190,7 @@ const AttachmentUploader = ({ fileUpdate, value, idea_title, account_id, moreOpt
 			reader.readAsDataURL(file);
 			if (event.target.files?.[0]) {
 				try {
-					fileUpdate(event.target.files?.[0]);
+					fileUpdate && fileUpdate(event.target.files?.[0]);
 				} catch (error) {
 					console.error(error);
 				}
@@ -192,7 +201,7 @@ const AttachmentUploader = ({ fileUpdate, value, idea_title, account_id, moreOpt
 	};
 
 	return (
-		<div className="relative attachment-uploader-wrapper">
+		<div className={` ${className as string} relative attachment-uploader-wrapper`}>
 			<input
 				name="idea_file_url"
 				className="attachment-uploader"

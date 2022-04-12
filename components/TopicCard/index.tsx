@@ -100,7 +100,9 @@ export const TopicCard = ({ topic }: ITopicData) => {
 							<td>
 								<span className="flex items-center gap-1 card-info">
 									<Icon size="16" name="Info" />
-									<p className={!topic.topic_description ? 'italic' : ''}>{topic.topic_description || `Blank`}</p>
+									<p className={!topic.topic_description ? 'italic' : ''}>
+										{topic.topic_description || `No description`}
+									</p>
 								</span>
 							</td>
 						</div>

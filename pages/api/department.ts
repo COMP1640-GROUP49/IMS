@@ -1,15 +1,16 @@
-import { IDepartmentData, ITopicData } from 'lib/interfaces';
+import { IDepartmentData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
 
-let departmentData: IDepartmentData;
-export const getDepartmentByName = async (department_name: string) => {
+let departmentData: IDepartmentData['department'];
+let department_id: string;
+export const getDepartmentIdByName = async (department_name: string) => {
 	const { data, error } = await supabase
 		.from('departments')
 		.select('department_id')
 		.ilike('department_name', `${department_name} departments`);
 	if (data && (data as []).length !== 0) {
-		departmentData = data[0] as IDepartmentData;
+		departmentData = data[0] as IDepartmentData['department'];
 	} else {
 		const { data, error } = await supabase
 			.from('departments')
@@ -17,27 +18,34 @@ export const getDepartmentByName = async (department_name: string) => {
 			.ilike('department_name', `${department_name} department`);
 
 		if (data && (data as []).length !== 0) {
-			departmentData = data[0] as IDepartmentData;
+			departmentData = data[0] as IDepartmentData['department'];
 		} else {
 			const { data, error } = await supabase
 				.from('departments')
 				.select('department_id')
 				.ilike('department_name', `${department_name}`);
 			if (data) {
-				departmentData = data[0] as IDepartmentData;
+				departmentData = data[0] as IDepartmentData['department'];
 			}
 		}
 	}
-	const { department_id } = departmentData;
+	if (departmentData) {
+		const { department_id: data } = departmentData;
+		department_id = data;
+	}
 	return { department_id, error };
 };
 
+let department_name: string;
 export const getDepartmentNameById = async (id: string) => {
 	const { data, error } = await supabase.from('departments').select('department_name').match({ department_id: id });
 	if (data && (data as []).length !== 0) {
-		departmentData = data[0] as unknown as IDepartmentData;
+		departmentData = data[0] as unknown as IDepartmentData['department'];
 	}
-	const { department_name } = departmentData;
+	if (departmentData) {
+		const { department_name: data } = departmentData;
+		department_name = data;
+	}
 	return { department_name, error };
 };
 
@@ -106,7 +114,9 @@ export const updateDepartment = async (department_name: string, department_id: s
 export const deleteDepartment = async (department_id: string, department_name: string) => {
 	const deleteDepartment = async () => {
 		await supabase.from('departments').delete().match({ department_id: department_id });
+		await supabase.rpc('delete_bucket_storage', { bucket_name: department_name });
 	};
+
 	await notifyToast(
 		deleteDepartment(),
 		`Deleting department of ${department_name}.`,
@@ -114,13 +124,21 @@ export const deleteDepartment = async (department_id: string, department_name: s
 	);
 };
 
-export const getDepartmentFromTopicId = async (topic_id: string) => {
+export const getDepartmentNameFromTopicId = async (topic_id: string) => {
 	const { data } = await supabase.from('topics').select('department_id').match({ topic_id: topic_id });
 	if (data && (data as []).length !== 0) {
-		departmentData = data[0] as IDepartmentData;
+		departmentData = data[0] as IDepartmentData['department'];
 	}
 	const { department_id } = departmentData;
 
-	const { department_name, error } = await getDepartmentNameById(department_id as string);
+	const { department_name, error } = await getDepartmentNameById(department_id);
 	return { department_name };
+};
+
+export const getDepartmentFromId = async (id: string) => {
+	const { data, error } = await supabase.from('departments').select().match({ department_id: id });
+	if (data) {
+		departmentData = data[0] as IDepartmentData['department'];
+	}
+	return { departmentData, error };
 };

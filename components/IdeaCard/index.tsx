@@ -12,6 +12,7 @@ import { EditIdeaModal } from 'components/Form/form';
 import { Icon } from 'components/Icon';
 import Modal from 'components/Modal';
 import { getCategoryById } from 'pages/api/category';
+import { getDepartmentIdByName, getDepartmentNameFromTopicId } from 'pages/api/department';
 import { deleteIdea } from 'pages/api/idea';
 import { getTopicIdByCategoryId } from 'pages/api/topic';
 import { getAccountByAccountId } from 'pages/api/user';
@@ -24,6 +25,7 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 	const [username, setUsername] = useState('');
 	const [categoryName, setCategoryName] = useState('');
 	const [topicId, setTopicId] = useState('');
+	const [departmentName, setDepartmentName] = useState('');
 
 	const router = useRouter();
 	const { asPath } = useRouter();
@@ -56,7 +58,7 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 	// 	setShowDeleteIdeaModal(false);
 	// }, []);
 	const handleDeleteIdeaModal = async () => {
-		await deleteIdea(idea.idea_id, idea.idea_title);
+		await deleteIdea(idea.idea_id, idea.idea_title, departmentName, topicId, idea.account_id);
 		router.reload();
 	};
 
@@ -64,13 +66,16 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 		const getAdditionalInfo = async () => {
 			const { userData } = await getAccountByAccountId(idea.account_id);
 			setAvatarUrl(userData?.avatar_url as string);
-			setUsername(userData?.username as string);
+			setUsername(userData?.username);
 
 			const { categoryData } = await getCategoryById(idea.category_id);
 			setCategoryName(categoryData?.category_name as string);
 
 			const { topicId } = await getTopicIdByCategoryId(idea.category_id);
 			setTopicId(topicId);
+
+			const { department_name } = await getDepartmentNameFromTopicId(topicId);
+			setDepartmentName(department_name);
 		};
 
 		void getAdditionalInfo();
@@ -140,7 +145,8 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 								<span className="flex items-center gap-1 card-info">
 									<Icon size="16" name="File" />
 									<p className={!idea.idea_content ? 'italic' : 'idea-content'}>
-										{convert(idea.idea_content, { wordwrap: 50, whitespaceCharacters: '\t\r\n\f\u200b' }) || `Blank`}
+										{convert(idea.idea_content, { wordwrap: 50, whitespaceCharacters: '\t\r\n\f\u200b' }) ||
+											`No content`}
 									</p>
 								</span>
 							</td>

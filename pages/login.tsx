@@ -77,6 +77,7 @@ const Login: NextPage = (props: any) => {
 							<Label size="text-subtitle">Username</Label>
 							<Input
 								value={username}
+								autocomplete="username"
 								onChange={handleUsernameChange}
 								required={true}
 								placeholder="Input your username"
@@ -87,6 +88,7 @@ const Login: NextPage = (props: any) => {
 							<Label size="text-subtitle">Password</Label>
 							<Input
 								value={password}
+								autocomplete="current-password"
 								onChange={handlePasswordChange}
 								required={true}
 								placeholder="Input your password"

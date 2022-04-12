@@ -126,8 +126,8 @@ export interface ICommentData extends IObjectKeys {
 		account_id: string;
 		idea_id: string;
 		parent_comment_id: string;
-		anonymous_posting: string;
-		comments_reaction: [];
+		anonymous_posting: boolean;
+		comments_reaction?: ICommentsReactionProps;
 	};
 }
 
@@ -136,7 +136,7 @@ export interface ICommentsProps {
 }
 
 export interface ICommentReactionData extends IObjectKeys {
-	comment: {
+	comment_reaction: {
 		comment_reaction_id: string;
 		comment_reaction_type: string;
 		comment_reaction_created: string;

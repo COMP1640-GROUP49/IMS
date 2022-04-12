@@ -74,14 +74,14 @@ export const deleteTopic = async (topic_id: string, topic_name: string) => {
 	);
 };
 
-let topicData: ITopicData;
+let topicData: ITopicData['topic'];
 export const getTopicByName = async (topicName: string) => {
 	const { data, error } = await supabase
 		.from('topics')
-		.select()
+		.select('*, categories(*, ideas(*))')
 		.ilike('topic_name', `${topicName.split('-').join(' ')}`);
 	if (data && (data as []).length !== 0) {
-		topicData = data[0] as ITopicData;
+		topicData = data[0] as ITopicData['topic'];
 	}
 	return { topicData, error };
 };

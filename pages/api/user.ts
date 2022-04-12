@@ -28,11 +28,11 @@ export const updateProfile = async (
 	);
 };
 
-let userData: IAccountData;
+let userData: IAccountData['account'];
 export const getAccountByAccountId = async (account_id: string) => {
 	const { data, error } = await supabase.from('accounts').select().match({ account_id: account_id });
 	if (data && (data as []).length !== 0) {
-		userData = data[0] as IAccountData;
+		userData = data[0] as IAccountData['account'];
 	}
 	return { userData, error };
 };

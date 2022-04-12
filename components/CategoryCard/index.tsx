@@ -75,7 +75,9 @@ export const CategoryCard = ({ category }: ICategoryData) => {
 							<td>
 								<span className="flex items-center gap-1 card-info">
 									<Icon size="16" name="Info" />
-									<p>{category_description}</p>
+									<p className={!category_description ? 'italic' : ''}>
+										{category_description || `No description`}
+									</p>{' '}
 								</span>
 							</td>
 						</div>

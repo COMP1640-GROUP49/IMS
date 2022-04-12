@@ -206,7 +206,7 @@
 	}
 
 	.btn-disabled {
-		@apply px-2 py-4 bg-platinum text-silver rounded-lg font-semi-bold self-stretch;
+		@apply px-4 py-2 bg-platinum text-silver rounded-lg font-semi-bold;
 	}
 
 	.btn-disabled svg {
@@ -263,28 +263,70 @@
 		@apply text-transparent bg-avatar-upload-pattern bg-center bg-no-repeat;
 	}
 
+	.attachment {
+		@apply w-full rounded-lg border-none bg-white h-16;
+		@apply text-transparent;
+	}
+
+	.attachment:hover {
+		@apply cursor-pointer;
+		@apply shadow-1;
+	}
+
 	.attachment-uploader:hover {
 		@apply cursor-pointer;
 		@apply rounded-lg border-dashed bg-platinum !important;
 	}
 
-	.attachment-uploader-wrapper {
+	.attachment-uploader-wrapper,
+	.attachment-wrapper {
 		@apply flex flex-auto flex-col gap-2;
 	}
+
 	.file-info-wrapper {
 		@apply flex flex-col;
 	}
 
-	.btn__remove-file {
+	.btn__remove-file,
+	.btn__show-reply {
 		@apply text-footer font-normal text-sonic-silver self-start h-auto;
 	}
 
-	.btn__remove-file:hover {
+	.btn__remove-file:hover,
+	.btn__show-reply:hover {
 		@apply text-black;
+	}
+
+	.btn__show-reply {
+		@apply ml-[calc(0px+48px+8px)] min-h-0 h-auto mt-4;
+	}
+
+	.comment-card:last-child .btn__show-reply,
+	.comment-reply-card:last-child .btn__show-reply {
+		@apply mb-0;
+	}
+
+	.comment-card:last-child .comment-reply-input {
+		@apply mt-6;
+	}
+
+	.comment-card:last-child .comment-reaction,
+	.comment-reply-card:last-child .comment-reaction {
+		@apply mb-0;
+	}
+
+	.comment-reply-card .comment-reply-card .comment-reply-card {
+		@apply ml-[calc(0px)] z-[10] !important;
 	}
 
 	.file-info {
 		@apply absolute top-1/4 -translate-y-1/4 ml-4;
+		@apply flex flex-auto flex-row gap-2 items-center;
+		@apply text-footer;
+	}
+
+	.attachment-wrapper .file-info {
+		@apply absolute top-1/2 -translate-y-1/2 ml-4;
 		@apply flex flex-auto flex-row gap-2 items-center;
 		@apply text-footer;
 	}
@@ -295,6 +337,10 @@
 
 	.file-info .file-size {
 		@apply text-sonic-silver font-thin;
+	}
+
+	.line-divider {
+		@apply w-[100vw] ml-[-24px] border-silver;
 	}
 
 	.divider {
@@ -485,6 +531,22 @@
 		@apply fixed inset-0 bg-black opacity-50 z-50;
 	}
 
+	.menu-bg {
+		@apply fixed inset-0;
+	}
+
+	.menu-content {
+		@apply flex bg-white absolute top-[32px] right-0 shadow-1 rounded-lg z-30;
+	}
+
+	.btn-menu {
+		@apply rounded-lg p-4 font-normal h-auto whitespace-nowrap;
+	}
+
+	.btn-menu:hover {
+		@apply bg-platinum;
+	}
+
 	.modal-container {
 		@apply fixed inset-x-0 bg-white rounded-lg p-6 z-50;
 		/* Center fixed el */
@@ -629,8 +691,86 @@
 		@apply min-h-[10vh];
 		@apply font-sans text-body;
 	}
+
 	.rich-text-editor > .ql-container > .ql-editor.ql-blank::before {
 		@apply text-silver not-italic;
+	}
+
+	.more-option {
+		@apply h-auto;
+	}
+
+	.more-option svg {
+		@apply text-sonic-silver;
+	}
+	.more-option svg:hover {
+		@apply text-black;
+	}
+
+	.disabled-editor.rich-text-editor {
+		@apply border-none;
+	}
+
+	.disabled-editor .ql-toolbar.ql-snow {
+		@apply hidden;
+	}
+
+	.disabled-editor .ql-editor {
+		@apply p-0 h-auto min-h-0;
+	}
+
+	.idea-content__disabled-editor {
+		@apply flex flex-col gap-4 sm:justify-center;
+	}
+
+	.btn-reaction {
+		@apply h-12;
+	}
+
+	.comment-content {
+		@apply relative flex flex-col;
+	}
+
+	.comment-content::before {
+		content: ' ';
+		@apply absolute bg-platinum w-[1px] h-[calc(100%)];
+		@apply top-[0] left-[24px];
+		@apply z-10;
+	}
+
+	.comment-content .disabled-editor {
+		@apply ml-[calc(48px+8px)] pt-2 pb-4;
+	}
+
+	.comment-reaction,
+	.reply-comment-loader {
+		@apply flex gap-2 items-center ml-[calc(48px+8px)];
+	}
+
+	.comment-reply-card {
+		@apply ml-[calc(0px+48px+8px)] mt-6;
+	}
+
+	.comment-reply-card + .comment-reply-input {
+		@apply mt-6;
+	}
+
+	.comment-reply-card:last-child {
+		@apply mb-6;
+	}
+
+	.comment-editor .ql-toolbar.ql-snow,
+	.comment-input .ql-toolbar.ql-snow,
+	.comment-reply-input .ql-toolbar.ql-snow {
+		@apply hidden;
+	}
+
+	.comment-reply-input {
+		@apply ml-[calc(48px+8px)] mb-6;
+	}
+
+	.comment-editor {
+		@apply ml-[calc(48px+8px)] mt-4 mb-4;
 	}
 }
 
@@ -640,9 +780,11 @@
 	}
 
 	.avatar-uploader::-webkit-file-upload-button,
-	.attachment-uploader::-webkit-file-upload-button {
+	.attachment-uploader::-webkit-file-upload-button,
+	.attachment::-webkit-file-upload-button {
 		@apply hidden;
 	}
+
 	.below-navigation-bar {
 		@apply mt-[112px] lg:mt-36;
 	}

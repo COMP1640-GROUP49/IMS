@@ -1,16 +1,30 @@
-import { IFileData, IIdeaData } from 'lib/interfaces';
+import { IFileData, IIdeaData, IIdeasProps } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
 
-export const getIdeasListByCategoryId = async (category_id: string, limit?: number) => {
-	// const { data, error } = await supabase.rpc('get_ideas_with_comments', { category_id_val: category_id });
+export const getIdeasListByCategoryId = async (
+	category_id: string,
+	limit?: number,
+	sortBy?: string,
+	ascending?: boolean
+) => {
 	const noLimit = 99999;
-	const { data, error } = await supabase
-		.from('ideas')
-		.select('*, comments!comments_idea_id_fkey(*), reaction(*)')
-		.match({ category_id: category_id })
-		.limit(limit || noLimit);
-	return { data, error };
+	if (sortBy || ascending) {
+		const { data, error } = await supabase
+			.from('ideas')
+			.select('*, comments!comments_idea_id_fkey(*), reaction(*)')
+			.match({ category_id: category_id })
+			.order(sortBy as string, { ascending: ascending })
+			.limit(limit || noLimit);
+		return { data, error };
+	} else {
+		const { data, error } = await supabase
+			.from('ideas')
+			.select('*, comments!comments_idea_id_fkey(*), reaction(*)')
+			.match({ category_id: category_id })
+			.limit(limit || noLimit);
+		return { data, error };
+	}
 };
 
 export const uploadAttachment = async (
@@ -164,14 +178,59 @@ export const removeIdeaAttachment = async (
 	}
 };
 
-export const deleteIdea = async (idea_id: string, idea_title: string) => {
+export const deleteIdea = async (
+	idea_id: string,
+	idea_title: string,
+	department_name: string,
+	topic_id: string,
+	account_id: string
+) => {
 	const deleteIdeaData = async () => {
 		const { data, error } = await supabase.from('ideas').delete().match({
 			idea_id: idea_id,
 		});
+		await removeIdeaAttachment(idea_title, department_name, topic_id, account_id);
 		if (error) {
 			throw error;
 		}
 	};
 	await notifyToast(deleteIdeaData(), `Deleting idea ${idea_title}.`, `Topic named ${idea_title} has been deleted.`);
+};
+
+let ideaData: IIdeaData;
+export const getIdeaById = async (ideaId: string, order_by?: string, ascending?: boolean) => {
+	if (order_by && ascending) {
+		const { data, error } = await supabase
+			.from('ideas')
+			.select('*, comments!comments_idea_id_fkey(*, comments_reaction(*)), reaction(*)')
+			.match({ idea_id: ideaId })
+			.order(order_by, { ascending: ascending });
+		if (data) {
+			ideaData = data[0] as IIdeaData;
+		} else {
+			ideaData = undefined!;
+		}
+	} else {
+		const { data, error } = await supabase
+			.from('ideas')
+			.select('*, comments!comments_idea_id_fkey(*, comments_reaction(*)), reaction(*)')
+			.match({ idea_id: ideaId })
+			.order('idea_created', { ascending: false })
+			.order('comment_created', { foreignTable: 'comments', ascending: false });
+		if (data) {
+			ideaData = data[0] as IIdeaData;
+		} else {
+			ideaData = undefined!;
+		}
+	}
+
+	return { ideaData };
+};
+
+export const increaseViewCountBy1 = async (ideaId: string, currentViewCount: number) => {
+	const { data, error } = await supabase
+		.from('ideas')
+		.update({ idea_view: ++currentViewCount })
+		.match({ idea_id: ideaId });
+	return { data, error };
 };

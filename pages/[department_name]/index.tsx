@@ -11,7 +11,7 @@ import { Icon } from 'components/Icon';
 import { MetaTags } from 'components/MetaTags';
 import Modal from 'components/Modal';
 import { TopicList } from 'components/TopicList';
-import { getDepartmentByName } from 'pages/api/department';
+import { getDepartmentIdByName } from 'pages/api/department';
 import { getTopicsListByDepartmentId } from 'pages/api/topic';
 import { ITopicsProps } from 'lib/interfaces';
 
@@ -21,8 +21,8 @@ interface IParams extends ParsedUrlQuery {
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 	const { department_name } = params as IParams;
-	const { department_id } = await getDepartmentByName(department_name as string);
-	const { data } = await getTopicsListByDepartmentId(department_id as string);
+	const { department_id } = await getDepartmentIdByName(department_name as string);
+	const { data } = await getTopicsListByDepartmentId(department_id);
 
 	return {
 		props: {

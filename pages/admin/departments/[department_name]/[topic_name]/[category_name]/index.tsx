@@ -29,8 +29,12 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 	const { category_name: slug } = params as IParams;
 	const { categoryData } = await getCategoryByName(slug as string);
 
+	const noLimit = 99999;
 	const { data } = await getIdeasListByCategoryId(
-		(categoryData as unknown as ICategoryData['category']).category_id as unknown as string
+		(categoryData as unknown as ICategoryData['category']).category_id as unknown as string,
+		noLimit,
+		'idea_created',
+		false
 	);
 
 	const { data: topicData } = await getTopicById(
