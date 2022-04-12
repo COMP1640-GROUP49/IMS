@@ -1,4 +1,4 @@
-import { IFileData, IIdeaData, IIdeasProps } from 'lib/interfaces';
+import { IFileData, IIdeaData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
 
@@ -22,6 +22,7 @@ export const getIdeasListByCategoryId = async (
 			.from('ideas')
 			.select('*, comments!comments_idea_id_fkey(*), reaction(*)')
 			.match({ category_id: category_id })
+			.order('popular_point', { ascending: false })
 			.limit(limit || noLimit);
 		return { data, error };
 	}

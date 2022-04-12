@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import moment from 'moment';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ClipLoader } from 'react-spinners';
 import { Avatar } from 'components/Avatar';
 import { Button } from 'components/Button';
@@ -22,9 +22,15 @@ type ReplyCommentCardProps = {
 	comment: ICommentData['comment'];
 	loadCommentData: (comments: ICommentsProps) => void;
 	currentUser: IUserData;
+	isFinalClosureExpired?: boolean;
 };
 
-export const ReplyCommentCard = ({ comment, loadCommentData, currentUser }: ReplyCommentCardProps) => {
+export const ReplyCommentCard = ({
+	comment,
+	loadCommentData,
+	currentUser,
+	isFinalClosureExpired,
+}: ReplyCommentCardProps) => {
 	const [replyCommentsList, setReplyCommentsList] = useState<ICommentsProps>();
 	const [showReply, setShowReply] = useState(false);
 	const [commentContent, setCommentContent] = useState(comment.comment_content);
@@ -196,7 +202,12 @@ export const ReplyCommentCard = ({ comment, loadCommentData, currentUser }: Repl
 										}
 									</p>
 								</Button>
-								<Button icon className={`btn-secondary btn-reaction`} onClick={handleShowReplyEditor}>
+								<Button
+									icon
+									disabled={isFinalClosureExpired}
+									className={`${isFinalClosureExpired ? 'btn-disabled' : 'btn-secondary'} btn-reaction`}
+									onClick={handleShowReplyEditor}
+								>
 									<Icon name="MessageSquare" size="16" />
 									{replyCommentsList ? (
 										<p>
@@ -222,6 +233,7 @@ export const ReplyCommentCard = ({ comment, loadCommentData, currentUser }: Repl
 									<div key={comment.comment_id}>
 										{showReply && (
 											<ReplyCommentCard
+												isFinalClosureExpired={isFinalClosureExpired}
 												currentUser={currentUser}
 												loadCommentData={loadCommentData}
 												key={comment.comment_id}

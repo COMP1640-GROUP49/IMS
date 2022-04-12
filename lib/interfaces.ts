@@ -96,6 +96,7 @@ export interface IIdeaData extends IObjectKeys {
 		anonymous_posting: boolean;
 		reaction?: IReactionProps;
 		comments?: ICommentsProps;
+		popular_point?: number;
 	};
 }
 

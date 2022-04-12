@@ -2,10 +2,26 @@ import { IReactionData } from 'lib/interfaces';
 import supabase from 'utils/supabase';
 
 let newReactionState: IReactionData['reaction'];
-export const addReactionToIdea = async (ideaId: string, accountId: string, reactionType: string) => {
+export const addReactionToIdea = async (
+	ideaId: string,
+	accountId: string,
+	reactionType: string,
+	currentPopularPoint?: number
+) => {
 	const { data, error } = await supabase
 		.from('reaction')
 		.insert({ idea_id: ideaId, account_id: accountId, reaction_type: reactionType });
+	if (reactionType === 'like') {
+		await supabase
+			.from('ideas')
+			.update({ popular_point: ++(currentPopularPoint as number) })
+			.match({ idea_id: ideaId });
+	} else if (reactionType === 'dislike') {
+		await supabase
+			.from('ideas')
+			.update({ popular_point: --(currentPopularPoint as number) })
+			.match({ idea_id: ideaId });
+	}
 	if (data && (data as []).length !== 0) {
 		const { reactionState, error } = await getReactionStateOfUserInIdea(accountId, ideaId);
 		newReactionState = reactionState;
@@ -13,11 +29,27 @@ export const addReactionToIdea = async (ideaId: string, accountId: string, react
 	return { newReactionState, error };
 };
 
-export const removeReactionFromIdea = async (ideaId: string, accountId: string, reactionType: string) => {
+export const removeReactionFromIdea = async (
+	ideaId: string,
+	accountId: string,
+	reactionType: string,
+	currentPopularPoint?: number
+) => {
 	const { data, error } = await supabase
 		.from('reaction')
 		.delete()
 		.match({ idea_id: ideaId, account_id: accountId, reaction_type: reactionType });
+	if (reactionType === 'dislike') {
+		await supabase
+			.from('ideas')
+			.update({ popular_point: ++(currentPopularPoint as number) })
+			.match({ idea_id: ideaId });
+	} else if (reactionType === 'like') {
+		await supabase
+			.from('ideas')
+			.update({ popular_point: --(currentPopularPoint as number) })
+			.match({ idea_id: ideaId });
+	}
 	if (data && (data as []).length !== 0) {
 		const { reactionState, error } = await getReactionStateOfUserInIdea(accountId, ideaId);
 		newReactionState = reactionState;

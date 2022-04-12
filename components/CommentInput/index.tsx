@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
+import moment from 'moment';
 import { FormEvent, useEffect, useState } from 'react';
 import AttachmentUploader from 'components/AttachmentUploader';
 import { Button } from 'components/Button';
@@ -7,7 +8,8 @@ import { Icon } from 'components/Icon';
 import RichTextEditor from 'components/RichTextEditor';
 import { IUserData } from 'pages/api/auth';
 import { createNewComment, getAllCommentsByIdeaId } from 'pages/api/comment';
-import { ICommentData, ICommentsProps, IIdeaData } from 'lib/interfaces';
+import { getTopicById, getTopicIdByCategoryId } from 'pages/api/topic';
+import { ICommentData, ICommentsProps, IIdeaData, ITopicData } from 'lib/interfaces';
 
 type CommentInputProps = {
 	idea: IIdeaData['idea'];
@@ -21,6 +23,8 @@ export const CommentInput = ({ idea, user, loadCommentData }: CommentInputProps)
 	const [formValidation, setFormValidation] = useState<IFormValidation>();
 
 	const [isFormValidated, setIsFormValidated] = useState(false);
+
+	const [isFinalClosureExpired, setIsFinalClosureExpired] = useState(false);
 
 	interface IFormValidation {
 		commentValidation: string;
@@ -91,16 +95,26 @@ export const CommentInput = ({ idea, user, loadCommentData }: CommentInputProps)
 	};
 
 	useEffect(() => {
+		const getAdditionalInfo = async () => {
+			const { topicId } = await getTopicIdByCategoryId(idea.category_id);
+			const { data } = await getTopicById(topicId);
+			setIsFinalClosureExpired(
+				moment((data as unknown as ITopicData['topic']).topic_final_closure_date).isBefore(moment.now())
+			);
+		};
+
+		void getAdditionalInfo();
+
 		if (formValidation?.commentValidation === 'success') {
 			setIsFormValidated(true);
 		} else {
 			setIsFormValidated(false);
 		}
-	}, [formData, formValidation]);
+	}, [formData, formValidation, idea]);
 
 	return (
 		<>
-			<main>
+			{!isFinalClosureExpired ? (
 				<div className="flex flex-col gap-6 comment-input">
 					<form onSubmit={handleCreateNewComment}>
 						<div className="flex flex-col gap-4">
@@ -135,7 +149,11 @@ export const CommentInput = ({ idea, user, loadCommentData }: CommentInputProps)
 						</div>
 					</form>
 				</div>
-			</main>
+			) : (
+				<p className="text-center text-sonic-silver">
+					Comments are disabled for this idea after the final closure date.
+				</p>
+			)}
 		</>
 	);
 };

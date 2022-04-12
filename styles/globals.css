@@ -811,4 +811,9 @@
 	.below-navigation-bar {
 		@apply mt-[112px] lg:mt-36;
 	}
+
+	#nprogress .bar {
+		@apply bg-black !important;
+		@apply h-[3px] !important;
+	}
 }

@@ -31,10 +31,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 
 	const noLimit = 99999;
 	const { data } = await getIdeasListByCategoryId(
-		(categoryData as unknown as ICategoryData['category']).category_id as unknown as string,
-		noLimit,
-		'idea_created',
-		false
+		(categoryData as unknown as ICategoryData['category']).category_id as unknown as string
 	);
 
 	const { data: topicData } = await getTopicById(
@@ -63,6 +60,7 @@ const CategoryManagementPage: NextPage<IIdeasProps> = (props) => {
 
 	const { topicData }: any = props;
 	const topic = topicData as ITopicData['topic'];
+	const [isFirstClosureExpired, setIsFirstClosureExpired] = useState(false);
 	const [isFinalClosureExpired, setIsFinalClosureExpired] = useState(false);
 
 	const limit = 5;
@@ -71,14 +69,14 @@ const CategoryManagementPage: NextPage<IIdeasProps> = (props) => {
 	const [itemOffset, setItemOffset] = useState(0);
 
 	useEffect(() => {
-		// Check for expire final closure date
+		setIsFirstClosureExpired(moment(topic.topic_first_closure_date).isBefore(moment.now()));
 		setIsFinalClosureExpired(moment(topic.topic_final_closure_date).isBefore(moment.now()));
-		// isFinalClosureExpired && alert('Final closure date has expired!');
+		// isFirstClosureExpired && alert('Final closure date has expired!');
 
 		const endOffset = itemOffset + limit;
 		setCurrentItems(ideas.slice(itemOffset, endOffset));
 		setPageCount(Math.ceil(ideas.length / limit));
-	}, [itemOffset, ideas, limit, topic, isFinalClosureExpired]);
+	}, [itemOffset, ideas, limit, topic, isFirstClosureExpired]);
 
 	const handlePageClick = (event: any) => {
 		const newOffset = (event.selected * limit) % ideas.length;
@@ -114,10 +112,10 @@ const CategoryManagementPage: NextPage<IIdeasProps> = (props) => {
 						{category.category_description && <p>{category.category_description}</p>}
 					</div>
 					<Button
-						disabled={isFinalClosureExpired ? true : false}
+						disabled={isFirstClosureExpired ? true : false}
 						onClick={handleShowCreateCategoryModal}
 						icon
-						className={`${isFinalClosureExpired ? 'btn-disabled' : 'btn-primary'} self-start sm:self-stretch`}
+						className={`${isFirstClosureExpired ? 'btn-disabled' : 'btn-primary'} self-start sm:self-stretch`}
 					>
 						<Icon name="FilePlus" size="16" />
 						Submit new idea
@@ -128,8 +126,17 @@ const CategoryManagementPage: NextPage<IIdeasProps> = (props) => {
 						</Modal>
 					)}
 				</div>
-				{isFinalClosureExpired && <p className="text-ultra-red italic">Final closure date has expired!</p>}
-				<IdeaList ideas={currentItems} />
+				{(isFirstClosureExpired || isFinalClosureExpired) && (
+					<p className="text-ultra-red italic">
+						{isFirstClosureExpired && isFinalClosureExpired
+							? 'First & final closure'
+							: isFirstClosureExpired
+							? 'First closure'
+							: isFinalClosureExpired && 'Final closure'}{' '}
+						has expired!
+					</p>
+				)}
+				<IdeaList category_id={category.category_id} ideas={currentItems} />
 				<Pagination
 					items={ideas as []}
 					currentItems={currentItems as []}

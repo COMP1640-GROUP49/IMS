@@ -49,11 +49,17 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 	const [pageCount, setPageCount] = useState(0);
 	const [itemOffset, setItemOffset] = useState(0);
 
+	const [isFirstClosureExpired, setIsFirstClosureExpired] = useState(false);
+	const [isFinalClosureExpired, setIsFinalClosureExpired] = useState(false);
+
 	useEffect(() => {
+		setIsFirstClosureExpired(moment(topic.topic_first_closure_date).isBefore(moment.now()));
+		setIsFinalClosureExpired(moment(topic.topic_final_closure_date).isBefore(moment.now()));
+
 		const endOffset = itemOffset + limit;
 		setCurrentItems(categories.slice(itemOffset, endOffset));
 		setPageCount(Math.ceil(categories.length / limit));
-	}, [itemOffset, categories, limit]);
+	}, [itemOffset, categories, limit, topic]);
 
 	const handlePageClick = (event: any) => {
 		const newOffset = (event.selected * limit) % categories.length;
@@ -93,11 +99,13 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 						</p>
 						<p>
 							First Closure Date:{' '}
-							<span className="font-semi-bold">{moment(topic.topic_first_closure_date).format('MMM DD, YYYY')}</span>
+							<span className="font-semi-bold">{moment(topic.topic_first_closure_date).format('MMM DD, YYYY')}</span>{' '}
+							{isFirstClosureExpired && <span className="text-ultra-red italic">(expired)</span>}
 						</p>
 						<p>
 							Final Closure Date:{' '}
-							<span className="font-semi-bold">{moment(topic.topic_final_closure_date).format('MMM DD, YYYY')}</span>
+							<span className="font-semi-bold">{moment(topic.topic_final_closure_date).format('MMM DD, YYYY')}</span>{' '}
+							{isFinalClosureExpired && <span className="text-ultra-red italic">(expired)</span>}
 						</p>
 					</div>
 					<div className="flex flex-col md:flex-row gap-4  md:justify-between justify-center">

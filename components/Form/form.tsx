@@ -2017,7 +2017,7 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 		} else {
 			setHasFormDataChanged(true);
 		}
-	}, [formValidation, isFormValidated, formData, attachment]);
+	}, [formValidation, isFormValidated, formData, attachment, ideaData, topic_id]);
 
 	const handleUpdateIdea = async (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
 		(event as FormEvent<HTMLFormElement>).preventDefault();
@@ -2032,11 +2032,10 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 		} else {
 			try {
 				await updateIdea(formData);
-				const { data } = await getTopicById(topicId);
-				const topicName = (data as unknown as ITopicData['topic']).topic_name;
-				const { categoryData } = await getCategoryById(formData.category_id);
-				const categoryName = (categoryData as unknown as ICategoryData['category']).category_name;
-
+				// const { data } = await getTopicById(topicId);
+				// const topicName = (data as unknown as ITopicData['topic']).topic_name;
+				// const { categoryData } = await getCategoryById(formData.category_id);
+				// const categoryName = (categoryData as unknown as ICategoryData['category']).category_name;
 				// await router.replace(
 				// 	`admin/departments/${
 				// 		departmentName.includes('Departments')

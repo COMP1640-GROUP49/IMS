@@ -35,24 +35,74 @@ const IdeaDetail = ({ idea: ideaData }: IIdeaData) => {
 
 	const handleLikeIdea = async () => {
 		if (reactionState?.reaction_type === 'like') {
-			const { newReactionState } = await removeReactionFromIdea(idea.idea_id, currentUser.id, 'like');
-			setReactionState(newReactionState);
+			const { newReactionState: removeLike } = await removeReactionFromIdea(
+				idea.idea_id,
+				currentUser.id,
+				'like',
+				idea.popular_point
+			);
+			setReactionState(removeLike);
 		} else {
-			const { newReactionState: removeDislike } = await removeReactionFromIdea(idea.idea_id, currentUser.id, 'dislike');
-			const { newReactionState } = await addReactionToIdea(idea.idea_id, currentUser.id, 'like');
-			setReactionState(newReactionState);
+			if (reactionState?.reaction_type === 'dislike') {
+				const { newReactionState: removeDislike } = await removeReactionFromIdea(
+					idea.idea_id,
+					currentUser.id,
+					'dislike',
+					idea.popular_point
+				);
+				const { newReactionState: addLike } = await addReactionToIdea(
+					idea.idea_id,
+					currentUser.id,
+					'like',
+					++idea.popular_point!
+				);
+				setReactionState(addLike);
+			} else {
+				const { newReactionState: addLike } = await addReactionToIdea(
+					idea.idea_id,
+					currentUser.id,
+					'like',
+					idea.popular_point
+				);
+				setReactionState(addLike);
+			}
 		}
 		void reloadIdeaData();
 	};
 
 	const handleDislikeIdea = async () => {
 		if (reactionState?.reaction_type === 'dislike') {
-			const { newReactionState } = await removeReactionFromIdea(idea.idea_id, currentUser.id, 'dislike');
-			setReactionState(newReactionState);
+			const { newReactionState: removeDislike } = await removeReactionFromIdea(
+				idea.idea_id,
+				currentUser.id,
+				'dislike',
+				idea.popular_point
+			);
+			setReactionState(removeDislike);
 		} else {
-			const { newReactionState: removeLike } = await removeReactionFromIdea(idea.idea_id, currentUser.id, 'like');
-			const { newReactionState } = await addReactionToIdea(idea.idea_id, currentUser.id, 'dislike');
-			setReactionState(newReactionState);
+			if (reactionState?.reaction_type === 'like') {
+				const { newReactionState: removeLike } = await removeReactionFromIdea(
+					idea.idea_id,
+					currentUser.id,
+					'like',
+					idea.popular_point
+				);
+				const { newReactionState: addDislike } = await addReactionToIdea(
+					idea.idea_id,
+					currentUser.id,
+					'dislike',
+					--idea.popular_point!
+				);
+				setReactionState(addDislike);
+			} else {
+				const { newReactionState: addDislike } = await addReactionToIdea(
+					idea.idea_id,
+					currentUser.id,
+					'dislike',
+					idea.popular_point
+				);
+				setReactionState(addDislike);
+			}
 		}
 		void reloadIdeaData();
 	};

@@ -16,8 +16,17 @@ import {
 	getCommentReactionStateOfUserInComment,
 	removeCommentReactionFromComment,
 } from 'pages/api/comment_reaction';
+import { getIdeaById } from 'pages/api/idea';
+import { getTopicById, getTopicIdByCategoryId } from 'pages/api/topic';
 import { getAccountByAccountId } from 'pages/api/user';
-import { IAccountData, ICommentData, ICommentReactionData, ICommentsProps } from 'lib/interfaces';
+import {
+	IAccountData,
+	ICommentData,
+	ICommentReactionData,
+	ICommentsProps,
+	IIdeaData,
+	ITopicData,
+} from 'lib/interfaces';
 
 type CommentCardProps = {
 	comment: ICommentData['comment'];
@@ -37,6 +46,8 @@ export const CommentCard = ({ comment, loadCommentData }: CommentCardProps) => {
 	const [showReply, setShowReply] = useState(false);
 	const [changeToCommentEditor, setChangeToCommentEditor] = useState(false);
 	const [hasDataChanged, setHasDataChanged] = useState(false);
+
+	const [isFinalClosureExpired, setIsFinalClosureExpired] = useState(false);
 
 	const handleCloseMoreMenu = () => {
 		setShowMoreMenu(false);
@@ -97,6 +108,12 @@ export const CommentCard = ({ comment, loadCommentData }: CommentCardProps) => {
 
 			const { commentReactionState } = await getCommentReactionStateOfUserInComment(currentUser.id, comment.comment_id);
 			setCommentReactionState(commentReactionState);
+			const { ideaData } = await getIdeaById(comment.idea_id);
+			const { topicId } = await getTopicIdByCategoryId((ideaData as unknown as IIdeaData['idea']).category_id);
+			const { data } = await getTopicById(topicId);
+			setIsFinalClosureExpired(
+				moment((data as unknown as ITopicData['topic']).topic_final_closure_date).isBefore(moment.now())
+			);
 		};
 
 		void getAdditionalData();
@@ -205,7 +222,12 @@ export const CommentCard = ({ comment, loadCommentData }: CommentCardProps) => {
 											}
 										</p>
 									</Button>
-									<Button icon className={`btn-secondary btn-reaction`} onClick={handleShowReplyEditor}>
+									<Button
+										icon
+										disabled={isFinalClosureExpired}
+										className={`${isFinalClosureExpired ? 'btn-disabled' : 'btn-secondary'} btn-reaction`}
+										onClick={handleShowReplyEditor}
+									>
 										<Icon name="MessageSquare" size="16" />
 										{replyCommentsList ? (
 											<p>
@@ -238,6 +260,7 @@ export const CommentCard = ({ comment, loadCommentData }: CommentCardProps) => {
 												<>
 													{showReply && (
 														<ReplyCommentCard
+															isFinalClosureExpired={isFinalClosureExpired}
 															currentUser={currentUser}
 															loadCommentData={loadCommentData}
 															key={comment.comment_id}
