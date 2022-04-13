@@ -1,15 +1,36 @@
-# **NextJS**, **TailwindCSS**, **TypeScript** Starter
+<p align="center">
+  <a href="https://ims-comp1640.netlify.app/" target="_blank" rel="noopener noreferrer">
+    <img width="180" src="https://ims-comp1640.netlify.app/icon-logo.svg" alt="IMS logo">
+  </a>
+</p>
+<br/>
+<p align="center">
+  <a href="https://app.netlify.com/sites/ims-comp1640/deploys"><img src="https://api.netlify.com/api/v1/badges/372f3d9e-42bb-453e-9610-b04eff26eca6/deploy-status" alt="node compatibility"></a>
+  <a href="https://wakatime.com/badge/user/d6421665-4d44-4679-9950-30e9a0dcd423/project/9c5ace1c-784d-41c9-a6b8-f04bdb319169"><img src="https://wakatime.com/badge/user/d6421665-4d44-4679-9950-30e9a0dcd423/project/9c5ace1c-784d-41c9-a6b8-f04bdb319169.svg" alt="total time"></a>
+  <a href="https://github.com/COMP1640-GROUP49/IMS"><img src="https://img.shields.io/github/license/COMP1640-GROUP49/IMS?style=flat" alt="license badge"></a>
+</p>
+<br/>
 
-## What are in this starter kit?
+# IMS
 
-Beside the combination of _NextJS_, _TailwindCSS_, and _TypeScript_, these package are also added and configured together.
+> Idea Management System
 
-- [x] ESLint
-- [x] Babel
-- [x] Prettier
-- [x] Husky/Lintstaged
+## What is IMS?
 
-## How to use?
+A team project for COMP1640 subject which represents a web-enabled role-based system for collecting ideas for improvement from staff in a large university.
+
+## Stacks
+
+- Core
+  - [x] Next.js/TypeScript
+  - [x] TailwindCSS
+  - [x] Supabase
+- Others
+  - [x] Emailjs.com
+  - [x] Husky/Lint-staged
+  - [ ] ...
+
+## Installation
 
 1. Clone this repo
 
@@ -21,6 +42,14 @@ Beside the combination of _NextJS_, _TailwindCSS_, and _TypeScript_, these packa
 
 5. Enjoy
 
-## What can I do with this repo?
+## Deployment
 
-It's up to you, this is just _a basic setup_ for later use.
+<https://ims-comp1640.netlify.app/>
+
+## Wanna try with test account?
+
+Contact me through [my email](mailto:phulngcs18529@fpt.edu.vn).
+
+## License
+
+IMS is licensed under the [MIT license](https://github.com/COMP1640-GROUP49/IMS/blob/main/README.md).
