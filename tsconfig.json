@@ -14,7 +14,10 @@
 		"isolatedModules": true,
 		"jsx": "preserve",
 		"incremental": true,
-		"baseUrl": "."
+		"baseUrl": ".",
+		"paths": {
+			"jszip-utils": ["node_modules/jszip-utils/dist/jszip-utils.min.js"]
+		}
 	},
 	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.*.js"],
 	"exclude": ["node_modules"]

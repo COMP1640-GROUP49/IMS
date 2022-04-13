@@ -1,6 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { saveAs } from 'file-saver';
+import JSZip from 'jszip';
 import { IFileData, IIdeaData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
+const JSZipUtils = require('jszip-utils');
 
 export const getIdeasListByCategoryId = async (
 	category_id: string,
@@ -234,4 +241,25 @@ export const increaseViewCountBy1 = async (ideaId: string, currentViewCount: num
 		.update({ idea_view: ++currentViewCount })
 		.match({ idea_id: ideaId });
 	return { data, error };
+};
+
+export const zipAndDownloadFile = async (url: string, idea_title: string, account_id: string) => {
+	const zip = new JSZip();
+
+	const fileName = url
+		.split('/')
+		.pop()
+		?.replaceAll(`${idea_title}_`, '')
+		.replaceAll(`_${account_id}`, '')
+		.split('?token')[0] as string;
+
+	const urlToPromise = async (url: string) => {
+		const data = await JSZipUtils.getBinaryContent(url);
+		return data as null;
+	};
+
+	const data = await urlToPromise(url);
+	zip.file(fileName, data);
+	const content = await zip.generateAsync({ type: 'blob' });
+	saveAs(content, `${fileName}.zip`);
 };

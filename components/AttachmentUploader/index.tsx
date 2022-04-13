@@ -1,7 +1,7 @@
+import JSZip from 'jszip';
 import React, { useState } from 'react';
 import { formatBytes } from 'utils/formatBytes';
 import { getFileSizeFromUrl } from 'utils/getFileSizeFromUrl';
-
 type AttachmentUploaderProps = {
 	fileUpdate?: (data: File, remove?: boolean) => void;
 	value?: string;
@@ -103,6 +103,9 @@ const AttachmentUploader = ({
 
 	const handleAttachmentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0] as Blob;
+
+	
+		
 
 		const reader = new FileReader();
 		setUploadTimes(uploadTimes + 1);

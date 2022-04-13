@@ -36,3 +36,16 @@ export const getAccountByAccountId = async (account_id: string) => {
 	}
 	return { userData, error };
 };
+
+const emailListData: any[] = [];
+export const getAllCoordinatorEmailByDepartmentId = async (departmentId: string) => {
+	const { data, error } = await supabase
+		.from('accounts')
+		.select('account_email')
+		.match({ account_department: departmentId, account_role: 2 });
+
+	(data as []).map((account) => emailListData.push(account['account_email']));
+	const emailList = emailListData.join(', ');
+
+	return { emailList, error };
+};

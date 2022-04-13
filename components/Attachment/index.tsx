@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import React, { useState } from 'react';
+import { zipAndDownloadFile } from 'pages/api/idea';
 import { formatBytes } from 'utils/formatBytes';
 import { getFileSizeFromUrl } from 'utils/getFileSizeFromUrl';
 
@@ -62,11 +64,8 @@ const Attachment = ({ value, idea_title, account_id, moreOptions }: AttachmentPr
 		}
 	}, 1);
 
-	const handleDownloadFile = () => {
-		console.log('here');
-		if (typeof window !== 'undefined') {
-			window.open(value, '_blank');
-		}
+	const handleDownloadFile = async () => {
+		await zipAndDownloadFile(value as string, idea_title as string, account_id as string);
 	};
 
 	return (

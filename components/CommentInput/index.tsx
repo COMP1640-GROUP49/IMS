@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import moment from 'moment';
+import { useRouter } from 'next/router';
 import { FormEvent, useEffect, useState } from 'react';
 import AttachmentUploader from 'components/AttachmentUploader';
 import { Button } from 'components/Button';
@@ -8,8 +9,10 @@ import { Icon } from 'components/Icon';
 import RichTextEditor from 'components/RichTextEditor';
 import { IUserData } from 'pages/api/auth';
 import { createNewComment, getAllCommentsByIdeaId } from 'pages/api/comment';
+import { sendEmailToIdeaAuthor } from 'pages/api/email';
 import { getTopicById, getTopicIdByCategoryId } from 'pages/api/topic';
-import { ICommentData, ICommentsProps, IIdeaData, ITopicData } from 'lib/interfaces';
+import { getAccountByAccountId } from 'pages/api/user';
+import { IAccountData, ICommentData, ICommentsProps, IIdeaData, ITopicData } from 'lib/interfaces';
 
 type CommentInputProps = {
 	idea: IIdeaData['idea'];
@@ -18,7 +21,16 @@ type CommentInputProps = {
 };
 
 export const CommentInput = ({ idea, user, loadCommentData }: CommentInputProps) => {
+	const router = useRouter();
 	const [formData, setFormData] = useState<ICommentData['comment']>();
+	const [formAutomaticEmail, setFormAutomaticEmail] = useState({
+		idea_title: idea.idea_title,
+		author_username: '',
+		username: '',
+		comment_content: formData?.comment_content,
+		idea_link: typeof window !== 'undefined' && window.location.href,
+		to_email: '',
+	});
 
 	const [formValidation, setFormValidation] = useState<IFormValidation>();
 
@@ -58,6 +70,12 @@ export const CommentInput = ({ idea, user, loadCommentData }: CommentInputProps)
 			anonymous_posting: formData?.anonymous_posting || false,
 		});
 
+		setFormAutomaticEmail({
+			...formAutomaticEmail,
+			username: (user.user_metadata as IAccountData['account']).username,
+			comment_content: data,
+		});
+
 		if (data !== '') {
 			if (data === '<p><br></p>') {
 				setFormValidation({
@@ -86,6 +104,12 @@ export const CommentInput = ({ idea, user, loadCommentData }: CommentInputProps)
 				await createNewComment(formData as ICommentData['comment']);
 				formData!.comment_content = '';
 				const data = await getAllCommentsByIdeaId(idea.idea_id, 'comment_created', true);
+				if (user.id !== idea.account_id) {
+					if (typeof document !== 'undefined') {
+						const hiddenForm = document.getElementById('hidden-form');
+						await sendEmailToIdeaAuthor(hiddenForm as HTMLFormElement);
+					}
+				}
 				loadCommentData(data);
 				// Reset comment input
 			} catch (error) {
@@ -94,6 +118,10 @@ export const CommentInput = ({ idea, user, loadCommentData }: CommentInputProps)
 		}
 	};
 
+	// const handleSendAutomaticEmail = () => {
+
+	// }
+
 	useEffect(() => {
 		const getAdditionalInfo = async () => {
 			const { topicId } = await getTopicIdByCategoryId(idea.category_id);
@@ -101,6 +129,14 @@ export const CommentInput = ({ idea, user, loadCommentData }: CommentInputProps)
 			setIsFinalClosureExpired(
 				moment((data as unknown as ITopicData['topic']).topic_final_closure_date).isBefore(moment.now())
 			);
+
+			const { userData: author } = await getAccountByAccountId(idea.account_id);
+			const { userData: currentUser } = await getAccountByAccountId(user.id);
+			setFormAutomaticEmail({
+				...formAutomaticEmail,
+				author_username: author.username,
+				to_email: author.account_email,
+			});
 		};
 
 		void getAdditionalInfo();
@@ -116,6 +152,51 @@ export const CommentInput = ({ idea, user, loadCommentData }: CommentInputProps)
 		<>
 			{!isFinalClosureExpired ? (
 				<div className="flex flex-col gap-6 comment-input">
+					<form id="hidden-form">
+						<div className="field">
+							<label htmlFor="idea_title">idea_title</label>
+							<input defaultValue={formAutomaticEmail.idea_title} type="text" name="idea_title" id="idea_title"></input>
+						</div>
+						<div className="field">
+							<label htmlFor="author_username">author_username</label>
+							<input
+								defaultValue={formAutomaticEmail.author_username}
+								type="text"
+								name="author_username"
+								id="author_username"
+							></input>
+						</div>
+						<div className="field">
+							<label htmlFor="username">username</label>
+							<input defaultValue={formAutomaticEmail.username} type="text" name="username" id="username"></input>
+						</div>
+						<div className="field">
+							<label htmlFor="comment_content">comment_content</label>
+							<input
+								defaultValue={formAutomaticEmail.comment_content}
+								type="text"
+								name="comment_content"
+								id="comment_content"
+							></input>
+						</div>
+						<div className="field">
+							<label htmlFor="idea_link">idea_link</label>
+							<input
+								defaultValue={formAutomaticEmail.idea_link as string}
+								type="text"
+								name="idea_link"
+								id="idea_link"
+							></input>
+						</div>
+						<div className="field">
+							<label htmlFor="to_email">to_email</label>
+							<input defaultValue={formAutomaticEmail.to_email} type="text" name="to_email" id="to_email"></input>
+						</div>
+						<div className="field">
+							<label htmlFor="reply_to">reply_to</label>
+							<input type="text" name="reply_to" id="reply_to"></input>
+						</div>
+					</form>
 					<form onSubmit={handleCreateNewComment}>
 						<div className="flex flex-col gap-4">
 							<div className="form-field">

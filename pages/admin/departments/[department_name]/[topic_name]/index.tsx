@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import moment from 'moment';
 import { GetServerSideProps, NextPage } from 'next';
@@ -5,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ParsedUrlQuery } from 'querystring';
 import { useCallback, useEffect, useState } from 'react';
+import { CSVLink } from 'react-csv';
 import { Button } from 'components/Button';
 import { CategoryList } from 'components/CategoryList';
 import { CreateCategoryModal } from 'components/Form/form';
@@ -14,8 +16,8 @@ import { MetaTags } from 'components/MetaTags';
 import Modal from 'components/Modal';
 import Pagination from 'components/Pagination';
 import { getCategoriesListByTopicId } from 'pages/api/category';
-import { getTopicByName } from 'pages/api/topic';
-import { ICategoriesProps, ICategoryData, ITopicData } from 'lib/interfaces';
+import { getAllIdeasByTopicId, getTopicByName } from 'pages/api/topic';
+import { ICategoriesProps, ICategoryData, IIdeasProps, ITopicData } from 'lib/interfaces';
 import { scrollToElementByClassName } from 'utils/scrollAnimate';
 
 interface IParams extends ParsedUrlQuery {
@@ -50,16 +52,9 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 	const [itemOffset, setItemOffset] = useState(0);
 
 	const [isFirstClosureExpired, setIsFirstClosureExpired] = useState(false);
+
 	const [isFinalClosureExpired, setIsFinalClosureExpired] = useState(false);
-
-	useEffect(() => {
-		setIsFirstClosureExpired(moment(topic.topic_first_closure_date).isBefore(moment.now()));
-		setIsFinalClosureExpired(moment(topic.topic_final_closure_date).isBefore(moment.now()));
-
-		const endOffset = itemOffset + limit;
-		setCurrentItems(categories.slice(itemOffset, endOffset));
-		setPageCount(Math.ceil(categories.length / limit));
-	}, [itemOffset, categories, limit, topic]);
+	const [ideaListCSV, setIdeaListCSV] = useState([]);
 
 	const handlePageClick = (event: any) => {
 		const newOffset = (event.selected * limit) % categories.length;
@@ -78,6 +73,19 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 		setShowCreateCategoriesModal(false);
 	}, []);
 
+	const handleDownloadAllIdeas = async () => {
+		const { ideaList } = await getAllIdeasByTopicId(topic.topic_id);
+		ideaList && setIdeaListCSV(ideaList as unknown as []);
+	};
+
+	useEffect(() => {
+		setIsFirstClosureExpired(moment(topic.topic_first_closure_date).isBefore(moment.now()));
+		setIsFinalClosureExpired(moment(topic.topic_final_closure_date).isBefore(moment.now()));
+
+		const endOffset = itemOffset + limit;
+		setCurrentItems(categories.slice(itemOffset, endOffset));
+		setPageCount(Math.ceil(categories.length / limit));
+	}, [itemOffset, categories, limit, topic]);
 	return (
 		<>
 			<MetaTags title={`${topic.topic_name}`} description={`Categories in topic ${topic.topic_name}`} />
@@ -117,10 +125,21 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 							<Icon name="PlusCircle" size="16" />
 							Create new category
 						</Button>
-						<Button icon className="btn-secondary self-start sm:self-stretch">
-							<Icon name="Download" size="16" />
-							Download all ideas as CSV
-						</Button>
+
+						{console.log(ideaListCSV)}
+						<CSVLink
+							data={ideaListCSV as unknown as []}
+							filename={`${topic.topic_name.toLowerCase().replace(/ /g, `-`)}-csv.csv`}
+						>
+							<Button
+								onClick={handleDownloadAllIdeas}
+								icon
+								className="sm:w-full btn-secondary self-start sm:self-stretch"
+							>
+								<Icon name="Download" size="16" />
+								Download all ideas as CSV
+							</Button>
+						</CSVLink>
 					</div>
 					{showCreateCategoriesModal && (
 						<Modal onCancel={handleCloseCreateCategoriesModal} headerText={`Create New Category`}>

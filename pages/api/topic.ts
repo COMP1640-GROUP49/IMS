@@ -1,4 +1,4 @@
-import { ITopicData } from 'lib/interfaces';
+import { ICategoriesProps, ICategoryData, IIdeasProps, ITopicData, ITopicsProps } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
 
@@ -93,4 +93,26 @@ export const getTopicIdByCategoryId = async (category_id: string) => {
 		topicId = (data[0] as ITopicData['topic']).topic_id;
 	}
 	return { topicId, error };
+};
+
+let ideaTopicData: ITopicData['topic'];
+let ideaTopicCategories: ICategoriesProps;
+let ideaList: IIdeasProps;
+
+export const getAllIdeasByTopicId = async (topicId: string) => {
+	const { data, error } = await supabase
+		.from('topics')
+		.select(`*, categories(ideas(*, comments!comments_idea_id_fkey(*), reaction(*)))`)
+		.match({ topic_id: topicId });
+	if (data && (data as []).length !== 0) {
+		ideaTopicData = data[0] as ITopicData['topic'];
+		ideaTopicCategories = ideaTopicData.categories as ICategoriesProps;
+
+		const tempResult: any[] = [];
+		(ideaTopicCategories as unknown as []).map((idea) =>
+			(idea['ideas'] as []).forEach((idea) => tempResult.push(idea))
+		);
+		ideaList = tempResult as unknown as IIdeasProps;
+	}
+	return { ideaList, error };
 };

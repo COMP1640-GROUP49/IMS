@@ -31,10 +31,12 @@ import {
 	getDepartmentNameFromTopicId,
 	getDepartmentList,
 	updateDepartment,
+	getDepartmentIdByName,
 } from 'pages/api/department';
+import { sendEmailToCoordinatorInDepartment } from 'pages/api/email';
 import { createNewIdea, removeIdeaAttachment, updateIdea, uploadAttachment } from 'pages/api/idea';
 import { createNewTopic, getTopicById, getTopicIdByCategoryId, updateTopic } from 'pages/api/topic';
-import { updateProfile } from 'pages/api/user';
+import { getAccountByAccountId, getAllCoordinatorEmailByDepartmentId, updateProfile } from 'pages/api/user';
 import {
 	ITopicData,
 	IAccountData,
@@ -1616,6 +1618,15 @@ export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 
 	const [isFormValidated, setIsFormValidated] = useState(false);
 
+	const [formAutomaticEmail, setFormAutomaticEmail] = useState({
+		qacoordinator_username: '',
+		username: '',
+		idea_name: '',
+		topic_name: '',
+		idea_link: typeof window !== 'undefined' && window.location.href,
+		to_email: '',
+	});
+
 	const handleTermsConditionsCheck = (event: React.ChangeEvent<HTMLInputElement>) => {
 		if ((event.target as HTMLInputElement).checked) {
 			setFormValidation({
@@ -1651,6 +1662,7 @@ export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 			account_id: account_id as string,
 			anonymous_posting: formData?.anonymous_posting || false,
 		});
+
 		if (event.target.name === 'idea_title') {
 			if (event.target.value.trim() !== '') {
 				setFormValidation({
@@ -1663,6 +1675,10 @@ export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 					ideaTitleValidation: 'error',
 				});
 			}
+			setFormAutomaticEmail({
+				...formAutomaticEmail,
+				idea_name: event.target.value,
+			});
 		}
 		if (event.target.name === 'category_id') {
 			if (event.target.value.trim() !== 'disabled') {
@@ -1719,6 +1735,24 @@ export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 		};
 		void getCategoryData();
 
+		const getAdditionalInfo = async () => {
+			const { userData } = await getAccountByAccountId(account_id as string);
+			const { department_name } = await getDepartmentNameFromTopicId(topic_id as string);
+			const { department_id } = await getDepartmentIdByName(department_name);
+			const { data: topicData } = await getTopicById(topic_id as string);
+			const { emailList } = await getAllCoordinatorEmailByDepartmentId(department_id);
+			const topic_name = (topicData as unknown as ITopicData['topic']).topic_name;
+			setFormAutomaticEmail({
+				...formAutomaticEmail,
+				username: userData?.username,
+				qacoordinator_username: `QA Coordinators of ${department_name}`,
+				topic_name: topic_name,
+				to_email: `${emailList}`,
+			});
+		};
+
+		void getAdditionalInfo();
+
 		if (
 			formValidation?.termsConditionsValidation === 'success' &&
 			formValidation.ideaTitleValidation === 'success' &&
@@ -1743,6 +1777,13 @@ export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 		} else {
 			try {
 				const data = await createNewIdea(formData);
+				const { userData } = await getAccountByAccountId(account_id as string);
+				if (+userData.account_role !== 2) {
+					if (typeof document !== 'undefined') {
+						const hiddenForm = document.getElementById('hidden-form');
+						await sendEmailToCoordinatorInDepartment(hiddenForm as HTMLFormElement);
+					}
+				}
 				// TODO: Go to the new idea page
 				void router.push(`${asPath}/${data.idea_id}`);
 				// void router.reload();
@@ -1758,6 +1799,51 @@ export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 				<MetaTags title={`Create New Idea`} description="Submit new idea" />
 				<main>
 					<div className="flex flex-col gap-6">
+						<form id="hidden-form">
+							<div className="field">
+								<label htmlFor="qacoordinator_username">qacoordinator_username</label>
+								<input
+									defaultValue={formAutomaticEmail.qacoordinator_username}
+									type="text"
+									name="qacoordinator_username"
+									id="qacoordinator_username"
+								></input>
+							</div>
+							<div className="field">
+								<label htmlFor="username">username</label>
+								<input defaultValue={formAutomaticEmail.username} type="text" name="username" id="username"></input>
+							</div>
+							<div className="field">
+								<label htmlFor="idea_name">idea_name</label>
+								<input defaultValue={formAutomaticEmail.idea_name} type="text" name="idea_name" id="idea_name"></input>
+							</div>
+							<div className="field">
+								<label htmlFor="topic_name">topic_name</label>
+								<input
+									defaultValue={formAutomaticEmail.topic_name}
+									type="text"
+									name="topic_name"
+									id="topic_name"
+								></input>
+							</div>
+							<div className="field">
+								<label htmlFor="idea_link">idea_link</label>
+								<input
+									defaultValue={formAutomaticEmail.idea_link as string}
+									type="text"
+									name="idea_link"
+									id="idea_link"
+								></input>
+							</div>
+							<div className="field">
+								<label htmlFor="reply_to">reply_to</label>
+								<input type="text" name="reply_to" id="reply_to"></input>
+							</div>
+							<div className="field">
+								<label htmlFor="to_email">to_email</label>
+								<input defaultValue={formAutomaticEmail.to_email} type="text" name="to_email" id="to_email"></input>
+							</div>
+						</form>
 						<form onSubmit={handleCreateNewIdea} className="flex flex-col gap-6">
 							<div className="flex flex-col gap-4">
 								<div className="form-field">
