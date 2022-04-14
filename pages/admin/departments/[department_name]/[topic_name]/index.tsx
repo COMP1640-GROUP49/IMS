@@ -17,7 +17,7 @@ import Modal from 'components/Modal';
 import Pagination from 'components/Pagination';
 import { getCategoriesListByTopicId } from 'pages/api/category';
 import { getAllIdeasByTopicId, getTopicByName } from 'pages/api/topic';
-import { ICategoriesProps, ICategoryData, IIdeasProps, ITopicData } from 'lib/interfaces';
+import { ICategoriesProps, ICategoryData, ITopicData } from 'lib/interfaces';
 import { scrollToElementByClassName } from 'utils/scrollAnimate';
 
 interface IParams extends ParsedUrlQuery {

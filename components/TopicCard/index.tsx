@@ -12,6 +12,7 @@ import { deleteTopic } from 'pages/api/topic';
 import { ICategoryData, ITopicData } from 'lib/interfaces';
 
 export const TopicCard = ({ topic }: ITopicData) => {
+	console.log('🚀 ~ file: index.tsx ~ line 15 ~ TopicCard ~ topic', topic);
 	const user = useContext(UserContext);
 	const { asPath } = useRouter();
 	const router = useRouter();
@@ -81,20 +82,25 @@ export const TopicCard = ({ topic }: ITopicData) => {
 								<span className="flex items-center gap-1 card-info">
 									<Icon size="16" name="File" />
 									<p>
-										{(topic.categories as unknown as []).filter(
-											(category: ICategoryData['category']) => category.ideas?.length
-										).length > 1
+										{(topic.categories as unknown as [])
+											.filter((category: ICategoryData['category']) => category.ideas?.length)
+											.map((topic) => (topic['ideas'] as []).length)[0] > 1
 											? `${
-													(topic.categories as unknown as []).filter(
-														(category: ICategoryData['category']) => category.ideas?.length
-													).length
+													(topic.categories as unknown as [])
+														.filter((category: ICategoryData['category']) => category.ideas?.length)
+														.map((topic) => (topic['ideas'] as []).length)[0]
 											  } ideas available`
 											: `${
-													(topic.categories as unknown as []).filter(
-														(category: ICategoryData['category']) => category.ideas?.length
-													).length
+													(topic.categories as unknown as [])
+														.filter((category: ICategoryData['category']) => category.ideas?.length)
+														.map((topic) => (topic['ideas'] as []).length)[0] || 0
 											  } idea available`}
 									</p>
+									{console.log(
+										(topic.categories as unknown as []).filter(
+											(category: ICategoryData['category']) => category.ideas?.length
+										)
+									)}
 								</span>
 							</td>
 							<td>

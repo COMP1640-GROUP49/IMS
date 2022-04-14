@@ -86,7 +86,7 @@
 		@apply font-semi-bold text-heading-4;
 	}
 	h2 {
-		@apply font-semibold text-heading-2;
+		@apply font-medium text-subtitle;
 	}
 	li > hr {
 		@apply mt-4;
@@ -167,6 +167,10 @@
 
 	.department-card:last-child {
 		@apply mb-0;
+	}
+
+	main {
+		@apply p-6;
 	}
 }
 
@@ -798,6 +802,16 @@
 
 	#hidden-form {
 		@apply hidden;
+	}
+
+	.graph {
+		@apply flex flex-col gap-4;
+		@apply lg:max-w-[35%];
+	}
+
+	.graph canvas {
+		@apply sm:ml-[-24px] sm:mr-[-24px];
+		@apply p-2 rounded-lg;
 	}
 }
 
