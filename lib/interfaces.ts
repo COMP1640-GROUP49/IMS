@@ -93,6 +93,7 @@ export interface IIdeaData extends IObjectKeys {
 		idea_updated: string;
 		account_id: string;
 		category_id: string;
+		topic_id: string;
 		anonymous_posting: boolean;
 		reaction?: IReactionProps;
 		comments?: ICommentsProps;

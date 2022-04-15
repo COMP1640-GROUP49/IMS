@@ -79,6 +79,7 @@ const Home: NextPage<IDepartmentsProps> = ({ data: departments }) => {
 		<>
 			<MetaTags title="IMS" />
 			<Header />
+			{/* QA Manager */}
 			{+user?.user_metadata?.role === 1 ? (
 				<>
 					<MetaTags title="Departments Management" description="Manage departments of IMS" />
@@ -107,7 +108,8 @@ const Home: NextPage<IDepartmentsProps> = ({ data: departments }) => {
 						/>
 					</main>
 				</>
-			) : +user?.user_metadata?.role === 2 ? (
+			) : // QA Coordinator
+			+user?.user_metadata?.role === 2 ? (
 				<main className="body-container flex flex-col gap-6 below-navigation-bar">
 					<div className="flex lg:flex-row lg:justify-between lg:items-center flex-col gap-6">
 						<div className="flex flex-col gap-2">
@@ -116,7 +118,8 @@ const Home: NextPage<IDepartmentsProps> = ({ data: departments }) => {
 					</div>
 					<TopicList topics={topics} />
 				</main>
-			) : +user?.user_metadata?.role === 3 ? (
+			) : // Staff
+			+user?.user_metadata?.role === 3 ? (
 				<main className="body-container flex flex-col gap-6 below-navigation-bar">
 					<div className="flex lg:flex-row lg:justify-between lg:items-center flex-col gap-6">
 						<div className="flex flex-col gap-2">

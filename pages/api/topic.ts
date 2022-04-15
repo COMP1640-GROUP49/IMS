@@ -1,4 +1,4 @@
-import { ICategoriesProps, ICategoryData, IIdeasProps, ITopicData, ITopicsProps } from 'lib/interfaces';
+import { ICategoriesProps, ICategoryData, IIdeasProps, ITopicData, ITopicsProps, IIdeaData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
 
@@ -98,6 +98,18 @@ export const getTopicIdByCategoryId = async (category_id: string) => {
 let ideaTopicData: ITopicData['topic'];
 let ideaTopicCategories: ICategoriesProps;
 let ideaList: IIdeasProps;
+
+let ideaData: IIdeaData['idea'];
+export const getIdeaByName = async (ideaName: string) => {
+	const { data, error } = await supabase
+		.from('ideas')
+		.select('*, comments!comments_idea_id_fkey(*), reaction(*))')
+		.ilike('idea_id', `${ideaName.split('-').join(' ')}`);
+	if (data && (data as []).length !== 0) {
+		ideaData = data[0] as IIdeaData['idea'];
+	}
+	return { ideaData, error };
+};
 
 export const getAllIdeasByTopicId = async (topicId: string, limit?: number, sortBy?: string, ascending?: boolean) => {
 	const noLimit = 999999;
