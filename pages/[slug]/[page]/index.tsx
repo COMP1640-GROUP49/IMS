@@ -47,8 +47,6 @@ const Slug1: NextPage = (props) => {
 	const user = useContext(UserContext);
 	const { slug }: any = props;
 	const { data }: any = props;
-	console.log('🚀 ~ file: index.tsx ~ line 51 ~ data', data);
-	console.log('🚀 ~ file: index.tsx ~ line 52 ~ data', data);
 	const categories = data as ICategoryData['category'];
 	const idea = data as IIdeaData['idea'];
 	const [showMoreMenu, setShowMoreMenu] = useState(false);

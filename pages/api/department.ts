@@ -1,4 +1,4 @@
-import { IDepartmentData } from 'lib/interfaces';
+import { IDepartmentData, ITopicData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
 
@@ -47,6 +47,20 @@ export const getDepartmentNameById = async (id: string) => {
 		department_name = data;
 	}
 	return { department_name, error };
+};
+
+let topicData: ITopicData['topic'];
+let topic_name: string;
+export const getTopicNameById = async (id: string) => {
+	const { data, error } = await supabase.from('topics').select('topic_name').match({ topic_id: id });
+	if (data && (data as []).length !== 0) {
+		topicData = data[0] as unknown as ITopicData['topic'];
+	}
+	if (topicData) {
+		const { topic_name: data } = topicData;
+		topic_name = data;
+	}
+	return { topic_name, error };
 };
 
 export const getDepartmentList = async (limit?: number) => {
