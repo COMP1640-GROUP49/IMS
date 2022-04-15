@@ -2138,7 +2138,7 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 				// 	}`
 				// );
 
-				router.back();
+				router.reload();
 			} catch (error) {
 				throw error;
 			}

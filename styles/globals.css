@@ -806,12 +806,38 @@
 
 	.graph {
 		@apply flex flex-col gap-4;
-		@apply lg:max-w-[35%];
+		@apply lg:p-6 lg:rounded-lg lg:shadow-0;
+		@apply md:p-6 md:rounded-lg md:shadow-0;
+	}
+
+	.graph:hover {
+		@apply lg:shadow-2;
+		@apply md:shadow-2;
 	}
 
 	.graph canvas {
-		@apply sm:ml-[-24px] sm:mr-[-24px];
-		@apply p-2 rounded-lg;
+		/* @apply sm:ml-[-24px] sm:mr-[-24px]; */
+	}
+
+	.charts-wrapper,
+	.charts-group {
+		@apply flex flex-col gap-6;
+	}
+
+	.charts-wrapper {
+		@apply lg:flex-row lg:justify-between lg:flex-auto lg:max-w-[100vw];
+	}
+
+	.charts-group {
+		@apply lg:w-[50vw];
+	}
+
+	.hidden-pie-chart {
+		@apply hidden lg:graph lg:w-[50vw];
+	}
+
+	.charts-group-2 {
+		@apply flex flex-col gap-4 lg:flex-row lg:flex-auto;
 	}
 }
 

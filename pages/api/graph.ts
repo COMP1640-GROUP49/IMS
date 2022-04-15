@@ -6,8 +6,22 @@ export const getAllIdeasInEachDepartment = async () => {
 	return { data, error };
 };
 
-export const getIdeasPercentageInEachDepartment = async () => {
-	const { data, error } = await supabase.rpc('get_ideas_percentage_in_each_department');
+export const getContributorsInEachDepartment = async () => {
+	const { data, error } = await supabase.rpc('get_contributors_in_each_department');
+	return { data, error };
+};
 
+export const getIdeasWithoutCommentsInEachDepartment = async () => {
+	const { data, error } = await supabase.rpc('get_ideas_without_comments_in_each_department');
+	return { data, error };
+};
+
+export const getAnonymousIdeasInEachDepartment = async () => {
+	const { data, error } = await supabase.rpc('get_anonymous_ideas_in_each_department');
+	return { data, error };
+};
+
+export const getAnonymousCommentsInEachDepartment = async () => {
+	const { data, error } = await supabase.rpc('get_anonymous_comments_in_each_department');
 	return { data, error };
 };

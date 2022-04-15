@@ -4,43 +4,80 @@ import { ClipLoader } from 'react-spinners';
 import { IdeaCard } from 'components/IdeaCard';
 import { Select } from 'components/Select';
 import { getIdeasListByCategoryId } from 'pages/api/idea';
+import { getAllIdeasByTopicId, getTopicIdByCategoryId } from 'pages/api/topic';
 import { IIdeasProps } from 'lib/interfaces';
 
-export const IdeaList = ({ category_id, ideas: ideaList }: any) => {
+export const IdeaList = ({ category_id, topic_id, ideas: ideaList }: any) => {
 	const [idea, setIdea] = useState<IIdeasProps>();
 
 	const handleChangeSortOption = async (event: React.ChangeEvent<HTMLSelectElement>) => {
 		const limit = 99999;
 		switch (event.target.value) {
 			case 'most-popular': {
-				const { data } = await getIdeasListByCategoryId(category_id as string);
-				setIdea(data as unknown as IIdeasProps);
-				break;
+				if (topic_id) {
+					const { ideaList } = await getAllIdeasByTopicId(topic_id as string);
+					setIdea(ideaList as unknown as IIdeasProps);
+					break;
+				} else {
+					const { data } = await getIdeasListByCategoryId(category_id as string);
+					setIdea(data as unknown as IIdeasProps);
+					break;
+				}
 			}
 			case 'most-view': {
-				const { data } = await getIdeasListByCategoryId(category_id as string, limit, 'idea_view', false);
-				setIdea(data as unknown as IIdeasProps);
-				break;
+				if (topic_id) {
+					const { ideaList } = await getAllIdeasByTopicId(topic_id as string, limit, 'idea_view', false);
+					setIdea(ideaList as unknown as IIdeasProps);
+					break;
+				} else {
+					const { data } = await getIdeasListByCategoryId(category_id as string, limit, 'idea_view', false);
+					setIdea(data as unknown as IIdeasProps);
+					break;
+				}
 			}
 			case 'newest': {
-				const { data } = await getIdeasListByCategoryId(category_id as string, limit, 'idea_created', false);
-				setIdea(data as unknown as IIdeasProps);
-				break;
+				if (topic_id) {
+					const { ideaList } = await getAllIdeasByTopicId(topic_id as string, limit, 'idea_created', false);
+					setIdea(ideaList as unknown as IIdeasProps);
+					break;
+				} else {
+					const { data } = await getIdeasListByCategoryId(category_id as string, limit, 'idea_created', false);
+					setIdea(data as unknown as IIdeasProps);
+					break;
+				}
 			}
 			case 'oldest': {
-				const { data } = await getIdeasListByCategoryId(category_id as string, limit, 'idea_created', true);
-				setIdea(data as unknown as IIdeasProps);
-				break;
+				if (topic_id) {
+					const { ideaList } = await getAllIdeasByTopicId(topic_id as string, limit, 'idea_created', true);
+					setIdea(ideaList as unknown as IIdeasProps);
+					break;
+				} else {
+					const { data } = await getIdeasListByCategoryId(category_id as string, limit, 'idea_created', true);
+					setIdea(data as unknown as IIdeasProps);
+					break;
+				}
 			}
 			case 'latest-updated': {
-				const { data } = await getIdeasListByCategoryId(category_id as string, limit, 'idea_updated', false);
-				setIdea(data as unknown as IIdeasProps);
-				break;
+				if (topic_id) {
+					const { ideaList } = await getAllIdeasByTopicId(topic_id as string, limit, 'idea_updated', false);
+					setIdea(ideaList as unknown as IIdeasProps);
+					break;
+				} else {
+					const { data } = await getIdeasListByCategoryId(category_id as string, limit, 'idea_updated', false);
+					setIdea(data as unknown as IIdeasProps);
+					break;
+				}
 			}
 			default: {
-				const { data } = await getIdeasListByCategoryId(category_id as string);
-				setIdea(data as unknown as IIdeasProps);
-				break;
+				if (topic_id) {
+					const { ideaList } = await getAllIdeasByTopicId(topic_id as string);
+					setIdea(ideaList as unknown as IIdeasProps);
+					break;
+				} else {
+					const { data } = await getIdeasListByCategoryId(category_id as string);
+					setIdea(data as unknown as IIdeasProps);
+					break;
+				}
 			}
 		}
 	};

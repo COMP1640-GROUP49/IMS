@@ -21,6 +21,7 @@
 		"bcryptjs": "^2.4.3",
 		"chart.js": "^3.7.1",
 		"chartjs-plugin-datalabels": "^2.0.0",
+		"chartjs-plugin-labels": "^1.1.0",
 		"emailjs-com": "^3.2.0",
 		"file-saver": "^2.0.5",
 		"html-to-text": "^8.2.0",

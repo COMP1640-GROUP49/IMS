@@ -99,20 +99,41 @@ let ideaTopicData: ITopicData['topic'];
 let ideaTopicCategories: ICategoriesProps;
 let ideaList: IIdeasProps;
 
-export const getAllIdeasByTopicId = async (topicId: string) => {
-	const { data, error } = await supabase
-		.from('topics')
-		.select(`*, categories(ideas(*, comments!comments_idea_id_fkey(*), reaction(*)))`)
-		.match({ topic_id: topicId });
-	if (data && (data as []).length !== 0) {
-		ideaTopicData = data[0] as ITopicData['topic'];
-		ideaTopicCategories = ideaTopicData.categories as ICategoriesProps;
+export const getAllIdeasByTopicId = async (topicId: string, limit?: number, sortBy?: string, ascending?: boolean) => {
+	const noLimit = 999999;
+	if (sortBy || ascending) {
+		const { data, error } = await supabase
+			.from('topics')
+			.select(`*, categories(ideas(*, comments!comments_idea_id_fkey(*), reaction(*)))`)
+			.match({ topic_id: topicId })
+			.order(sortBy as string, { foreignTable: 'categories.ideas', ascending: ascending as boolean });
+		if (data && (data as []).length !== 0) {
+			ideaTopicData = data[0] as ITopicData['topic'];
+			ideaTopicCategories = ideaTopicData.categories as ICategoriesProps;
 
-		const tempResult: any[] = [];
-		(ideaTopicCategories as unknown as []).map((idea) =>
-			(idea['ideas'] as []).forEach((idea) => tempResult.push(idea))
-		);
-		ideaList = tempResult as unknown as IIdeasProps;
+			const tempResult: any[] = [];
+			(ideaTopicCategories as unknown as []).map((idea) =>
+				(idea['ideas'] as []).forEach((idea) => tempResult.push(idea))
+			);
+			ideaList = tempResult as unknown as IIdeasProps;
+		}
+	} else {
+		const { data, error } = await supabase
+			.from('topics')
+			.select(`*, categories(ideas(*, comments!comments_idea_id_fkey(*), reaction(*)))`)
+			.match({ topic_id: topicId })
+			.order('popular_point', { foreignTable: 'categories.ideas', ascending: false });
+
+		if (data && (data as []).length !== 0) {
+			ideaTopicData = data[0] as ITopicData['topic'];
+			ideaTopicCategories = ideaTopicData.categories as ICategoriesProps;
+
+			const tempResult: any[] = [];
+			(ideaTopicCategories as unknown as []).map((idea) =>
+				(idea['ideas'] as []).forEach((idea) => tempResult.push(idea))
+			);
+			ideaList = tempResult as unknown as IIdeasProps;
+		}
 	}
-	return { ideaList, error };
+	return { ideaList };
 };

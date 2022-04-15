@@ -1,15 +1,18 @@
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { ClipLoader } from 'react-spinners';
 import { CategoryCard } from 'components/CategoryCard';
 
 export const CategoryList = ({ categories }: any) => {
+	const { asPath } = useRouter();
+
 	return (
 		<div className="flex flex-col gap-6 user-list">
 			<div className="flex justify-between">
 				<p className="text-body font-semi-bold users-list">List of categories</p>
-				<Link href="/">
+				<Link href={`${asPath}/all-ideas`}>
 					<a>
-						<p className="font-semibold text-base text-sonic-silver">View all ideas</p>
+						<p className="font-semi-bold text-sonic-silver hover:text-black">View all ideas</p>
 					</a>
 				</Link>
 			</div>

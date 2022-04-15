@@ -5,19 +5,20 @@ import { GetServerSideProps, NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ParsedUrlQuery } from 'querystring';
-import { RefObject, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { CSVDownload, CSVLink } from 'react-csv';
 import { Button } from 'components/Button';
 import { CategoryList } from 'components/CategoryList';
 import { CreateCategoryModal } from 'components/Form/form';
 import { Header } from 'components/Header';
 import { Icon } from 'components/Icon';
+import { IdeaList } from 'components/IdeaList';
 import { MetaTags } from 'components/MetaTags';
 import Modal from 'components/Modal';
 import Pagination from 'components/Pagination';
 import { getCategoriesListByTopicId } from 'pages/api/category';
 import { getAllIdeasByTopicId, getTopicByName } from 'pages/api/topic';
-import { ICategoriesProps, ICategoryData, ITopicData } from 'lib/interfaces';
+import { ICategoriesProps, ICategoryData, IIdeasProps, ITopicData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import { scrollToElementByClassName } from 'utils/scrollAnimate';
 
@@ -31,20 +32,23 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 	const { data } = await getCategoriesListByTopicId(
 		(topicData as unknown as ITopicData['topic']).topic_id as unknown as string
 	);
+	const { ideaList } = await getAllIdeasByTopicId(topicData.topic_id);
 
 	return {
 		props: {
 			slug,
 			topicData,
 			data,
+			ideaList,
 		},
 	};
 };
 
-const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
+const AllIdeas: NextPage<ICategoriesProps> = (props) => {
 	const { data: categories } = props;
 	const { slug }: any = props;
 	const { topicData }: any = props;
+	const { ideaList }: any = props;
 	const topic = topicData as ITopicData['topic'];
 	const { asPath } = useRouter();
 	const limit = 5;
@@ -94,6 +98,13 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 	};
 
 	useEffect(() => {
+		const prepareFileToDownload = async () => {
+			const { ideaList } = await getAllIdeasByTopicId(topic.topic_id);
+			ideaList && setIdeaListCSV(ideaList as unknown as []);
+		};
+
+		void prepareFileToDownload();
+
 		setIsFirstClosureExpired(moment(topic.topic_first_closure_date).isBefore(moment.now()));
 		setIsFinalClosureExpired(moment(topic.topic_final_closure_date).isBefore(moment.now()));
 
@@ -103,15 +114,15 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 	}, [itemOffset, categories, limit, topic]);
 	return (
 		<>
-			<MetaTags title={`${topic.topic_name}`} description={`Categories in topic ${topic.topic_name}`} />
+			<MetaTags title={`All ideas | ${topic.topic_name}`} description={`All ideas in topic ${topic.topic_name}`} />
 			<Header />
 			<main className="body-container flex flex-col gap-6 below-navigation-bar">
 				<div className="flex flex-col gap-6 lg:flex-row  lg:justify-between">
 					<div className="flex flex-col gap-2">
-						<Link href={asPath.replace((slug as string).toLowerCase(), '')}>
+						<Link href={asPath.replace('all-ideas', '')}>
 							<a className="back-link">
 								<Icon size="24" name="RotateCcw" />
-								Back to topics list
+								Back to list of categories
 							</a>
 						</Link>
 						<h1>{`${topic.topic_name}`}</h1>
@@ -140,7 +151,6 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 							<Icon name="PlusCircle" size="16" />
 							Create new category
 						</Button>
-
 						<Button
 							onClick={handleDownloadAllIdeas}
 							icon
@@ -161,7 +171,7 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 						</Modal>
 					)}
 				</div>
-				<CategoryList categories={currentItems} />
+				<IdeaList topic_id={topic.topic_id} ideas={ideaList as IIdeasProps} />
 				<Pagination
 					items={categories as []}
 					currentItems={currentItems as []}
@@ -174,4 +184,4 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 		</>
 	);
 };
-export default TopicsManagementPage;
+export default AllIdeas;
