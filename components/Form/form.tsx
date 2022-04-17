@@ -405,7 +405,6 @@ export const EditUserModal = ({ account }: IAccountData) => {
 	return (
 		<>
 			<MetaTags title={`Edit @${account.username} account`} description="Create a new user account" />
-			{/* {console.log('formdataChange', formDataChanges, isFormValidated, formValidation)} */}
 			<div className="flex flex-col gap-6">
 				<form onSubmit={handleUpdateAccount} className="form-edit flex flex-col gap-6">
 					<div className="flex flex-col gap-4">
