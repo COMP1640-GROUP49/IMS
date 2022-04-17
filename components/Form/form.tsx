@@ -1853,7 +1853,7 @@ export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 			const topic_name = (topicData as unknown as ITopicData['topic']).topic_name;
 			setFormAutomaticEmail({
 				...formAutomaticEmail,
-				username: userData?.username,
+				username: formData?.anonymous_posting ? `@${userData?.username}` : 'An anonymous user',
 				qacoordinator_username: `QA Coordinators of ${department_name}`,
 				topic_name: topic_name,
 				to_email: `${emailList}`,

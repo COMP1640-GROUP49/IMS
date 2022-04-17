@@ -72,7 +72,9 @@ export const CommentInput = ({ idea, user, loadCommentData }: CommentInputProps)
 
 		setFormAutomaticEmail({
 			...formAutomaticEmail,
-			username: (user.user_metadata as IAccountData['account']).username,
+			username: formData?.anonymous_posting
+				? `@${(user.user_metadata as IAccountData['account']).username}`
+				: 'An anonymous user',
 			comment_content: data,
 		});
 
