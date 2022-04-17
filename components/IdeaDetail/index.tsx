@@ -18,7 +18,6 @@ import { getAccountByAccountId } from 'pages/api/user';
 import { IAccountData, ICommentsProps, IIdeaData, IReactionData } from 'lib/interfaces';
 
 const IdeaDetail = ({ idea: ideaData }: IIdeaData) => {
-	console.log('🚀 ~ file: index.tsx ~ line 21 ~ IdeaDetail ~ ideaData', ideaData);
 	const [idea, setIdea] = useState<IIdeaData['idea']>(ideaData);
 	const [avatarUrl, setAvatarUrl] = useState('');
 	const [user, setUser] = useState<IAccountData['account']>();

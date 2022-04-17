@@ -1,4 +1,4 @@
-<p align="center">
+<p align="center" style="display: flex;justify-content: center;gap: 4px;">
   <a href="https://ims-comp1640.netlify.app/" target="_blank" rel="noopener noreferrer">
     <img width="180" src="https://ims-comp1640.netlify.app/icon-logo.svg" alt="IMS logo">
   </a>
