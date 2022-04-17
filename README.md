@@ -44,7 +44,11 @@ A team project for COMP1640 subject which represents a web-enabled role-based sy
 
 ## Deployment
 
+<<<<<<< HEAD
 [ims-comp1640.netlify.app](https://ims-comp1640.netlify.app/)
+=======
+<https://ims-comp1640.netlify.app/>
+>>>>>>> d6852a015d16f5d7c8b75e3b0ee34cb91ef8ad87
 
 ## Wanna try with test account?
 
