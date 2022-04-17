@@ -5,8 +5,8 @@ import { GetServerSideProps, NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ParsedUrlQuery } from 'querystring';
-import { RefObject, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { CSVDownload, CSVLink } from 'react-csv';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { CSVLink } from 'react-csv';
 import { ClipLoader } from 'react-spinners';
 import { Button } from 'components/Button';
 import { CategoryList } from 'components/CategoryList';
@@ -19,6 +19,7 @@ import Pagination from 'components/Pagination';
 import { UserContext } from 'components/PrivateRoute';
 import { getCategoriesListByTopicId } from 'pages/api/category';
 import { getAllIdeasByTopicId, getAllIdeasByTopicIdNew, getTopicByName } from 'pages/api/topic';
+import { getIdeasCSV, headersCSV } from 'lib/csv-headers';
 import { ICategoriesProps, ICategoryData, ITopicData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import { scrollToElementByClassName } from 'utils/scrollAnimate';
@@ -78,7 +79,7 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 
 	const handleDownloadAllIdeas = async () => {
 		const prepareFile = async () => {
-			const { ideaList } = await getAllIdeasByTopicIdNew(topic.topic_id);
+			const { ideaList } = await getIdeasCSV(topic.topic_id);
 			ideaList && setIdeaListCSV(ideaList as unknown as []);
 		};
 		await notifyToast(
@@ -163,6 +164,7 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 									<CSVLink
 										className="hidden"
 										data={ideaListCSV as unknown as []}
+										headers={headersCSV}
 										filename={`${topic.topic_name.toLowerCase().replace(/ /g, `-`)}-csv.csv`}
 									/>
 								</div>

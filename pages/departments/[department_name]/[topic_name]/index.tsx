@@ -19,6 +19,7 @@ import Pagination from 'components/Pagination';
 import { UserContext } from 'components/PrivateRoute';
 import { getCategoriesListByTopicId } from 'pages/api/category';
 import { getAllIdeasByTopicId, getAllIdeasByTopicIdNew, getTopicByName } from 'pages/api/topic';
+import { getIdeasCSV, headersCSV } from 'lib/csv-headers';
 import { ICategoriesProps, ICategoryData, ITopicData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import { scrollToElementByClassName } from 'utils/scrollAnimate';
@@ -78,7 +79,7 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 
 	const handleDownloadAllIdeas = async () => {
 		const prepareFile = async () => {
-			const { ideaList } = await getAllIdeasByTopicIdNew(topic.topic_id);
+			const { ideaList } = await getIdeasCSV(topic.topic_id);
 			ideaList && setIdeaListCSV(ideaList as unknown as []);
 		};
 
@@ -164,6 +165,7 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 									<CSVLink
 										className="hidden"
 										data={ideaListCSV as unknown as []}
+										headers={headersCSV}
 										filename={`${topic.topic_name.toLowerCase().replace(/ /g, `-`)}-csv.csv`}
 									/>
 								</div>
