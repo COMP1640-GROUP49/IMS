@@ -149,7 +149,7 @@ const CategoryManagementPage: NextPage<IIdeasProps> = (props) => {
 						/>
 						<Header />
 						<main className="body-container flex flex-col gap-6 below-navigation-bar">
-							<div className="flex flex-col gap-6 lg:flex-row  lg:justify-between items-center">
+							<div className="flex flex-col gap-6 lg:flex-row  lg:justify-between lg:items-center">
 								<div className="flex flex-col gap-2">
 									<Link href={asPath.replace((slug as string).toLowerCase(), '')}>
 										<a className="back-link">

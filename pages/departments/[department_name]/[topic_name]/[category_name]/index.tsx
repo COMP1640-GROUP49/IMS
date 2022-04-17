@@ -149,7 +149,7 @@ const CategoryManagementPage: NextPage<IIdeasProps> = (props) => {
 						/>
 						<Header />
 						<main className="body-container flex flex-col gap-6 below-navigation-bar">
-							<div className="flex flex-col gap-6 lg:flex-row  lg:justify-between">
+							<div className="flex flex-col gap-6 lg:flex-row  lg:justify-between ">
 								<div className="flex flex-col gap-2">
 									<Link href={asPath.replace((slug as string).toLowerCase(), '')}>
 										<a className="back-link">
@@ -164,7 +164,9 @@ const CategoryManagementPage: NextPage<IIdeasProps> = (props) => {
 									disabled={isFirstClosureExpired ? true : false}
 									onClick={handleShowCreateCategoryModal}
 									icon
-									className={`${isFirstClosureExpired ? 'btn-disabled' : 'btn-primary'} self-start sm:self-stretch`}
+									className={`${
+										isFirstClosureExpired ? 'btn-disabled' : 'btn-primary'
+									} self-start sm:self-stretch lg:self-center`}
 								>
 									<Icon name="FilePlus" size="16" />
 									Submit new idea
