@@ -9,8 +9,10 @@ import { CommentList } from 'components/CommentList';
 import { Icon } from 'components/Icon';
 import { UserContext } from 'components/PrivateRoute';
 import RichTextEditor from 'components/RichTextEditor';
+import { getDepartmentNameFromTopicId } from 'pages/api/department';
 import { getIdeaById, increaseViewCountBy1 } from 'pages/api/idea';
 import { addReactionToIdea, getReactionStateOfUserInIdea, removeReactionFromIdea } from 'pages/api/reaction';
+import { getTopicIdByCategoryId } from 'pages/api/topic';
 import { getAccountByAccountId } from 'pages/api/user';
 import { IAccountData, ICommentsProps, IIdeaData, IReactionData } from 'lib/interfaces';
 
@@ -21,10 +23,13 @@ const IdeaDetail = ({ idea: ideaData }: IIdeaData) => {
 	const [reactionState, setReactionState] = useState<IReactionData['reaction']>();
 	const currentUser = useContext(UserContext);
 
+	const [departmentName, setDepartmentName] = useState('');
+	const [topicId, setTopicId] = useState('');
+
 	const loadCommentData = (comments: ICommentsProps) => {
 		setIdea({
 			...ideaData,
-			comments: comments,
+			comments_list: comments,
 		});
 	};
 
@@ -119,6 +124,15 @@ const IdeaDetail = ({ idea: ideaData }: IIdeaData) => {
 		};
 
 		void getAdditionalInfo();
+
+		const getDepartmentNameAndTopicId = async () => {
+			const { topicId } = await getTopicIdByCategoryId(idea.category_id);
+			topicId && setTopicId(topicId);
+
+			const { department_name } = await getDepartmentNameFromTopicId(topicId);
+			department_name && setDepartmentName(department_name);
+		};
+		void getDepartmentNameAndTopicId();
 	}, [idea, currentUser]);
 	return (
 		<>
@@ -155,7 +169,12 @@ const IdeaDetail = ({ idea: ideaData }: IIdeaData) => {
 					/>
 				</div>
 				{idea?.idea_file_url && (
-					<Attachment idea_title={idea.idea_title} account_id={idea.account_id} value={idea?.idea_file_url} />
+					<Attachment
+						idea_title={idea.idea_title}
+						account_id={idea.account_id}
+						value={idea?.idea_file_url}
+						moreOptions={{ department_name: departmentName, topic_id: topicId }}
+					/>
 				)}
 
 				<div className="flex flex-row gap-2">
@@ -169,7 +188,7 @@ const IdeaDetail = ({ idea: ideaData }: IIdeaData) => {
 						<Icon name="ThumbsUp" size="16" />
 						<p>
 							{
-								(idea.reaction as unknown as []).filter(
+								(idea.reaction_list as unknown as []).filter(
 									(reaction: IReactionData['reaction']) => reaction.reaction_type === 'like'
 								).length
 							}
@@ -185,7 +204,7 @@ const IdeaDetail = ({ idea: ideaData }: IIdeaData) => {
 						<Icon name="ThumbsDown" size="16" />
 						<p>
 							{
-								(idea.reaction as unknown as []).filter(
+								(idea.reaction_list as unknown as []).filter(
 									(reaction: IReactionData['reaction']) => reaction.reaction_type === 'dislike'
 								).length
 							}
@@ -194,14 +213,14 @@ const IdeaDetail = ({ idea: ideaData }: IIdeaData) => {
 					<Button icon className={`btn-secondary btn-reaction`}>
 						<Icon name="MessageSquare" size="16" />
 						<p>
-							{(idea.comments as unknown as []).length > 1
-								? `${(idea.comments as unknown as []).length} comments`
-								: `${(idea.comments as unknown as []).length} comment`}
+							{(idea.comments_list as unknown as []).length > 1
+								? `${(idea.comments_list as unknown as []).length} comments`
+								: `${(idea.comments_list as unknown as []).length} comment`}
 						</p>
 					</Button>
 				</div>
 			</div>
-			{(idea.comments as unknown as []).length > 0 && <hr className="line-divider" />}
+			{(idea.comments_list as unknown as []).length > 0 && <hr className="line-divider" />}
 			<CommentList loadCommentData={loadCommentData} idea={idea} />
 			<hr className="line-divider" />
 			<CommentInput loadCommentData={loadCommentData} idea={idea} user={currentUser} />

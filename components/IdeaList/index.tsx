@@ -3,113 +3,88 @@ import { useEffect, useState } from 'react';
 import { ClipLoader } from 'react-spinners';
 import { IdeaCard } from 'components/IdeaCard';
 import { Select } from 'components/Select';
-import { getIdeasListByCategoryId } from 'pages/api/idea';
-import { getAllIdeasByTopicId, getTopicIdByCategoryId } from 'pages/api/topic';
-import { IIdeasProps } from 'lib/interfaces';
+import { getCategoriesListByTopicId } from 'pages/api/category';
+import { ICategoriesProps, ICategoryData } from 'lib/interfaces';
 
-export const IdeaList = ({ category_id, topic_id, ideas: ideaList }: any) => {
-	const [idea, setIdea] = useState<IIdeasProps>();
+type IdeaProps = {
+	topic_id?: string;
+	ideas: any;
+	handleSortData: (sortBy: string, topic_id?: string) => Promise<void>;
+	handleChangeCategorySort?: (category_id: string) => Promise<void>;
+	sortOptions?: any;
+};
 
+export const IdeaList = ({ topic_id, ideas, handleSortData, handleChangeCategorySort, sortOptions }: IdeaProps) => {
 	const handleChangeSortOption = async (event: React.ChangeEvent<HTMLSelectElement>) => {
-		const limit = 99999;
-		switch (event.target.value) {
-			case 'most-popular': {
-				if (topic_id) {
-					const { ideaList } = await getAllIdeasByTopicId(topic_id as string);
-					setIdea(ideaList as unknown as IIdeasProps);
-					break;
-				} else {
-					const { data } = await getIdeasListByCategoryId(category_id as string);
-					setIdea(data as unknown as IIdeasProps);
-					break;
-				}
-			}
-			case 'most-view': {
-				if (topic_id) {
-					const { ideaList } = await getAllIdeasByTopicId(topic_id as string, limit, 'idea_view', false);
-					setIdea(ideaList as unknown as IIdeasProps);
-					break;
-				} else {
-					const { data } = await getIdeasListByCategoryId(category_id as string, limit, 'idea_view', false);
-					setIdea(data as unknown as IIdeasProps);
-					break;
-				}
-			}
-			case 'newest': {
-				if (topic_id) {
-					const { ideaList } = await getAllIdeasByTopicId(topic_id as string, limit, 'idea_created', false);
-					setIdea(ideaList as unknown as IIdeasProps);
-					break;
-				} else {
-					const { data } = await getIdeasListByCategoryId(category_id as string, limit, 'idea_created', false);
-					setIdea(data as unknown as IIdeasProps);
-					break;
-				}
-			}
-			case 'oldest': {
-				if (topic_id) {
-					const { ideaList } = await getAllIdeasByTopicId(topic_id as string, limit, 'idea_created', true);
-					setIdea(ideaList as unknown as IIdeasProps);
-					break;
-				} else {
-					const { data } = await getIdeasListByCategoryId(category_id as string, limit, 'idea_created', true);
-					setIdea(data as unknown as IIdeasProps);
-					break;
-				}
-			}
-			case 'latest-updated': {
-				if (topic_id) {
-					const { ideaList } = await getAllIdeasByTopicId(topic_id as string, limit, 'idea_updated', false);
-					setIdea(ideaList as unknown as IIdeasProps);
-					break;
-				} else {
-					const { data } = await getIdeasListByCategoryId(category_id as string, limit, 'idea_updated', false);
-					setIdea(data as unknown as IIdeasProps);
-					break;
-				}
-			}
-			default: {
-				if (topic_id) {
-					const { ideaList } = await getAllIdeasByTopicId(topic_id as string);
-					setIdea(ideaList as unknown as IIdeasProps);
-					break;
-				} else {
-					const { data } = await getIdeasListByCategoryId(category_id as string);
-					setIdea(data as unknown as IIdeasProps);
-					break;
-				}
-			}
-		}
+		await handleSortData(event.target.value, topic_id);
 	};
+
+	const handleChangeCategoryOption = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+		handleChangeCategorySort && (await handleChangeCategorySort(event.target.value));
+	};
+
+	const [categoryList, setCategoryList] = useState<ICategoriesProps>();
+
 	useEffect(() => {
-		!idea && setIdea(ideaList as IIdeasProps);
-	}, [idea, ideaList, category_id]);
+		const getAdditionalData = async () => {
+			const { data } = await getCategoriesListByTopicId(topic_id as string);
+			setCategoryList(data as unknown as ICategoriesProps);
+		};
+		void getAdditionalData();
+	}, [topic_id]);
 
 	return (
 		<div className="flex flex-col gap-6 user-list">
-			<div className="flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-end form-edit">
+			<div className="flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-center form-edit">
 				<p className="text-body font-semi-bold users-list">List of ideas</p>
-				<div className="flex flex-col lg:flex-row items-stretch gap-2 lg:items-center">
-					<span className="font-semi-bold">Sort by</span>
-					<Select
-						name="idea-list-sort"
-						defaultValue={'most-popular'}
-						required={false}
-						onChange={handleChangeSortOption}
-					>
-						<option value={'most-popular'}>{'Most Popular'}</option>
-						<option value={'most-view'}>{'Most View'}</option>
-						<option value={'newest'}>{'Newest '}</option>
-						<option value={'oldest'}>{'Oldest '}</option>
-						<option value={'latest-updated'}>{'Latest Updated '}</option>
-					</Select>
+				<div className="flex flex-col lg:flex-row gap-6 ">
+					{handleChangeCategorySort && (
+						<div className="flex flex-col lg:flex-row items-stretch gap-2 lg:items-center">
+							<span className="font-semi-bold">Categories</span>
+							<Select
+								defaultValue={'all-categories'}
+								name="sort-idea-by-category"
+								required
+								onChange={handleChangeCategoryOption}
+							>
+								<option value={'all-categories'}>{'All categories'}</option>
+								{categoryList ? (
+									(categoryList as unknown as []).map((category) => (
+										<option
+											key={(category as ICategoryData['category']).category_id}
+											value={(category as ICategoryData['category']).category_id}
+										>
+											{(category as ICategoryData['category']).category_name}
+										</option>
+									))
+								) : (
+									<ClipLoader />
+								)}
+							</Select>
+						</div>
+					)}
+					<div className="flex flex-col lg:flex-row items-stretch gap-2 lg:items-center">
+						<span className="font-semi-bold">Sort by</span>
+						<Select
+							name="idea-list-sort"
+							defaultValue={'most-popular'}
+							required={false}
+							onChange={handleChangeSortOption}
+						>
+							<option value={'most-popular'}>{'Most Popular'}</option>
+							<option value={'most-view'}>{'Most View'}</option>
+							<option value={'newest'}>{'Newest '}</option>
+							<option value={'oldest'}>{'Oldest '}</option>
+							<option value={'latest-updated'}>{'Latest Updated '}</option>
+						</Select>
+					</div>
 				</div>
 			</div>
 			<div className="lg:p-6 lg:shadow-0">
 				<table>
 					<tbody>
-						{idea ? (
-							(idea as unknown as []).map((idea) => <IdeaCard key={idea['idea_id']} idea={idea} />)
+						{ideas ? (
+							(ideas as unknown as []).map((idea) => <IdeaCard key={idea['idea_id']} idea={idea} />)
 						) : (
 							<tr>
 								<td rowSpan={7}>

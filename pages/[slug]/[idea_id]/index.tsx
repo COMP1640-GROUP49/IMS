@@ -1,12 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { GetServerSideProps, NextPage } from 'next';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import Router, { useRouter } from 'next/router';
+import { ParsedUrlQuery } from 'querystring';
 import { useCallback, useContext, useState } from 'react';
-import { ClipLoader } from 'react-spinners';
 import { Button } from 'components/Button';
-import { CategoryList } from 'components/CategoryList';
 import { EditIdeaModal } from 'components/Form/form';
 import { Header } from 'components/Header';
 import { Icon } from 'components/Icon';
@@ -15,42 +13,56 @@ import { MoreMenu } from 'components/Menu';
 import { MetaTags } from 'components/MetaTags';
 import Modal from 'components/Modal';
 import { UserContext } from 'components/PrivateRoute';
-import { getCategoriesListByTopicId } from 'pages/api/category';
+import { getCategoryById } from 'pages/api/category';
+import { getDepartmentNameFromTopicId } from 'pages/api/department';
 import { deleteIdea, getIdeaById } from 'pages/api/idea';
-import { getTopicByName } from 'pages/api/topic';
-import { ICategoryData, IIdeaData, ITopicData } from 'lib/interfaces';
+import { getTopicIdByCategoryId } from 'pages/api/topic';
+import { getAccountByAccountId } from 'pages/api/user';
+import { ICategoryData, IIdeaData, IIdeasProps } from 'lib/interfaces';
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-	const slug = context.params!['page'];
-	const { topicData } = await getTopicByName(slug as string);
+interface IParams extends ParsedUrlQuery {
+	category_name: string | string[] | undefined;
+}
 
-	let data;
-	if (topicData) {
-		const { data: categoryList } = await getCategoriesListByTopicId(
-			(topicData as unknown as ITopicData['topic']).topic_id as unknown as string
-		);
-		data = categoryList;
-	} else {
-		const { ideaData } = await getIdeaById(slug as string);
-		data = ideaData;
-	}
+export const getServerSideProps: GetServerSideProps = async ({ params }) => {
+	const { idea_id: slug } = params as IParams;
+	const { ideaData } = await getIdeaById(slug as string);
+	const { userData } = await getAccountByAccountId(
+		(ideaData as unknown as IIdeaData['idea']).account_id as unknown as string
+	);
+	const { categoryData } = await getCategoryById(
+		(ideaData as unknown as IIdeaData['idea']).category_id as unknown as string
+	);
 
+	const { topicId } = await getTopicIdByCategoryId((categoryData as unknown as ICategoryData['category']).category_id);
+
+	const { department_name: departmentName } = await getDepartmentNameFromTopicId(topicId);
 	return {
 		props: {
+			categoryData,
+			userData,
 			slug,
-			data,
+			ideaData,
+			topicId,
+			departmentName,
 		},
 	};
 };
 
-const Slug1: NextPage = (props) => {
-	const user = useContext(UserContext);
-	const { slug }: any = props;
-	const { data }: any = props;
-	const categories = data as ICategoryData['category'];
-	const idea = data as IIdeaData['idea'];
-	const [showMoreMenu, setShowMoreMenu] = useState(false);
+const IdeaDetailPage: NextPage<IIdeasProps> = (props) => {
 	const { asPath } = useRouter();
+	const { slug }: any = props;
+
+	const { ideaData }: any = props;
+	const idea = ideaData as IIdeaData['idea'];
+
+	const { categoryData }: any = props;
+	const category = categoryData as ICategoryData['category'];
+
+	const { topicId }: any = props;
+	const { departmentName }: any = props;
+
+	const [showMoreMenu, setShowMoreMenu] = useState(false);
 
 	const handleCloseMoreMenu = () => {
 		setShowMoreMenu(false);
@@ -75,28 +87,24 @@ const Slug1: NextPage = (props) => {
 		// setShowConfirmIdeaModal(false);
 		setShowDeleteIdeaModal(!showDeleteIdeaModal);
 	}, [showDeleteIdeaModal]);
+
+	const handleCloseDeleteModal = useCallback(() => {
+		setShowDeleteIdeaModal(false);
+	}, []);
+
 	const router = useRouter();
 	const handleDeleteIdeaModal = async () => {
 		await deleteIdea(idea.idea_id, idea.idea_title, departmentName as string, topicId as string, idea.account_id);
 		await router.replace(asPath.replace(idea.idea_id.toLowerCase(), ''));
 	};
 
-	const handleCloseDeleteModal = useCallback(() => {
-		setShowDeleteIdeaModal(false);
-	}, []);
+	const currentUser = useContext(UserContext);
 
 	return (
 		<>
-			<MetaTags title="IMS" />
-			<Header />
-			{+user?.user_metadata?.role === 1 ? (
-				<main className="body-container flex flex-col gap-6 below-navigation-bar">
-					<div className="flex lg:flex-row lg:justify-between lg:items-center flex-col gap-6">
-						<div className="flex flex-col gap-2"></div>
-					</div>
-					<CategoryList categories={categories} />
-				</main>
-			) : +user?.user_metadata?.role === 3 ? (
+			<>
+				<MetaTags title={``} description={`Ideas in category`} />
+				<Header />
 				<main className="body-container flex flex-col gap-6 below-navigation-bar">
 					<div className="flex flex-col gap-3 lg:justify-between">
 						<Link href={asPath.replace((slug as string).toLowerCase(), '')}>
@@ -107,12 +115,12 @@ const Slug1: NextPage = (props) => {
 						</Link>
 						<div className="flex gap-2 items-center">
 							<Icon size="16" name="Hash" />
-							<p>{categories?.category_name}</p>
+							<p>{category?.category_name}</p>
 						</div>
 						<div className="flex justify-between items-center">
 							<h1>{idea.idea_title}</h1>
 
-							{user && idea.account_id === user.id && (
+							{currentUser && idea.account_id === currentUser.id && (
 								<Button className="more-option relative" onClick={handleShowMoreMenu} icon>
 									<Icon size="24" name="MoreHorizontal" />
 									{showMoreMenu && (
@@ -135,7 +143,7 @@ const Slug1: NextPage = (props) => {
 					<IdeaDetail idea={idea} />
 					{showEditIdeaModal && (
 						<Modal onCancel={handleCloseEditIdeaModal} headerText={`Edit ${idea.idea_title}`}>
-							<EditIdeaModal duplicate={true} ideaData={idea} />
+							<EditIdeaModal duplicate={true} topic_id={topicId as string} ideaData={idea} />
 						</Modal>
 					)}
 
@@ -158,10 +166,9 @@ const Slug1: NextPage = (props) => {
 						</Modal>
 					)}
 				</main>
-			) : (
-				<ClipLoader />
-			)}
+			</>
 		</>
 	);
 };
-export default Slug1;
+
+export default IdeaDetailPage;

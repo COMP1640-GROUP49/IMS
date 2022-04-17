@@ -27,7 +27,7 @@ const PrivateRoute = ({ children }: any) => {
 					}
 					break;
 				default:
-					if (asPath === '/login' || asPath.includes('/admin/')) {
+					if (asPath === '/login' || asPath.includes('/admin/') || asPath.startsWith('/admin')) {
 						void router.push('/');
 					}
 					break;

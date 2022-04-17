@@ -93,3 +93,12 @@ export const getCategoryListByTopicId = async (topicId: string, limit?: number) 
 		.limit(limit || noLimit);
 	return { data, error };
 };
+
+let categoryDataExisted: ICategoryData['category'];
+export const CheckCategoryExisted = async (categoryName: string) => {
+	const { data } = await supabase.from('categories').select('category_name').ilike('category_name', categoryName);
+	if (data && data.length > 0) {
+		categoryDataExisted = data[0] as ICategoryData['category'];
+	}
+	return categoryDataExisted;
+};

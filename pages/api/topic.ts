@@ -1,4 +1,4 @@
-import { ICategoriesProps, ICategoryData, IIdeasProps, ITopicData, ITopicsProps, IIdeaData } from 'lib/interfaces';
+import { ICategoriesProps, IIdeasProps, ITopicData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import supabase from 'utils/supabase';
 
@@ -8,6 +8,7 @@ export const getTopicsListByDepartmentId = async (department_id: string, limit?:
 		.from('topics')
 		.select(`*, categories(topic_id, ideas(category_id))`)
 		.match({ department_id: department_id })
+		.order('topic_start_date', { ascending: true })
 		.limit(limit || noLimit);
 	return { data, error };
 };
@@ -99,12 +100,13 @@ let ideaTopicData: ITopicData['topic'];
 let ideaTopicCategories: ICategoriesProps;
 let ideaList: IIdeasProps;
 
+// https://github.com/PostgREST/postgrest/issues/1414
 export const getAllIdeasByTopicId = async (topicId: string, limit?: number, sortBy?: string, ascending?: boolean) => {
 	const noLimit = 999999;
 	if (sortBy || ascending) {
 		const { data, error } = await supabase
 			.from('topics')
-			.select(`*, categories(ideas(*, comments!comments_idea_id_fkey(*), reaction(*)))`)
+			.select(`*, categories(ideas(*, comment_list:comments!comments_idea_id_fkey(*), reaction_list:reaction(*)))`)
 			.match({ topic_id: topicId })
 			.order(sortBy as string, { foreignTable: 'categories.ideas', ascending: ascending as boolean });
 		if (data && (data as []).length !== 0) {
@@ -120,9 +122,9 @@ export const getAllIdeasByTopicId = async (topicId: string, limit?: number, sort
 	} else {
 		const { data, error } = await supabase
 			.from('topics')
-			.select(`*, categories(ideas(*, comments!comments_idea_id_fkey(*), reaction(*)))`)
+			.select(`*, categories(ideas(*, comments_list:comments!comments_idea_id_fkey(*), reaction_list:reaction(*)))`)
 			.match({ topic_id: topicId })
-			.order('popular_point', { foreignTable: 'categories.ideas', ascending: false });
+			.order('idea_created', { foreignTable: 'categories.ideas', ascending: false });
 
 		if (data && (data as []).length !== 0) {
 			ideaTopicData = data[0] as ITopicData['topic'];
@@ -133,6 +135,33 @@ export const getAllIdeasByTopicId = async (topicId: string, limit?: number, sort
 				(idea['ideas'] as []).forEach((idea) => tempResult.push(idea))
 			);
 			ideaList = tempResult as unknown as IIdeasProps;
+		}
+	}
+	return { ideaList };
+};
+
+let topicDataExisted: ITopicData['topic'];
+export const CheckTopicExisted = async (topicName: string) => {
+	const { data } = await supabase.from('topics').select('topic_name').ilike('topic_name', topicName);
+	if (data && data.length > 0) {
+		topicDataExisted = data[0] as ITopicData['topic'];
+	}
+	return topicDataExisted;
+};
+
+export const getAllIdeasByTopicIdNew = async (topicId: string, sortBy?: string) => {
+	if (sortBy) {
+		const { data } = await supabase.rpc('get_all_ideas_by_topic_id', { sort_by_val: sortBy, topic_id_val: topicId });
+		if (data && (data as unknown as []).length !== 0) {
+			ideaList = data as unknown as IIdeasProps;
+		}
+	} else {
+		const { data } = await supabase.rpc('get_all_ideas_by_topic_id', {
+			sort_by_val: 'most-popular',
+			topic_id_val: topicId,
+		});
+		if (data && (data as unknown as []).length !== 0) {
+			ideaList = data as unknown as IIdeasProps;
 		}
 	}
 	return { ideaList };

@@ -25,17 +25,18 @@ import {
 	uploadAvatar,
 } from 'pages/api/admin';
 import { IUserData } from 'pages/api/auth';
-import { createNewCategory, getCategoryById, getCategoryListByTopicId, updateCategory } from 'pages/api/category';
+import { CheckCategoryExisted, createNewCategory, getCategoryListByTopicId, updateCategory } from 'pages/api/category';
 import {
 	createDepartment,
 	getDepartmentNameFromTopicId,
 	getDepartmentList,
 	updateDepartment,
 	getDepartmentIdByName,
+	CheckDepartmentExisted,
 } from 'pages/api/department';
 import { sendEmailToCoordinatorInDepartment } from 'pages/api/email';
 import { createNewIdea, removeIdeaAttachment, updateIdea, uploadAttachment } from 'pages/api/idea';
-import { createNewTopic, getTopicById, getTopicIdByCategoryId, updateTopic } from 'pages/api/topic';
+import { CheckTopicExisted, createNewTopic, getTopicById, getTopicIdByCategoryId, updateTopic } from 'pages/api/topic';
 import { getAccountByAccountId, getAllCoordinatorEmailByDepartmentId, updateProfile } from 'pages/api/user';
 import {
 	ITopicData,
@@ -405,222 +406,220 @@ export const EditUserModal = ({ account }: IAccountData) => {
 		<>
 			<MetaTags title={`Edit @${account.username} account`} description="Create a new user account" />
 			{/* {console.log('formdataChange', formDataChanges, isFormValidated, formValidation)} */}
-			<main>
-				<div className="flex flex-col gap-6">
-					<form onSubmit={handleUpdateAccount} className="form-edit flex flex-col gap-6">
-						<div className="flex flex-col gap-4">
-							<div className="flex flex-col gap-2">
-								<Label size="text-subtitle">Account</Label>
-								<hr />
-							</div>
-							<div className="flex flex-col gap-2">
-								<Label size="text-normal">Username</Label>
-								<Input
-									name="username"
-									value={formData?.username || ''}
-									onChange={handleChange}
-									required
-									placeholder={"Input account's username"}
-									type="text"
-								/>
-								{formValidation &&
-									(formValidation['usernameValidation'] === 'success' ? (
-										<div className="label-success">This username is available.</div>
-									) : formValidation['usernameValidation'] === 'warning' ? (
-										<div className="label-warning">Please input the username.</div>
-									) : formValidation['usernameValidation'] === 'error' ? (
-										<div className="label-error">This username is not available. Please choose another one.</div>
-									) : null)}
-							</div>
-							<div className="flex flex-col gap-2">
-								<Label size="text-normal">New Password</Label>
-								<Input
-									name="encrypted_password"
-									onChange={handleChange}
-									required={false}
-									placeholder={"Input account's new password if needed to change"}
-									type="password"
-								/>
-								{/* TODO: Show/hide password */}
-								{/* <button>
+			<div className="flex flex-col gap-6">
+				<form onSubmit={handleUpdateAccount} className="form-edit flex flex-col gap-6">
+					<div className="flex flex-col gap-4">
+						<div className="flex flex-col gap-2">
+							<Label size="text-subtitle">Account</Label>
+							<hr />
+						</div>
+						<div className="flex flex-col gap-2">
+							<Label size="text-normal">Username</Label>
+							<Input
+								name="username"
+								value={formData?.username || ''}
+								onChange={handleChange}
+								required
+								placeholder={"Input account's username"}
+								type="text"
+							/>
+							{formValidation &&
+								(formValidation['usernameValidation'] === 'success' ? (
+									<div className="label-success">This username is available.</div>
+								) : formValidation['usernameValidation'] === 'warning' ? (
+									<div className="label-warning">Please input the username.</div>
+								) : formValidation['usernameValidation'] === 'error' ? (
+									<div className="label-error">This username is not available. Please choose another one.</div>
+								) : null)}
+						</div>
+						<div className="flex flex-col gap-2">
+							<Label size="text-normal">New Password</Label>
+							<Input
+								name="encrypted_password"
+								onChange={handleChange}
+								required={false}
+								placeholder={"Input account's new password if needed to change"}
+								type="password"
+							/>
+							{/* TODO: Show/hide password */}
+							{/* <button>
 									<Icon name="Eye" size="32" color="gray" className="absolute bottom-4 right-2"></Icon>
 								</button> */}
-								{formValidation &&
-									(formValidation['passwordValidation'] === 'success' ? (
-										<div className="label-success">This password is valid.</div>
-									) : formValidation['passwordValidation'] === 'error' ? (
-										<div className="label-error">Password must be greater than 6 characters.</div>
-									) : null)}
-							</div>
-							<div id="select-role" className="flex flex-col gap-2">
-								<Label size="text-normal">Role</Label>
-								<Select
-									value={formData?.account_role?.role_id as string}
-									name="account_role"
-									required
-									onChange={handleChange}
-								>
-									<option disabled value={'disabled'}>
-										{"Select account's role"}
-									</option>
-									<option value="0">Admin</option>
-									<option value="1">QA Manager</option>
-									<option value="2">QA Coordinator</option>
-									<option value="3">Staff</option>
-								</Select>
-								{formValidation &&
-									(formValidation['roleValidation'] === 'error' ? (
-										<div className="label-warning">Please select role for account.</div>
-									) : null)}
-							</div>
-							<div id="select-department" className="flex flex-col gap-2">
-								<Label size="text-normal">Department</Label>
-								<Select
-									name="account_department"
-									value={formData?.account_department?.department_id as string}
-									required
-									onChange={handleChange}
-								>
-									<option disabled value={'disabled'}>
-										{"Select account's department"}
-									</option>
-									{departmentList ? (
-										(departmentList as unknown as []).map((department) => (
-											<option
-												key={(department as IDepartmentData['department']).department_id}
-												value={(department as IDepartmentData['department']).department_id}
-											>
-												{(department as IDepartmentData['department']).department_name}
-											</option>
-										))
-									) : (
-										<ClipLoader />
-									)}
-								</Select>
-								{formValidation &&
-									(formValidation['roleValidation'] === 'error' ? (
-										<div className="label-warning">Please select department for account.</div>
-									) : null)}
-							</div>
-							<div className="flex flex-col gap-2">
-								<Label size="text-normal">Email</Label>
-								<Input
-									name="account_email"
-									value={formData?.account_email || ''}
-									onChange={handleChange}
-									required
-									placeholder={"Input account's email"}
-									type="email"
-								/>
-								{formValidation &&
-									(formValidation['emailValidation'] === 'success' ? (
-										<div className="label-success">This email address is valid.</div>
-									) : formValidation['emailValidation'] === 'warning' ? (
-										<div className="label-warning">Please input the email address.</div>
-									) : formValidation['emailValidation'] === 'error-format' ? (
-										<div className="label-error">This email has an invalid email address format. Please try again.</div>
-									) : formValidation['emailValidation'] === 'error-existed' ? (
-										<div className="label-error">
-											This email has been registered in the system. Please try another one.
-										</div>
-									) : null)}
-							</div>
+							{formValidation &&
+								(formValidation['passwordValidation'] === 'success' ? (
+									<div className="label-success">This password is valid.</div>
+								) : formValidation['passwordValidation'] === 'error' ? (
+									<div className="label-error">Password must be greater than 6 characters.</div>
+								) : null)}
 						</div>
-						<div className="flex flex-col gap-4">
-							<div className="flex flex-col gap-2">
-								<Label optional size="text-subtitle">
-									Information
-								</Label>
-								<hr />
-							</div>
-							<div className="flex flex-col gap-2">
-								<Label size="text-normal">Full name</Label>
-								<Input
-									name="account_full_name"
-									value={formData.account_full_name || ''}
-									onChange={handleChange}
-									required={false}
-									placeholder={"Input account's full name"}
-									type="text"
-								/>
-							</div>
-
-							<div className="flex flex-col gap-2">
-								<Label size="text-normal">Address</Label>
-								<Input
-									name="account_address"
-									value={formData.account_address || ''}
-									onChange={handleChange}
-									required={false}
-									placeholder={"Input account's address"}
-									type="text"
-								/>
-							</div>
-							<div className="flex flex-col gap-2">
-								<Label size="text-normal">Phone number</Label>
-								<Input
-									name="account_phone_number"
-									value={formData.account_phone_number || ''}
-									onChange={handleChange}
-									required={false}
-									placeholder={"Input account's phone number"}
-									type="tel"
-								/>
-								{formValidation && formValidation['phoneValidation'] === 'warning' ? (
-									<div className="label-warning">Invalid phone number format.</div>
-								) : formValidation && formValidation['phoneValidation'] === 'success' ? (
-									<div className="label-success">This phone number is valid.</div>
-								) : null}
-							</div>
-							<div className="flex flex-col gap-2">
-								<Label size="text-normal">Avatar</Label>
-								<AvatarUploader value={formData.avatar_url} fileUpdate={fileUpdate} size="150" />
-							</div>
+						<div id="select-role" className="flex flex-col gap-2">
+							<Label size="text-normal">Role</Label>
+							<Select
+								value={formData?.account_role?.role_id as string}
+								name="account_role"
+								required
+								onChange={handleChange}
+							>
+								<option disabled value={'disabled'}>
+									{"Select account's role"}
+								</option>
+								<option value="0">Admin</option>
+								<option value="1">QA Manager</option>
+								<option value="2">QA Coordinator</option>
+								<option value="3">Staff</option>
+							</Select>
+							{formValidation &&
+								(formValidation['roleValidation'] === 'error' ? (
+									<div className="label-warning">Please select role for account.</div>
+								) : null)}
 						</div>
-						<div className="flex justify-between sm:flex-col sm:gap-4">
-							<Button
-								type="submit"
-								disabled={!formDataChanges || !isFormValidated ? true : false}
-								icon={true}
-								className={`${
-									isFormValidated && formDataChanges ? `btn-secondary` : `btn-disabled`
-								}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+						<div id="select-department" className="flex flex-col gap-2">
+							<Label size="text-normal">Department</Label>
+							<Select
+								name="account_department"
+								value={formData?.account_department?.department_id as string}
+								required
+								onChange={handleChange}
 							>
-								<Icon name="Save" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
-								Save changes
-							</Button>
-							<Button
-								type="button"
-								onClick={handleShowDeleteModal}
-								icon={true}
-								className={` btn-primary md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
-							>
-								<Icon name="Save" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
-								Delete account
-							</Button>
-							{showDeleteModal && (
-								<Modal onCancel={handleCloseDeleteModal}>
-									<div className="flex flex-col gap-6 justify-center">
-										<p>
-											Are you sure you want to delete this account{' '}
-											<span className="font-semi-bold">@{account.username}</span>?
-										</p>
-										<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
-											{/*TODO: Edit delete button box-shadow*/}
-											<Button onClick={handleDeleteAccount} className="btn-danger w-full">
-												Delete it
-											</Button>
-											<Button onClick={handleCloseDeleteModal} className="btn-secondary w-full">
-												Cancel
-											</Button>
-										</div>
+								<option disabled value={'disabled'}>
+									{"Select account's department"}
+								</option>
+								{departmentList ? (
+									(departmentList as unknown as []).map((department) => (
+										<option
+											key={(department as IDepartmentData['department']).department_id}
+											value={(department as IDepartmentData['department']).department_id}
+										>
+											{(department as IDepartmentData['department']).department_name}
+										</option>
+									))
+								) : (
+									<ClipLoader />
+								)}
+							</Select>
+							{formValidation &&
+								(formValidation['roleValidation'] === 'error' ? (
+									<div className="label-warning">Please select department for account.</div>
+								) : null)}
+						</div>
+						<div className="flex flex-col gap-2">
+							<Label size="text-normal">Email</Label>
+							<Input
+								name="account_email"
+								value={formData?.account_email || ''}
+								onChange={handleChange}
+								required
+								placeholder={"Input account's email"}
+								type="email"
+							/>
+							{formValidation &&
+								(formValidation['emailValidation'] === 'success' ? (
+									<div className="label-success">This email address is valid.</div>
+								) : formValidation['emailValidation'] === 'warning' ? (
+									<div className="label-warning">Please input the email address.</div>
+								) : formValidation['emailValidation'] === 'error-format' ? (
+									<div className="label-error">This email has an invalid email address format. Please try again.</div>
+								) : formValidation['emailValidation'] === 'error-existed' ? (
+									<div className="label-error">
+										This email has been registered in the system. Please try another one.
 									</div>
-								</Modal>
-							)}
+								) : null)}
 						</div>
-					</form>
-				</div>
-			</main>
+					</div>
+					<div className="flex flex-col gap-4">
+						<div className="flex flex-col gap-2">
+							<Label optional size="text-subtitle">
+								Information
+							</Label>
+							<hr />
+						</div>
+						<div className="flex flex-col gap-2">
+							<Label size="text-normal">Full name</Label>
+							<Input
+								name="account_full_name"
+								value={formData.account_full_name || ''}
+								onChange={handleChange}
+								required={false}
+								placeholder={"Input account's full name"}
+								type="text"
+							/>
+						</div>
+
+						<div className="flex flex-col gap-2">
+							<Label size="text-normal">Address</Label>
+							<Input
+								name="account_address"
+								value={formData.account_address || ''}
+								onChange={handleChange}
+								required={false}
+								placeholder={"Input account's address"}
+								type="text"
+							/>
+						</div>
+						<div className="flex flex-col gap-2">
+							<Label size="text-normal">Phone number</Label>
+							<Input
+								name="account_phone_number"
+								value={formData.account_phone_number || ''}
+								onChange={handleChange}
+								required={false}
+								placeholder={"Input account's phone number"}
+								type="tel"
+							/>
+							{formValidation && formValidation['phoneValidation'] === 'warning' ? (
+								<div className="label-warning">Invalid phone number format.</div>
+							) : formValidation && formValidation['phoneValidation'] === 'success' ? (
+								<div className="label-success">This phone number is valid.</div>
+							) : null}
+						</div>
+						<div className="flex flex-col gap-2">
+							<Label size="text-normal">Avatar</Label>
+							<AvatarUploader value={formData.avatar_url} fileUpdate={fileUpdate} size="150" />
+						</div>
+					</div>
+					<div className="flex justify-between sm:flex-col sm:gap-4">
+						<Button
+							type="submit"
+							disabled={!formDataChanges || !isFormValidated ? true : false}
+							icon={true}
+							className={`${
+								isFormValidated && formDataChanges ? `btn-secondary` : `btn-disabled`
+							}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+						>
+							<Icon name="Save" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+							Save changes
+						</Button>
+						<Button
+							type="button"
+							onClick={handleShowDeleteModal}
+							icon={true}
+							className={` btn-primary md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+						>
+							<Icon name="Save" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+							Delete account
+						</Button>
+						{showDeleteModal && (
+							<Modal onCancel={handleCloseDeleteModal}>
+								<div className="flex flex-col gap-6 justify-center">
+									<p>
+										Are you sure you want to delete this account{' '}
+										<span className="font-semi-bold">@{account.username}</span>?
+									</p>
+									<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
+										{/*TODO: Edit delete button box-shadow*/}
+										<Button onClick={handleDeleteAccount} className="btn-danger w-full">
+											Delete it
+										</Button>
+										<Button onClick={handleCloseDeleteModal} className="btn-secondary w-full">
+											Cancel
+										</Button>
+									</div>
+								</div>
+							</Modal>
+						)}
+					</div>
+				</form>
+			</div>
 		</>
 	);
 };
@@ -948,16 +947,29 @@ export const CreateDepartmentModal = () => {
 	interface IFormValidation {
 		departmentNameValidation: string;
 	}
-	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+	const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
 		setFormDepartment({
 			...formDepartment!,
 			[event.target.name]: event.target.value.trim(),
 		});
-		if (event.target.name.trim() !== '') {
-			setFormValidation({
-				...formValidation!,
-				departmentNameValidation: 'success',
-			});
+		if ((event.target.name = 'department_name')) {
+			if (event.target.value.trim() !== '') {
+				const departmentCheckExistedResult = await CheckDepartmentExisted(event.target.value.trim());
+				if (
+					departmentCheckExistedResult &&
+					departmentCheckExistedResult.department_name.toLowerCase() === event.target.value.trim().toLowerCase()
+				) {
+					setFormValidation({
+						...formValidation,
+						departmentNameValidation: 'error-existed',
+					});
+				} else {
+					setFormValidation({
+						...formValidation!,
+						departmentNameValidation: 'success',
+					});
+				}
+			}
 		}
 	};
 	const handleCreateDepartment = async (event: React.FormEvent<HTMLFormElement> | HTMLFormElement) => {
@@ -990,6 +1002,16 @@ export const CreateDepartmentModal = () => {
 							placeholder={"Input department's name"}
 							type="text"
 						/>
+						{formValidation &&
+							(formValidation['departmentNameValidation'] === 'error-existed' ? (
+								<div className="label-error">
+									This department has existed. Please choose another name and try again.
+								</div>
+							) : (
+								formValidation['departmentNameValidation'] === 'success' && (
+									<div className="label-success">This department name is valid.</div>
+								)
+							))}
 					</div>
 					<Button
 						disabled={!isFormValidated}
@@ -1016,18 +1038,38 @@ export const EditDepartmentModal = ({ department }: any) => {
 	const [isFormDataChanges, setIsFormDataChanges] = useState(false);
 	const [formValidation, setFormValidation] = useState<IFormValidation>();
 	interface IFormValidation {
-		departmentName: string;
+		departmentNameValidation: string;
 	}
-	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+	const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
 		setEditDepartment({
 			...editDepartment,
 			[event.target.name]: event.target.value,
 		});
-		if (event.target.name !== '') {
-			setFormValidation({
-				...formValidation!,
-				departmentName: 'success',
-			});
+		if ((event.target.name = 'department_name')) {
+			if (event.target.value.trim() !== '') {
+				if (event.target.value === (department as IDepartmentData['department']).department_name) {
+					setFormValidation({
+						...formValidation,
+						departmentNameValidation: 'loaded',
+					});
+				} else {
+					const departmentCheckExistedResult = await CheckDepartmentExisted(event.target.value.trim());
+					if (
+						departmentCheckExistedResult &&
+						departmentCheckExistedResult.department_name.toLowerCase() === event.target.value.trim().toLowerCase()
+					) {
+						setFormValidation({
+							...formValidation,
+							departmentNameValidation: 'error-existed',
+						});
+					} else {
+						setFormValidation({
+							...formValidation!,
+							departmentNameValidation: 'success',
+						});
+					}
+				}
+			}
 		}
 	};
 
@@ -1037,7 +1079,7 @@ export const EditDepartmentModal = ({ department }: any) => {
 		router.reload();
 	};
 	useEffect(() => {
-		if (formValidation?.departmentName === 'success') {
+		if (formValidation?.departmentNameValidation === 'success') {
 			setIsFormValidated(true);
 		} else {
 			setIsFormValidated(false);
@@ -1067,6 +1109,16 @@ export const EditDepartmentModal = ({ department }: any) => {
 							placeholder={"Input department's name"}
 							type="text"
 						/>
+						{formValidation &&
+							(formValidation['departmentNameValidation'] === 'error-existed' ? (
+								<div className="label-error">
+									This department has existed. Please choose another name and try again.
+								</div>
+							) : (
+								formValidation['departmentNameValidation'] === 'success' && (
+									<div className="label-success">This department name is valid.</div>
+								)
+							))}
 					</div>
 					<Button
 						disabled={!isFormValidated && !isFormDataChanges}
@@ -1098,7 +1150,7 @@ export const CreateTopicModal = ({ department_id }: any) => {
 
 	const [isFormValidated, setIsFormValidated] = useState(false);
 
-	const handleChange = (
+	const handleChange = async (
 		event:
 			| React.ChangeEvent<HTMLInputElement>
 			| React.ChangeEvent<HTMLSelectElement>
@@ -1111,16 +1163,27 @@ export const CreateTopicModal = ({ department_id }: any) => {
 		});
 
 		if (event.target.name === 'topic_name') {
-			if (event.target.value === '') {
+			if (event.target.value.trim() === '') {
 				setFormValidation({
 					...formValidation,
 					topicNameValidation: 'error',
 				});
 			} else {
-				setFormValidation({
-					...formValidation,
-					topicNameValidation: 'success',
-				});
+				const topicCheckExistedResult = await CheckTopicExisted(event.target.value.trim());
+				if (
+					topicCheckExistedResult &&
+					topicCheckExistedResult.topic_name.toLowerCase() === event.target.value.trim().toLowerCase()
+				) {
+					setFormValidation({
+						...formValidation,
+						topicNameValidation: 'error-existed',
+					});
+				} else {
+					setFormValidation({
+						...formValidation,
+						topicNameValidation: 'success',
+					});
+				}
 			}
 		}
 	};
@@ -1146,86 +1209,86 @@ export const CreateTopicModal = ({ department_id }: any) => {
 	return (
 		<>
 			<MetaTags title={`Create New Topic`} description="Create a new user account" />
-			<main>
-				<div className="flex flex-col gap-6">
-					<form onSubmit={handleCreateNewTopic} className="flex flex-col gap-6">
-						<div className="flex flex-col gap-4">
-							<div className="form-field">
-								<Label size="text-normal">Topic Name</Label>
-								<Input
-									onChange={handleChange}
-									value={(formData as ITopicData['topic'])?.topic_name}
-									name="topic_name"
-									required={true}
-									placeholder={"Input topics's name"}
-									type="text"
-								/>
-								{formValidation &&
-									(formValidation['topicNameValidation'] === 'success' ? (
-										<div className="label-success">This topic name is valid.</div>
-									) : formValidation['topicNameValidation'] === 'error' ? (
-										<div className="label-warning">Please input the topic name.</div>
-									) : null)}
-							</div>
-							<div className="form-field">
-								<Label size="text-normal">Start Date</Label>
-								<Input
-									onChange={handleChange}
-									value={(formData as ITopicData['topic'])?.topic_start_date}
-									name="topic_start_date"
-									required={true}
-									placeholder={"Input topics's start date"}
-									type="datetime-local"
-								/>
-							</div>
-							<div className="form-field">
-								<Label size="text-normal">First Closure Date</Label>
-								<Input
-									onChange={handleChange}
-									value={(formData as ITopicData['topic'])?.topic_first_closure_date}
-									name="topic_first_closure_date"
-									required={true}
-									placeholder={"Input topics's first closure date"}
-									type="datetime-local"
-								/>
-							</div>
-							<div className="form-field">
-								<Label size="text-normal">Final Closure Date</Label>
-								<Input
-									onChange={handleChange}
-									value={(formData as ITopicData['topic'])?.topic_final_closure_date}
-									name="topic_final_closure_date"
-									required={true}
-									placeholder={"Input topics's final closure date"}
-									type="datetime-local"
-								/>
-							</div>
-							<div className="form-field">
-								<Label optional size="text-normal">
-									Topic Description
-								</Label>
-								<TextArea
-									onChange={handleChange}
-									value={(formData as ITopicData['topic'])?.topic_description}
-									name="topic_description"
-									required={false}
-									placeholder={"Input topics's description"}
-								/>
-							</div>
-							<Button
-								disabled={!isFormValidated}
-								icon={true}
-								className={`${
-									isFormValidated ? `btn-primary` : `btn-disabled`
-								}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
-							>
-								<Icon name="FolderPlus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
-								Create topic
-							</Button>
+			<div className="flex flex-col gap-6">
+				<form onSubmit={handleCreateNewTopic} className="flex flex-col gap-6">
+					<div className="flex flex-col gap-4">
+						<div className="form-field">
+							<Label size="text-normal">Topic Name</Label>
+							<Input
+								onChange={handleChange}
+								value={(formData as ITopicData['topic'])?.topic_name}
+								name="topic_name"
+								required={true}
+								placeholder={"Input topics's name"}
+								type="text"
+							/>
+							{formValidation &&
+								(formValidation['topicNameValidation'] === 'success' ? (
+									<div className="label-success">This topic name is valid.</div>
+								) : formValidation['topicNameValidation'] === 'error' ? (
+									<div className="label-warning">Please input the topic name.</div>
+								) : formValidation['topicNameValidation'] === 'error-existed' ? (
+									<div className="label-error">This topic has existed. Please choose another name and try again.</div>
+								) : null)}
 						</div>
-					</form>
-				</div>
-			</main>
+						<div className="form-field">
+							<Label size="text-normal">Start Date</Label>
+							<Input
+								onChange={handleChange}
+								value={(formData as ITopicData['topic'])?.topic_start_date}
+								name="topic_start_date"
+								required={true}
+								placeholder={"Input topics's start date"}
+								type="datetime-local"
+							/>
+						</div>
+						<div className="form-field">
+							<Label size="text-normal">First Closure Date</Label>
+							<Input
+								onChange={handleChange}
+								value={(formData as ITopicData['topic'])?.topic_first_closure_date}
+								name="topic_first_closure_date"
+								required={true}
+								placeholder={"Input topics's first closure date"}
+								type="datetime-local"
+							/>
+						</div>
+						<div className="form-field">
+							<Label size="text-normal">Final Closure Date</Label>
+							<Input
+								onChange={handleChange}
+								value={(formData as ITopicData['topic'])?.topic_final_closure_date}
+								name="topic_final_closure_date"
+								required={true}
+								placeholder={"Input topics's final closure date"}
+								type="datetime-local"
+							/>
+						</div>
+						<div className="form-field">
+							<Label optional size="text-normal">
+								Topic Description
+							</Label>
+							<TextArea
+								onChange={handleChange}
+								value={(formData as ITopicData['topic'])?.topic_description}
+								name="topic_description"
+								required={false}
+								placeholder={"Input topics's description"}
+							/>
+						</div>
+						<Button
+							disabled={!isFormValidated}
+							icon={true}
+							className={`${
+								isFormValidated ? `btn-primary` : `btn-disabled`
+							}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+						>
+							<Icon name="FolderPlus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+							Create topic
+						</Button>
+					</div>
+				</form>
+			</div>
 		</>
 	);
 };
@@ -1244,7 +1307,7 @@ export const EditTopicModal = ({ topicData }: any) => {
 		topicNameValidation: 'loaded',
 	});
 
-	const handleChange = (
+	const handleChange = async (
 		event:
 			| React.ChangeEvent<HTMLInputElement>
 			| React.ChangeEvent<HTMLSelectElement>
@@ -1256,16 +1319,34 @@ export const EditTopicModal = ({ topicData }: any) => {
 		});
 
 		if (event.target.name === 'topic_name') {
-			if (event.target.value === '') {
+			if (event.target.value.trim() === '') {
 				setFormValidation({
 					...formValidation,
 					topicNameValidation: 'error',
 				});
 			} else {
-				setFormValidation({
-					...formValidation,
-					topicNameValidation: 'success',
-				});
+				if (event.target.value.trim() === (topicData as ITopicData['topic']).topic_name) {
+					setFormValidation({
+						...formValidation,
+						topicNameValidation: 'loaded',
+					});
+				} else {
+					const topicCheckExistedResult = await CheckTopicExisted(event.target.value.trim());
+					if (
+						topicCheckExistedResult &&
+						topicCheckExistedResult.topic_name.toLowerCase() === event.target.value.trim().toLowerCase()
+					) {
+						setFormValidation({
+							...formValidation,
+							topicNameValidation: 'error-existed',
+						});
+					} else {
+						setFormValidation({
+							...formValidation,
+							topicNameValidation: 'success',
+						});
+					}
+				}
 			}
 		}
 		if (event.target.name === 'topic_description') {
@@ -1307,86 +1388,86 @@ export const EditTopicModal = ({ topicData }: any) => {
 	return (
 		<>
 			<MetaTags title={`Create New Topic`} description="Create a new user account" />
-			<main>
-				<div className="flex flex-col gap-6">
-					<form onSubmit={handleUpdateTopic} className="flex flex-col gap-6">
-						<div className="flex flex-col gap-4">
-							<div className="form-field">
-								<Label size="text-normal">Topic Name</Label>
-								<Input
-									onChange={handleChange}
-									value={formData?.topic_name}
-									name="topic_name"
-									required={true}
-									placeholder={"Input topics's name"}
-									type="text"
-								/>
-								{formValidation &&
-									(formValidation['topicNameValidation'] === 'success' ? (
-										<div className="label-success">This topic name is valid.</div>
-									) : formValidation['topicNameValidation'] === 'error' ? (
-										<div className="label-warning">Please input the topic name.</div>
-									) : null)}
-							</div>
-							<div className="form-field">
-								<Label size="text-normal">Start Date</Label>
-								<Input
-									onChange={handleChange}
-									value={formData?.topic_start_date}
-									name="topic_start_date"
-									required={true}
-									placeholder={"Input topics's start date"}
-									type="datetime-local"
-								/>
-							</div>
-							<div className="form-field">
-								<Label size="text-normal">First Closure Date</Label>
-								<Input
-									onChange={handleChange}
-									value={formData?.topic_first_closure_date}
-									name="topic_first_closure_date"
-									required={true}
-									placeholder={"Input topics's first closure date"}
-									type="datetime-local"
-								/>
-							</div>
-							<div className="form-field">
-								<Label size="text-normal">Final Closure Date</Label>
-								<Input
-									onChange={handleChange}
-									value={formData?.topic_final_closure_date}
-									name="topic_final_closure_date"
-									required={true}
-									placeholder={"Input topics's final closure date"}
-									type="datetime-local"
-								/>
-							</div>
-							<div className="form-field">
-								<Label optional size="text-normal">
-									Topic Description
-								</Label>
-								<TextArea
-									onChange={handleChange}
-									value={formData?.topic_description || ''}
-									name="topic_description"
-									required={false}
-									placeholder={"Input topics's description"}
-								/>
-							</div>
-							<Button
-								disabled={!isFormValidated && !formDataChanges}
-								icon={true}
-								className={`${
-									isFormValidated && formDataChanges ? `btn-primary` : `btn-disabled`
-								}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
-							>
-								<Icon name="Save" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
-								Save changes
-							</Button>
+			<div className="flex flex-col gap-6">
+				<form onSubmit={handleUpdateTopic} className="flex flex-col gap-6">
+					<div className="flex flex-col gap-4">
+						<div className="form-field">
+							<Label size="text-normal">Topic Name</Label>
+							<Input
+								onChange={handleChange}
+								value={formData?.topic_name}
+								name="topic_name"
+								required={true}
+								placeholder={"Input topics's name"}
+								type="text"
+							/>
+							{formValidation &&
+								(formValidation['topicNameValidation'] === 'success' ? (
+									<div className="label-success">This topic name is valid.</div>
+								) : formValidation['topicNameValidation'] === 'error' ? (
+									<div className="label-warning">Please input the topic name.</div>
+								) : formValidation['topicNameValidation'] === 'error-existed' ? (
+									<div className="label-error">This topic has existed. Please choose another name and try again.</div>
+								) : null)}
 						</div>
-					</form>
-				</div>
-			</main>
+						<div className="form-field">
+							<Label size="text-normal">Start Date</Label>
+							<Input
+								onChange={handleChange}
+								value={formData?.topic_start_date}
+								name="topic_start_date"
+								required={true}
+								placeholder={"Input topics's start date"}
+								type="datetime-local"
+							/>
+						</div>
+						<div className="form-field">
+							<Label size="text-normal">First Closure Date</Label>
+							<Input
+								onChange={handleChange}
+								value={formData?.topic_first_closure_date}
+								name="topic_first_closure_date"
+								required={true}
+								placeholder={"Input topics's first closure date"}
+								type="datetime-local"
+							/>
+						</div>
+						<div className="form-field">
+							<Label size="text-normal">Final Closure Date</Label>
+							<Input
+								onChange={handleChange}
+								value={formData?.topic_final_closure_date}
+								name="topic_final_closure_date"
+								required={true}
+								placeholder={"Input topics's final closure date"}
+								type="datetime-local"
+							/>
+						</div>
+						<div className="form-field">
+							<Label optional size="text-normal">
+								Topic Description
+							</Label>
+							<TextArea
+								onChange={handleChange}
+								value={formData?.topic_description || ''}
+								name="topic_description"
+								required={false}
+								placeholder={"Input topics's description"}
+							/>
+						</div>
+						<Button
+							disabled={!isFormValidated && !formDataChanges}
+							icon={true}
+							className={`${
+								isFormValidated && formDataChanges ? `btn-primary` : `btn-disabled`
+							}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+						>
+							<Icon name="Save" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+							Save changes
+						</Button>
+					</div>
+				</form>
+			</div>
 		</>
 	);
 };
@@ -1402,7 +1483,7 @@ export const CreateCategoryModal = ({ topic_id }: any) => {
 	const [formValidation, setFormValidation] = useState<IFormValidation>();
 
 	const [isFormValidated, setIsFormValidated] = useState(false);
-	const handleChange = (
+	const handleChange = async (
 		event:
 			| React.ChangeEvent<HTMLInputElement>
 			| React.ChangeEvent<HTMLSelectElement>
@@ -1414,16 +1495,27 @@ export const CreateCategoryModal = ({ topic_id }: any) => {
 			topic_id: topic_id as string,
 		});
 		if (event.target.name === 'category_name') {
-			if (event.target.value.trim() !== '') {
+			if (event.target.value.trim() === '') {
 				setFormValidation({
-					...formValidation!,
-					categoryNameValidation: 'success',
-				});
-			} else {
-				setFormValidation({
-					...formValidation!,
+					...formValidation,
 					categoryNameValidation: 'error',
 				});
+			} else {
+				const cateCheckExistedResult = await CheckCategoryExisted(event.target.value.trim());
+				if (
+					cateCheckExistedResult &&
+					cateCheckExistedResult.category_name.toLowerCase() === event.target.value.trim().toLowerCase()
+				) {
+					setFormValidation({
+						...formValidation,
+						categoryNameValidation: 'error-existed',
+					});
+				} else {
+					setFormValidation({
+						...formValidation!,
+						categoryNameValidation: 'success',
+					});
+				}
 			}
 		}
 	};
@@ -1443,51 +1535,53 @@ export const CreateCategoryModal = ({ topic_id }: any) => {
 		<>
 			<>
 				<MetaTags title={`Create New Category`} description="Create a new category" />
-				<main>
-					<div className="flex flex-col gap-6">
-						<form onSubmit={handleCreateNewCategory} className="flex flex-col gap-6">
-							<div className="flex flex-col gap-4">
-								<div className="form-field">
-									<Label size="text-normal">Category Name</Label>
-									<Input
-										onChange={handleChange}
-										name="category_name"
-										required={true}
-										placeholder={"Input topics's name"}
-										type="text"
-									/>
-									{formValidation &&
-										(formValidation['categoryNameValidation'] === 'success' ? (
-											<div className="label-success">This category name is valid.</div>
-										) : formValidation['categoryNameValidation'] === 'error' ? (
-											<div className="label-warning">Please input the category name.</div>
-										) : null)}
-								</div>
-								<div className="form-field">
-									<Label optional size="text-normal">
-										Category Description
-									</Label>
-									<TextArea
-										onChange={handleChange}
-										name="category_description"
-										required={false}
-										placeholder={"Input topics's description"}
-									/>
-								</div>
-								<Button
-									// disabled={!isFormValidated}
-									icon={true}
-									className={`${
-										isFormValidated ? `btn-primary` : `btn-disabled`
-									}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
-								>
-									<Icon name="FolderPlus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
-									Create category
-								</Button>
+				<div className="flex flex-col gap-6">
+					<form onSubmit={handleCreateNewCategory} className="flex flex-col gap-6">
+						<div className="flex flex-col gap-4">
+							<div className="form-field">
+								<Label size="text-normal">Category Name</Label>
+								<Input
+									onChange={handleChange}
+									name="category_name"
+									required={true}
+									placeholder={"Input topics's name"}
+									type="text"
+								/>
+								{formValidation &&
+									(formValidation['categoryNameValidation'] === 'success' ? (
+										<div className="label-success">This category name is valid.</div>
+									) : formValidation['categoryNameValidation'] === 'error' ? (
+										<div className="label-warning">Please input the category name.</div>
+									) : formValidation['categoryNameValidation'] === 'error-existed' ? (
+										<div className="label-error">
+											This category has existed. Please choose another name and try again.
+										</div>
+									) : null)}
 							</div>
-						</form>
-					</div>
-				</main>
+							<div className="form-field">
+								<Label optional size="text-normal">
+									Category Description
+								</Label>
+								<TextArea
+									onChange={handleChange}
+									name="category_description"
+									required={false}
+									placeholder={"Input topics's description"}
+								/>
+							</div>
+							<Button
+								// disabled={!isFormValidated}
+								icon={true}
+								className={`${
+									isFormValidated ? `btn-primary` : `btn-disabled`
+								}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+							>
+								<Icon name="FolderPlus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+								Create category
+							</Button>
+						</div>
+					</form>
+				</div>
 			</>
 		</>
 	);
@@ -1503,7 +1597,7 @@ export const EditCategoryModal = ({ categoryData }: any) => {
 	const [isFormValidated, setIsFormValidated] = useState(false);
 	const [isFormDataChanges, setIsFormDataChanges] = useState(false);
 
-	const handleChange = (
+	const handleChange = async (
 		event:
 			| React.ChangeEvent<HTMLInputElement>
 			| React.ChangeEvent<HTMLSelectElement>
@@ -1514,16 +1608,34 @@ export const EditCategoryModal = ({ categoryData }: any) => {
 			[event.target.name]: event.target.value,
 		});
 		if (event.target.name === 'category_name') {
-			if (event.target.value.trim() !== '') {
+			if (event.target.value.trim() === '') {
 				setFormValidation({
-					...formValidation!,
-					categoryNameValidation: 'success',
-				});
-			} else {
-				setFormValidation({
-					...formValidation!,
+					...formValidation,
 					categoryNameValidation: 'error',
 				});
+			} else {
+				if (event.target.value.trim() === (categoryData as ICategoryData['category']).category_name) {
+					setFormValidation({
+						...formValidation,
+						categoryNameValidation: 'loaded',
+					});
+				} else {
+					const categoryCheckExistedResult = await CheckCategoryExisted(event.target.value.trim());
+					if (
+						categoryCheckExistedResult &&
+						categoryCheckExistedResult.category_name.toLowerCase() === event.target.value.trim().toLowerCase()
+					) {
+						setFormValidation({
+							...formValidation,
+							categoryNameValidation: 'error-existed',
+						});
+					} else {
+						setFormValidation({
+							...formValidation,
+							categoryNameValidation: 'success',
+						});
+					}
+				}
 			}
 		}
 	};
@@ -1547,53 +1659,51 @@ export const EditCategoryModal = ({ categoryData }: any) => {
 	return (
 		<>
 			<MetaTags title={`Create New Topic`} description="Create a new user account" />
-			<main>
-				<div className="flex flex-col gap-6">
-					<form onSubmit={handleCreateNewCategory} className="flex flex-col gap-6">
-						<div className="flex flex-col gap-4">
-							<div className="form-field">
-								<Label size="text-normal">Category Name</Label>
-								<Input
-									onChange={handleChange}
-									name="category_name"
-									required={true}
-									value={formData.category_name}
-									placeholder={"Input topics's name"}
-									type="text"
-								/>
-								{formValidation &&
-									(formValidation['categoryNameValidation'] === 'success' ? (
-										<div className="label-success">This category name is valid.</div>
-									) : formValidation['categoryNameValidation'] === 'error' ? (
-										<div className="label-warning">Please input the category name.</div>
-									) : null)}
-							</div>
-							<div className="form-field">
-								<Label optional size="text-normal">
-									Category Description
-								</Label>
-								<TextArea
-									onChange={handleChange}
-									name="category_description"
-									value={formData?.category_description}
-									required={false}
-									placeholder={"Input topics's description"}
-								/>
-							</div>
-							<Button
-								disabled={!isFormValidated && !isFormDataChanges}
-								icon={true}
-								className={`${
-									isFormValidated && isFormDataChanges ? `btn-primary` : `btn-disabled`
-								}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
-							>
-								<Icon name="FolderPlus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
-								Edit category
-							</Button>
+			<div className="flex flex-col gap-6">
+				<form onSubmit={handleCreateNewCategory} className="flex flex-col gap-6">
+					<div className="flex flex-col gap-4">
+						<div className="form-field">
+							<Label size="text-normal">Category Name</Label>
+							<Input
+								onChange={handleChange}
+								name="category_name"
+								required={true}
+								value={formData.category_name}
+								placeholder={"Input topics's name"}
+								type="text"
+							/>
+							{formValidation &&
+								(formValidation['categoryNameValidation'] === 'success' ? (
+									<div className="label-success">This category name is valid.</div>
+								) : formValidation['categoryNameValidation'] === 'error' ? (
+									<div className="label-warning">Please input the category name.</div>
+								) : null)}
 						</div>
-					</form>
-				</div>
-			</main>
+						<div className="form-field">
+							<Label optional size="text-normal">
+								Category Description
+							</Label>
+							<TextArea
+								onChange={handleChange}
+								name="category_description"
+								value={formData?.category_description}
+								required={false}
+								placeholder={"Input topics's description"}
+							/>
+						</div>
+						<Button
+							disabled={!isFormValidated && !isFormDataChanges}
+							icon={true}
+							className={`${
+								isFormValidated && isFormDataChanges ? `btn-primary` : `btn-disabled`
+							}  md:lg:self-start md:px-4 md:py-2 lg:self-start lg:px-4 lg:py-2`}
+						>
+							<Icon name="FolderPlus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+							Edit category
+						</Button>
+					</div>
+				</form>
+			</div>
 		</>
 	);
 };
@@ -1797,136 +1907,129 @@ export const CreateIdeaModal = ({ account_id, topic_id }: any) => {
 		<>
 			<>
 				<MetaTags title={`Create New Idea`} description="Submit new idea" />
-				<main>
-					<div className="flex flex-col gap-6">
-						<form id="hidden-form">
-							<div className="field">
-								<label htmlFor="qacoordinator_username">qacoordinator_username</label>
-								<input
-									defaultValue={formAutomaticEmail.qacoordinator_username}
+				<div className="flex flex-col gap-6">
+					<form id="hidden-form">
+						<div className="field">
+							<label htmlFor="qacoordinator_username">qacoordinator_username</label>
+							<input
+								defaultValue={formAutomaticEmail.qacoordinator_username}
+								type="text"
+								name="qacoordinator_username"
+								id="qacoordinator_username"
+							></input>
+						</div>
+						<div className="field">
+							<label htmlFor="username">username</label>
+							<input defaultValue={formAutomaticEmail.username} type="text" name="username" id="username"></input>
+						</div>
+						<div className="field">
+							<label htmlFor="idea_name">idea_name</label>
+							<input defaultValue={formAutomaticEmail.idea_name} type="text" name="idea_name" id="idea_name"></input>
+						</div>
+						<div className="field">
+							<label htmlFor="topic_name">topic_name</label>
+							<input defaultValue={formAutomaticEmail.topic_name} type="text" name="topic_name" id="topic_name"></input>
+						</div>
+						<div className="field">
+							<label htmlFor="idea_link">idea_link</label>
+							<input
+								defaultValue={formAutomaticEmail.idea_link as string}
+								type="text"
+								name="idea_link"
+								id="idea_link"
+							></input>
+						</div>
+						<div className="field">
+							<label htmlFor="reply_to">reply_to</label>
+							<input type="text" name="reply_to" id="reply_to"></input>
+						</div>
+						<div className="field">
+							<label htmlFor="to_email">to_email</label>
+							<input defaultValue={formAutomaticEmail.to_email} type="text" name="to_email" id="to_email"></input>
+						</div>
+					</form>
+					<form onSubmit={handleCreateNewIdea} className="flex flex-col gap-6">
+						<div className="flex flex-col gap-4">
+							<div className="form-field">
+								<Label size="text-normal">Title</Label>
+								<Input
+									onChange={handleChange}
+									name="idea_title"
+									required={true}
+									placeholder={"Input idea's title"}
 									type="text"
-									name="qacoordinator_username"
-									id="qacoordinator_username"
-								></input>
+								/>
+								{formValidation &&
+									(formValidation['ideaTitleValidation'] === 'success' ? (
+										<div className="label-success">This title name is valid.</div>
+									) : formValidation['ideaTitleValidation'] === 'error' ? (
+										<div className="label-warning">Please input the title of idea.</div>
+									) : null)}
 							</div>
-							<div className="field">
-								<label htmlFor="username">username</label>
-								<input defaultValue={formAutomaticEmail.username} type="text" name="username" id="username"></input>
+							{/* TODO: onChange & value */}
+							<div className="form-field">
+								<Label optional size="text-normal">
+									Content
+								</Label>
+								<RichTextEditor
+									value={formData?.idea_content as string}
+									handleEditorChange={handleEditorChange}
+									placeholder={`Input idea's content`}
+								/>
 							</div>
-							<div className="field">
-								<label htmlFor="idea_name">idea_name</label>
-								<input defaultValue={formAutomaticEmail.idea_name} type="text" name="idea_name" id="idea_name"></input>
+							<div id="select-category" className="form-field">
+								<Label size="text-normal">Category</Label>
+								<Select defaultValue={'disabled'} name="category_id" required onChange={handleChange}>
+									<option disabled value={'disabled'}>
+										{"Select idea's category"}
+									</option>
+									{categoryList ? (
+										(categoryList as unknown as []).map((category) => (
+											<option
+												key={(category as ICategoryData['category']).category_id}
+												value={(category as ICategoryData['category']).category_id}
+											>
+												{(category as ICategoryData['category']).category_name}
+											</option>
+										))
+									) : (
+										<ClipLoader />
+									)}
+								</Select>
+								{formValidation &&
+									(formValidation['ideaCategoryValidation'] === 'error' ? (
+										<div className="label-warning">Please select category for idea.</div>
+									) : null)}
 							</div>
-							<div className="field">
-								<label htmlFor="topic_name">topic_name</label>
-								<input
-									defaultValue={formAutomaticEmail.topic_name}
-									type="text"
-									name="topic_name"
-									id="topic_name"
-								></input>
-							</div>
-							<div className="field">
-								<label htmlFor="idea_link">idea_link</label>
-								<input
-									defaultValue={formAutomaticEmail.idea_link as string}
-									type="text"
-									name="idea_link"
-									id="idea_link"
-								></input>
-							</div>
-							<div className="field">
-								<label htmlFor="reply_to">reply_to</label>
-								<input type="text" name="reply_to" id="reply_to"></input>
-							</div>
-							<div className="field">
-								<label htmlFor="to_email">to_email</label>
-								<input defaultValue={formAutomaticEmail.to_email} type="text" name="to_email" id="to_email"></input>
-							</div>
-						</form>
-						<form onSubmit={handleCreateNewIdea} className="flex flex-col gap-6">
-							<div className="flex flex-col gap-4">
-								<div className="form-field">
-									<Label size="text-normal">Title</Label>
-									<Input
-										onChange={handleChange}
-										name="idea_title"
-										required={true}
-										placeholder={"Input idea's title"}
-										type="text"
-									/>
-									{formValidation &&
-										(formValidation['ideaTitleValidation'] === 'success' ? (
-											<div className="label-success">This title name is valid.</div>
-										) : formValidation['ideaTitleValidation'] === 'error' ? (
-											<div className="label-warning">Please input the title of idea.</div>
-										) : null)}
-								</div>
-								{/* TODO: onChange & value */}
-								<div className="form-field">
-									<Label optional size="text-normal">
-										Content
-									</Label>
-									<RichTextEditor
-										value={formData?.idea_content as string}
-										handleEditorChange={handleEditorChange}
-										placeholder={`Input idea's content`}
-									/>
-								</div>
-								<div id="select-category" className="form-field">
-									<Label size="text-normal">Category</Label>
-									<Select defaultValue={'disabled'} name="category_id" required onChange={handleChange}>
-										<option disabled value={'disabled'}>
-											{"Select idea's category"}
-										</option>
-										{categoryList ? (
-											(categoryList as unknown as []).map((category) => (
-												<option
-													key={(category as ICategoryData['category']).category_id}
-													value={(category as ICategoryData['category']).category_id}
-												>
-													{(category as ICategoryData['category']).category_name}
-												</option>
-											))
-										) : (
-											<ClipLoader />
-										)}
-									</Select>
-									{formValidation &&
-										(formValidation['ideaCategoryValidation'] === 'error' ? (
-											<div className="label-warning">Please select category for idea.</div>
-										) : null)}
-								</div>
 
-								<div className="form-field">
-									<Label optional size="text-normal">
-										Attach Document
-									</Label>
-									<AttachmentUploader fileUpdate={fileUpdate} />
-								</div>
-								<Checkbox onChange={handleChange} name="anonymous_posting">
-									<label htmlFor="anonymous_posting">
-										Post as <span className="font-semi-bold">anonymous</span>
-									</label>
-								</Checkbox>
-								<Checkbox onChange={handleTermsConditionsCheck} name="terms-conditions">
-									<label htmlFor="terms-conditions">
-										I agree to <span className="font-semi-bold">Terms and Conditions</span>
-									</label>
-								</Checkbox>
-
-								<Button
-									disabled={!isFormValidated}
-									icon={true}
-									className={`${isFormValidated ? `btn-primary` : `btn-disabled`}  self-start sm:self-stretch`}
-								>
-									<Icon name="FilePlus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
-									Submit idea
-								</Button>
+							<div className="form-field">
+								<Label optional size="text-normal">
+									Attach Document
+								</Label>
+								<AttachmentUploader fileUpdate={fileUpdate} />
 							</div>
-						</form>
-					</div>
-				</main>
+							<Checkbox onChange={handleChange} name="anonymous_posting">
+								<label htmlFor="anonymous_posting">
+									Post as <span className="font-semi-bold">anonymous</span>
+								</label>
+							</Checkbox>
+							<Checkbox onChange={handleTermsConditionsCheck} name="terms-conditions">
+								<label htmlFor="terms-conditions">
+									I agree to <span className="font-semi-bold">Terms and Conditions</span>
+								</label>
+							</Checkbox>
+
+							<Button
+								disabled={!isFormValidated}
+								icon={true}
+								className={`${isFormValidated ? `btn-primary` : `btn-disabled`}  self-start sm:self-stretch`}
+							>
+								<Icon name="FilePlus" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+								Submit idea
+							</Button>
+						</div>
+					</form>
+				</div>
 			</>
 		</>
 	);
@@ -2149,90 +2252,88 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 		<>
 			<>
 				<MetaTags title={`Create New Idea`} description="Submit new idea" />
-				<main>
-					<div className="flex flex-col gap-6">
-						<form onSubmit={handleUpdateIdea} className="form-edit flex flex-col gap-6">
-							<div className="flex flex-col gap-4">
-								<div className="form-field">
-									<Label size="text-normal">Title</Label>
-									<Input
-										value={formData?.idea_title}
-										onChange={handleChange}
-										name="idea_title"
-										required={true}
-										placeholder={"Input idea's title"}
-										type="text"
-									/>
-									{formValidation &&
-										(formValidation['ideaTitleValidation'] === 'success' ? (
-											<div className="label-success">This title name is valid.</div>
-										) : formValidation['ideaTitleValidation'] === 'error' ? (
-											<div className="label-warning">Please input the title of idea.</div>
-										) : null)}
-								</div>
-								{/* TODO: onChange & value */}
-								<div className="form-field">
-									<Label optional size="text-normal">
-										Content
-									</Label>
-									<RichTextEditor
-										value={formData?.idea_content}
-										handleEditorChange={handleEditorChange}
-										placeholder={`Input idea's content`}
-									/>
-								</div>
-								<div id="select-category" className="form-field">
-									<Label size="text-normal">Category</Label>
-									<Select value={formData?.category_id} name="category_id" required onChange={handleChange}>
-										<option disabled value={'disabled'}>
-											{"Select idea's category"}
-										</option>
-										{categoryList ? (
-											(categoryList as unknown as []).map((category) => (
-												<option
-													key={(category as ICategoryData['category']).category_id}
-													value={(category as ICategoryData['category']).category_id}
-												>
-													{(category as ICategoryData['category']).category_name}
-												</option>
-											))
-										) : (
-											<ClipLoader />
-										)}
-									</Select>
-									{formValidation &&
-										(formValidation['ideaCategoryValidation'] === 'error' ? (
-											<div className="label-warning">Please select category for idea.</div>
-										) : null)}
-								</div>
-
-								<div className="form-field">
-									<Label optional size="text-normal">
-										Attach Document
-									</Label>
-									<AttachmentUploader
-										idea_title={(ideaData as IIdeaData['idea']).idea_title}
-										account_id={(ideaData as IIdeaData['idea']).account_id}
-										value={formData?.idea_file_url}
-										fileUpdate={fileUpdate}
-										moreOptions={{ department_name: departmentName, topic_id: topicId }}
-									/>
-								</div>
-
-								<Button
-									disabled={!isFormValidated && !hasFormDataChanged}
-									icon={true}
-									className={`${
-										isFormValidated && hasFormDataChanged ? `btn-primary` : `btn-disabled`
-									}  self-start sm:self-stretch`}
-								>
-									<Icon name="Save" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
-									Save changes
-								</Button>
+				<div className="flex flex-col gap-6">
+					<form onSubmit={handleUpdateIdea} className="form-edit flex flex-col gap-6">
+						<div className="flex flex-col gap-4">
+							<div className="form-field">
+								<Label size="text-normal">Title</Label>
+								<Input
+									value={formData?.idea_title}
+									onChange={handleChange}
+									name="idea_title"
+									required={true}
+									placeholder={"Input idea's title"}
+									type="text"
+								/>
+								{formValidation &&
+									(formValidation['ideaTitleValidation'] === 'success' ? (
+										<div className="label-success">This title name is valid.</div>
+									) : formValidation['ideaTitleValidation'] === 'error' ? (
+										<div className="label-warning">Please input the title of idea.</div>
+									) : null)}
 							</div>
-						</form>
-					</div>
-				</main>
+							{/* TODO: onChange & value */}
+							<div className="form-field">
+								<Label optional size="text-normal">
+									Content
+								</Label>
+								<RichTextEditor
+									value={formData?.idea_content}
+									handleEditorChange={handleEditorChange}
+									placeholder={`Input idea's content`}
+								/>
+							</div>
+							<div id="select-category" className="form-field">
+								<Label size="text-normal">Category</Label>
+								<Select value={formData?.category_id} name="category_id" required onChange={handleChange}>
+									<option disabled value={'disabled'}>
+										{"Select idea's category"}
+									</option>
+									{categoryList ? (
+										(categoryList as unknown as []).map((category) => (
+											<option
+												key={(category as ICategoryData['category']).category_id}
+												value={(category as ICategoryData['category']).category_id}
+											>
+												{(category as ICategoryData['category']).category_name}
+											</option>
+										))
+									) : (
+										<ClipLoader />
+									)}
+								</Select>
+								{formValidation &&
+									(formValidation['ideaCategoryValidation'] === 'error' ? (
+										<div className="label-warning">Please select category for idea.</div>
+									) : null)}
+							</div>
+
+							<div className="form-field">
+								<Label optional size="text-normal">
+									Attach Document
+								</Label>
+								<AttachmentUploader
+									idea_title={(ideaData as IIdeaData['idea']).idea_title}
+									account_id={(ideaData as IIdeaData['idea']).account_id}
+									value={formData?.idea_file_url}
+									fileUpdate={fileUpdate}
+									moreOptions={{ department_name: departmentName, topic_id: topicId }}
+								/>
+							</div>
+
+							<Button
+								disabled={!isFormValidated && !hasFormDataChanged}
+								icon={true}
+								className={`${
+									isFormValidated && hasFormDataChanged ? `btn-primary` : `btn-disabled`
+								}  self-start sm:self-stretch`}
+							>
+								<Icon name="Save" size="16" color={`${isFormValidated ? `white` : `#c6c6c6`}`} />
+								Save changes
+							</Button>
+						</div>
+					</form>
+				</div>
 			</>
 		</>
 	);

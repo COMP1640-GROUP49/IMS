@@ -1,4 +1,3 @@
-import JSZip from 'jszip';
 import React, { useState } from 'react';
 import { formatBytes } from 'utils/formatBytes';
 import { getFileSizeFromUrl } from 'utils/getFileSizeFromUrl';
@@ -103,9 +102,6 @@ const AttachmentUploader = ({
 
 	const handleAttachmentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0] as Blob;
-
-	
-		
 
 		const reader = new FileReader();
 		setUploadTimes(uploadTimes + 1);
@@ -212,7 +208,7 @@ const AttachmentUploader = ({
 				className="attachment-uploader"
 				type="file"
 				accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint,
-                text/plain, application/pdf"
+                text/plain, application/pdf, image/*"
 				onChange={handleAttachmentChange}
 			/>
 		</div>

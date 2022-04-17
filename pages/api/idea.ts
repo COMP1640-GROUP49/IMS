@@ -19,7 +19,7 @@ export const getIdeasListByCategoryId = async (
 	if (sortBy || ascending) {
 		const { data, error } = await supabase
 			.from('ideas')
-			.select('*, comments!comments_idea_id_fkey(*), reaction(*)')
+			.select('*, comments_list:comments!comments_idea_id_fkey(*), reaction_list:reaction(*)')
 			.match({ category_id: category_id })
 			.order(sortBy as string, { ascending: ascending })
 			.limit(limit || noLimit);
@@ -27,7 +27,7 @@ export const getIdeasListByCategoryId = async (
 	} else {
 		const { data, error } = await supabase
 			.from('ideas')
-			.select('*, comments!comments_idea_id_fkey(*), reaction(*)')
+			.select('*, comments_list:comments!comments_idea_id_fkey(*), reaction_list:reaction(*)')
 			.match({ category_id: category_id })
 			.order('popular_point', { ascending: false })
 			.limit(limit || noLimit);
@@ -139,9 +139,9 @@ export const createNewIdea = async (ideaForm: IIdeaData['idea']) => {
 export const updateIdea = async (ideaForm: IIdeaData['idea']) => {
 	let data: any;
 	const updateIdeaData = async () => {
-		if (ideaForm?.comments && ideaForm?.reaction) {
-			delete ideaForm?.comments;
-			delete ideaForm.reaction;
+		if (ideaForm?.comments_list && ideaForm?.reaction_list) {
+			delete ideaForm?.comments_list;
+			delete ideaForm.reaction_list;
 		}
 
 		const { data: updateIdeaData, error } = await supabase
@@ -210,7 +210,7 @@ export const getIdeaById = async (ideaId: string, order_by?: string, ascending?:
 	if (order_by && ascending) {
 		const { data, error } = await supabase
 			.from('ideas')
-			.select('*, comments!comments_idea_id_fkey(*, comments_reaction(*)), reaction(*)')
+			.select('*, comments_list:comments!comments_idea_id_fkey(*, comments_reaction(*)), reaction_list:reaction(*)')
 			.match({ idea_id: ideaId })
 			.order(order_by, { ascending: ascending });
 		if (data) {
@@ -221,7 +221,7 @@ export const getIdeaById = async (ideaId: string, order_by?: string, ascending?:
 	} else {
 		const { data, error } = await supabase
 			.from('ideas')
-			.select('*, comments!comments_idea_id_fkey(*, comments_reaction(*)), reaction(*)')
+			.select('*, comments_list:comments!comments_idea_id_fkey(*, comments_reaction(*)), reaction_list:reaction(*)')
 			.match({ idea_id: ideaId })
 			.order('idea_created', { ascending: false })
 			.order('comment_created', { foreignTable: 'comments', ascending: false });

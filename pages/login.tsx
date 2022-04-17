@@ -64,7 +64,7 @@ const Login: NextPage = (props: any) => {
 	return (
 		<main>
 			<MetaTags title="Login" description="Please log in into IMS" />
-			<div className="p-6 flex gap-6 justify-center items-center h-screen md:px-40">
+			<div className="flex gap-6 justify-center items-center h-screen md:px-40">
 				<form
 					className="flex flex-1 gap-6 flex-col lg:flex-row lg:justify-center items-center"
 					onSubmit={(event) => handleLogin(event, { username, password })}

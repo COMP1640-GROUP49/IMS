@@ -6,9 +6,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ParsedUrlQuery } from 'querystring';
 import { useCallback, useEffect, useState } from 'react';
-import { CSVDownload, CSVLink } from 'react-csv';
+import { CSVLink } from 'react-csv';
 import { Button } from 'components/Button';
-import { CategoryList } from 'components/CategoryList';
 import { CreateCategoryModal } from 'components/Form/form';
 import { Header } from 'components/Header';
 import { Icon } from 'components/Icon';
@@ -16,9 +15,9 @@ import { IdeaList } from 'components/IdeaList';
 import { MetaTags } from 'components/MetaTags';
 import Modal from 'components/Modal';
 import Pagination from 'components/Pagination';
-import { getCategoriesListByTopicId } from 'pages/api/category';
-import { getAllIdeasByTopicId, getTopicByName } from 'pages/api/topic';
-import { ICategoriesProps, ICategoryData, IIdeasProps, ITopicData } from 'lib/interfaces';
+import { getIdeasListByCategoryId } from 'pages/api/idea';
+import { getAllIdeasByTopicId, getAllIdeasByTopicIdNew, getTopicByName } from 'pages/api/topic';
+import { ICategoriesProps, IIdeaData, IIdeasProps, ITopicData } from 'lib/interfaces';
 import { notifyToast } from 'lib/toast';
 import { scrollToElementByClassName } from 'utils/scrollAnimate';
 
@@ -29,30 +28,30 @@ interface IParams extends ParsedUrlQuery {
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 	const { topic_name: slug } = params as IParams;
 	const { topicData } = await getTopicByName(slug as string);
-	const { data } = await getCategoriesListByTopicId(
-		(topicData as unknown as ITopicData['topic']).topic_id as unknown as string
-	);
-	const { ideaList } = await getAllIdeasByTopicId(topicData.topic_id);
+
+	const { ideaList: ideas } = await getAllIdeasByTopicIdNew(topicData.topic_id);
 
 	return {
 		props: {
 			slug,
 			topicData,
-			data,
-			ideaList,
+			ideas,
 		},
 	};
 };
 
 const AllIdeas: NextPage<ICategoriesProps> = (props) => {
-	const { data: categories } = props;
-	const { slug }: any = props;
 	const { topicData }: any = props;
-	const { ideaList }: any = props;
+	const { ideas }: any = props;
+
+	const [ideaList, setIdeaList] = useState<IIdeasProps>();
+	!ideaList && setIdeaList(ideas as unknown as IIdeasProps);
+
 	const topic = topicData as ITopicData['topic'];
+
 	const { asPath } = useRouter();
 	const limit = 5;
-	const [currentItems, setCurrentItems] = useState<ICategoryData[]>();
+	const [currentItems, setCurrentItems] = useState<IIdeaData[]>();
 	const [pageCount, setPageCount] = useState(0);
 	const [itemOffset, setItemOffset] = useState(0);
 
@@ -62,7 +61,7 @@ const AllIdeas: NextPage<ICategoriesProps> = (props) => {
 	const [ideaListCSV, setIdeaListCSV] = useState([]);
 
 	const handlePageClick = (event: any) => {
-		const newOffset = (event.selected * limit) % categories.length;
+		const newOffset = (event.selected * limit) % (ideaList as unknown as []).length;
 		setItemOffset(newOffset);
 	};
 
@@ -70,17 +69,143 @@ const AllIdeas: NextPage<ICategoriesProps> = (props) => {
 		scrollToElementByClassName('scrollPos');
 	};
 
+	const [sortOptions, setSortOptions] = useState({
+		category: '',
+		sort: '',
+	});
+	const handleSortData = async (sortBy: string, topic_id?: string) => {
+		const limit = 99999;
+		setSortOptions({ ...sortOptions, sort: sortBy });
+
+		if (sortOptions.category !== '') {
+			switch (sortOptions.category) {
+				case 'all-categories': {
+					switch (sortBy) {
+						default: {
+							if (topic_id) {
+								const { ideaList } = await getAllIdeasByTopicIdNew(topic_id, sortBy);
+								setIdeaList(ideaList as unknown as IIdeasProps);
+							}
+							break;
+						}
+					}
+					break;
+				}
+				default: {
+					switch (sortBy) {
+						case 'most-popular': {
+							const { data } = await getIdeasListByCategoryId(sortOptions.category);
+							setIdeaList(data as unknown as IIdeasProps);
+							break;
+						}
+						case 'most-view': {
+							const { data } = await getIdeasListByCategoryId(sortOptions.category, limit, 'idea_view', false);
+							setIdeaList(data as unknown as IIdeasProps);
+							break;
+						}
+						case 'newest': {
+							const { data } = await getIdeasListByCategoryId(sortOptions.category, limit, 'idea_created', false);
+							setIdeaList(data as unknown as IIdeasProps);
+							break;
+						}
+						case 'oldest': {
+							const { data } = await getIdeasListByCategoryId(sortOptions.category, limit, 'idea_created', true);
+							setIdeaList(data as unknown as IIdeasProps);
+							break;
+						}
+						case 'latest-updated': {
+							const { data } = await getIdeasListByCategoryId(sortOptions.category, limit, 'idea_updated', false);
+							setIdeaList(data as unknown as IIdeasProps);
+							break;
+						}
+						default: {
+							if (topic_id) {
+								const { ideaList } = await getAllIdeasByTopicIdNew(topic_id);
+								setIdeaList(ideaList as unknown as IIdeasProps);
+							}
+							break;
+						}
+					}
+				}
+			}
+		} else {
+			if (topic_id) {
+				const { ideaList } = await getAllIdeasByTopicIdNew(topic_id, sortBy);
+				setIdeaList(ideaList as unknown as IIdeasProps);
+			}
+		}
+	};
+
+	const handleChangeCategorySort = async (category_id: string) => {
+		const limit = 99999;
+		setSortOptions({ ...sortOptions, category: category_id });
+
+		if (sortOptions.sort !== '') {
+			switch (category_id) {
+				case 'all-categories': {
+					const { ideaList } = await getAllIdeasByTopicIdNew(topic.topic_id, sortOptions.sort);
+					setIdeaList(ideaList as unknown as IIdeasProps);
+					break;
+				}
+				default: {
+					switch (sortOptions.sort) {
+						case 'most-popular': {
+							const { data } = await getIdeasListByCategoryId(category_id);
+							setIdeaList(data as unknown as IIdeasProps);
+							break;
+						}
+						case 'most-view': {
+							const { data } = await getIdeasListByCategoryId(category_id, limit, 'idea_view', false);
+							setIdeaList(data as unknown as IIdeasProps);
+							break;
+						}
+						case 'newest': {
+							const { data } = await getIdeasListByCategoryId(category_id, limit, 'idea_created', false);
+							setIdeaList(data as unknown as IIdeasProps);
+							break;
+						}
+						case 'oldest': {
+							const { data } = await getIdeasListByCategoryId(category_id, limit, 'idea_created', true);
+							setIdeaList(data as unknown as IIdeasProps);
+							break;
+						}
+						case 'latest-updated': {
+							const { data } = await getIdeasListByCategoryId(category_id, limit, 'idea_updated', false);
+							setIdeaList(data as unknown as IIdeasProps);
+							break;
+						}
+					}
+					break;
+				}
+			}
+		} else {
+			switch (category_id) {
+				case 'all-categories': {
+					const { ideaList } = await getAllIdeasByTopicIdNew(topic.topic_id);
+					setIdeaList(ideaList as unknown as IIdeasProps);
+					break;
+				}
+				default: {
+					const { data } = await getIdeasListByCategoryId(category_id);
+					setIdeaList(data as unknown as IIdeasProps);
+					break;
+				}
+			}
+		}
+	};
+
 	const [showCreateCategoriesModal, setShowCreateCategoriesModal] = useState(false);
 	const handleShowCreateCategoryModal = useCallback(() => {
 		setShowCreateCategoriesModal(!showCreateCategoriesModal);
 	}, [showCreateCategoriesModal]);
+
 	const handleCloseCreateCategoriesModal = useCallback(() => {
 		setShowCreateCategoriesModal(false);
 	}, []);
 
 	const handleDownloadAllIdeas = async () => {
 		const prepareFile = async () => {
-			const { ideaList } = await getAllIdeasByTopicId(topic.topic_id);
+			const { ideaList } = await getAllIdeasByTopicIdNew(topic.topic_id);
 			ideaList && setIdeaListCSV(ideaList as unknown as []);
 		};
 		await notifyToast(
@@ -99,7 +224,7 @@ const AllIdeas: NextPage<ICategoriesProps> = (props) => {
 
 	useEffect(() => {
 		const prepareFileToDownload = async () => {
-			const { ideaList } = await getAllIdeasByTopicId(topic.topic_id);
+			const { ideaList } = await getAllIdeasByTopicIdNew(topic.topic_id);
 			ideaList && setIdeaListCSV(ideaList as unknown as []);
 		};
 
@@ -109,9 +234,9 @@ const AllIdeas: NextPage<ICategoriesProps> = (props) => {
 		setIsFinalClosureExpired(moment(topic.topic_final_closure_date).isBefore(moment.now()));
 
 		const endOffset = itemOffset + limit;
-		setCurrentItems(categories.slice(itemOffset, endOffset));
-		setPageCount(Math.ceil(categories.length / limit));
-	}, [itemOffset, categories, limit, topic]);
+		setCurrentItems((ideaList as unknown as []).slice(itemOffset, endOffset));
+		setPageCount(Math.ceil((ideaList as unknown as []).length / limit));
+	}, [itemOffset, topic, ideaList]);
 	return (
 		<>
 			<MetaTags title={`All ideas | ${topic.topic_name}`} description={`All ideas in topic ${topic.topic_name}`} />
@@ -171,9 +296,14 @@ const AllIdeas: NextPage<ICategoriesProps> = (props) => {
 						</Modal>
 					)}
 				</div>
-				<IdeaList topic_id={topic.topic_id} ideas={ideaList as IIdeasProps} />
+				<IdeaList
+					topic_id={topic.topic_id}
+					ideas={currentItems}
+					handleSortData={handleSortData}
+					handleChangeCategorySort={handleChangeCategorySort}
+				/>
 				<Pagination
-					items={categories as []}
+					items={ideaList as unknown as []}
 					currentItems={currentItems as []}
 					itemOffset={itemOffset}
 					pageCount={pageCount}

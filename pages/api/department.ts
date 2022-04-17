@@ -78,7 +78,7 @@ export const getDepartmentTopics = async (limit?: number) => {
 	const { data, error } = await supabase
 		.from('departments')
 		.select(`*, topics(*, categories(category_name)), accounts(username)`)
-		.order('department_name', { ascending: true })
+		.order('department_id', { ascending: true })
 		.limit(limit || noLimit);
 	return { data, error };
 };
@@ -155,4 +155,16 @@ export const getDepartmentFromId = async (id: string) => {
 		departmentData = data[0] as IDepartmentData['department'];
 	}
 	return { departmentData, error };
+};
+
+let departmentDataExisted: IDepartmentData['department'];
+export const CheckDepartmentExisted = async (departmentName: string) => {
+	const { data } = await supabase
+		.from('departments')
+		.select('department_name')
+		.ilike('department_name', departmentName);
+	if (data && data.length > 0) {
+		departmentDataExisted = data[0] as IDepartmentData['department'];
+	}
+	return departmentDataExisted;
 };

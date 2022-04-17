@@ -9,8 +9,8 @@ type CommentListProps = {
 export const CommentList = ({ idea, loadCommentData }: CommentListProps) => {
 	return (
 		<div className="comment-list flex flex-col gap-0">
-			{idea.comments &&
-				(idea.comments as unknown as []).map((comment: ICommentData['comment']) => (
+			{idea.comments_list &&
+				(idea.comments_list as unknown as []).map((comment: ICommentData['comment']) => (
 					<CommentCard loadCommentData={loadCommentData} key={comment.comment_id} comment={comment} />
 				))}
 		</div>

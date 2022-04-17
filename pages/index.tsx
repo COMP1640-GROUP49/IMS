@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import type { GetServerSideProps, NextPage } from 'next';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { ClipLoader } from 'react-spinners';
 import { Button } from 'components/Button';
 import { DepartmentList } from 'components/DepartmentList';
 import { CreateDepartmentModal } from 'components/Form/form';
+import { GroupBar, HorizontalBar, LineChart, PieChart, VerticalBar } from 'components/Graph';
 import { Header } from 'components/Header';
 import { Icon } from 'components/Icon';
 import { MetaTags } from 'components/MetaTags';
@@ -17,22 +19,78 @@ import { TopicList } from 'components/TopicList/';
 import { getDepartmentNameById, getDepartmentTopics } from 'pages/api/department';
 import { IDepartmentData, IDepartmentsProps, ITopicsProps } from 'lib/interfaces';
 import { scrollToElementByClassName } from 'utils/scrollAnimate';
+import {
+	getAllIdeasInEachDepartment,
+	getAnonymousCommentsInEachDepartment,
+	getAnonymousIdeasInEachDepartment,
+	getContributorsInEachDepartment,
+	getIdeasWithoutCommentsInEachDepartment,
+} from './api/graph';
 import { getTopicsListByDepartmentId } from './api/topic';
 
 export const getServerSideProps: GetServerSideProps = async () => {
-	const { data, error } = await getDepartmentTopics();
+	const { data, error: error6 } = await getDepartmentTopics();
+	const { data: ideasInEachDepartment, error } = await getAllIdeasInEachDepartment();
+	const { data: contributorsInEachDepartment, error: error1 } = await getContributorsInEachDepartment();
+	const { data: ideasWithoutComment, error: error2 } = await getIdeasWithoutCommentsInEachDepartment();
+	const { data: anonymousIdeas, error: error4 } = await getAnonymousIdeasInEachDepartment();
+	const { data: anonymousComments, error: error5 } = await getAnonymousCommentsInEachDepartment();
 
 	if (error) {
 		throw error;
 	}
 	return {
 		props: {
+			ideasInEachDepartment,
+			contributorsInEachDepartment,
+			ideasWithoutComment,
+			anonymousIdeas,
+			anonymousComments,
 			data,
 		},
 	};
 };
 
-const Home: NextPage<IDepartmentsProps> = ({ data: departments }) => {
+interface DataProps {
+	ideasInEachDepartment: [
+		{
+			department_name: string;
+			ideas_count: number;
+		}
+	];
+
+	contributorsInEachDepartment: [
+		{
+			department_name: string;
+			contributors_count: number;
+		}
+	];
+
+	ideasWithoutComment: [
+		{
+			department_name: string;
+			ideas_without_comments_count: number;
+		}
+	];
+
+	anonymousIdeas: [
+		{
+			department_name: string;
+			anonymous_ideas_count: number;
+		}
+	];
+
+	anonymousComments: [
+		{
+			department_name: string;
+			anonymous_comments_count: number;
+		}
+	];
+	data: IDepartmentsProps;
+}
+
+const Home: NextPage<DataProps> = (props: DataProps) => {
+	const departments = props.data;
 	const limit = 5;
 	const [currentItems, setCurrentItems] = useState<IDepartmentData[]>();
 	const [pageCount, setPageCount] = useState(0);
@@ -53,11 +111,12 @@ const Home: NextPage<IDepartmentsProps> = ({ data: departments }) => {
 		user && user.user_metadata.role !== 0 && user.user_metadata.role !== 1 && void loadTopics();
 
 		const endOffset = itemOffset + limit;
-		setCurrentItems(departments.slice(itemOffset, endOffset));
-		setPageCount(Math.ceil(departments.length / limit));
+		setCurrentItems((departments as unknown as []).slice(itemOffset, endOffset));
+		setPageCount(Math.ceil((departments as unknown as []).length / limit));
 	}, [itemOffset, departments, limit, user]);
+
 	const handlePageClick = (event: any) => {
-		const newOffset = (event.selected * limit) % departments.length;
+		const newOffset = (event.selected * limit) % (departments as unknown as []).length;
 		setItemOffset(newOffset);
 	};
 
@@ -69,11 +128,30 @@ const Home: NextPage<IDepartmentsProps> = ({ data: departments }) => {
 	const handleShowCreateDepartmentModal = useCallback(() => {
 		setShowCreateDepartmentModal(!showCreateDepartmentModal);
 	}, [showCreateDepartmentModal]);
+
 	const handleCloseEditDepartmentModal = useCallback(() => {
 		setShowCreateDepartmentModal(false);
 	}, []);
 
 	const router = useRouter();
+
+	const { ideasInEachDepartment } = props;
+	const { contributorsInEachDepartment } = props;
+	const { ideasWithoutComment } = props;
+	const { anonymousIdeas } = props;
+	const { anonymousComments } = props;
+
+	const labels = ideasInEachDepartment.map((department) =>
+		department.department_name.includes('Departments')
+			? `${department.department_name.replace(` Departments`, ``)}`
+			: department.department_name.includes('departments')
+			? `${department.department_name.replace(` departments`, ``)}`
+			: department.department_name.includes('Department')
+			? `${department.department_name.replace(` Department`, ``)}`
+			: department.department_name.includes('department')
+			? `${department.department_name.replace(` department`, ``)}`
+			: `${department.department_name.trim()}`
+	);
 
 	return (
 		<>
@@ -82,30 +160,67 @@ const Home: NextPage<IDepartmentsProps> = ({ data: departments }) => {
 			{/* QA Manager */}
 			{+user?.user_metadata?.role === 1 ? (
 				<>
-					<MetaTags title="Departments Management" description="Manage departments of IMS" />
+					<MetaTags title="Dashboard" description="Dashboard of IMS" />
 					<Header />
-					<main className="body-container flex flex-col gap-6 below-navigation-bar">
-						<div className="flex flex-col gap-6 lg:flex-row  lg:justify-between">
-							<h1 className="scrollPos">Departments</h1>
-							<Button onClick={handleShowCreateDepartmentModal} icon className="btn-primary self-start sm:self-stretch">
-								<Icon name="PlusSquare" size="16" />
-								Create new departments
-							</Button>
-							{showCreateDepartmentModal && (
-								<Modal onCancel={handleCloseEditDepartmentModal} headerText={`Create New Department`}>
-									<CreateDepartmentModal />
-								</Modal>
-							)}
+					<main className="below-navigation-bar flex flex-col gap-6">
+						<div className="flex sm:flex-col gap-4 flex-row justify-between items-center">
+							<h1 className="self-start">Dashboard</h1>
+							<Link href={'/departments'} passHref>
+								<Button className="btn-primary self-start sm:self-stretch">Explore departments</Button>
+							</Link>
 						</div>
-						<DepartmentList departments={currentItems} />
-						<Pagination
-							items={departments as []}
-							currentItems={currentItems as []}
-							itemOffset={itemOffset}
-							pageCount={pageCount}
-							handlePaginationClick={handlePaginationClick}
-							handlePageClick={handlePageClick}
-						/>
+						<div className="flex flex-col gap-6">
+							<h2 className="text-sonic-silver hover:text-black">Statistic</h2>
+							<div className="charts-wrapper">
+								<div className="charts-group">
+									<div className="graph bar-chart">
+										<p>Number of ideas in each department</p>
+										{ideasInEachDepartment ? (
+											<VerticalBar labels={labels} data={ideasInEachDepartment} />
+										) : (
+											<ClipLoader />
+										)}
+									</div>
+									<div className="lg:hidden graph pie-chart">
+										<p>Percentage of ideas by each department</p>
+										{ideasInEachDepartment ? <PieChart labels={labels} data={ideasInEachDepartment} /> : <ClipLoader />}
+									</div>
+									<div className="graph line-chart">
+										<p>Number of contributors in each department</p>
+										{contributorsInEachDepartment ? (
+											<LineChart labels={labels} data={contributorsInEachDepartment} />
+										) : (
+											<ClipLoader />
+										)}
+									</div>
+								</div>
+								<div className="hidden-pie-chart">
+									<p>Percentage of ideas by each department</p>
+									{ideasInEachDepartment ? <PieChart labels={labels} data={ideasInEachDepartment} /> : <ClipLoader />}
+								</div>
+							</div>
+						</div>
+						<div className="flex flex-col gap-6">
+							<h2 className="text-sonic-silver hover:text-black">Exception</h2>
+							<div className="charts-group-2">
+								<div className="graph bar-chart lg:w-1/2">
+									<p>Ideas without comments</p>
+									{ideasInEachDepartment ? (
+										<HorizontalBar labels={labels} data={ideasWithoutComment} />
+									) : (
+										<ClipLoader />
+									)}
+								</div>
+								<div className="graph line-chart lg:w-1/2">
+									<p>Anonymous ideas and comments</p>
+									{contributorsInEachDepartment ? (
+										<GroupBar labels={labels} data1={anonymousIdeas} data2={anonymousComments} />
+									) : (
+										<ClipLoader />
+									)}
+								</div>
+							</div>
+						</div>
 					</main>
 				</>
 			) : // QA Coordinator

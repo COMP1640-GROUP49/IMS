@@ -5,8 +5,8 @@ import { GetServerSideProps, NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ParsedUrlQuery } from 'querystring';
-import { RefObject, useCallback, useEffect, useRef, useState } from 'react';
-import { CSVDownload, CSVLink } from 'react-csv';
+import { useCallback, useEffect, useState } from 'react';
+import { CSVLink } from 'react-csv';
 import { Button } from 'components/Button';
 import { CategoryList } from 'components/CategoryList';
 import { CreateCategoryModal } from 'components/Form/form';
@@ -79,6 +79,7 @@ const TopicsManagementPage: NextPage<ICategoriesProps> = (props) => {
 			const { ideaList } = await getAllIdeasByTopicIdNew(topic.topic_id);
 			ideaList && setIdeaListCSV(ideaList as unknown as []);
 		};
+
 		await notifyToast(
 			prepareFile(),
 			`Preparing CSV file for you to download.`,
