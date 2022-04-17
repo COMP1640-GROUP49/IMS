@@ -44,9 +44,13 @@ export const Header = () => {
 			</div>
 			<div className={`hamburger-menu__open ${openHamburgerMenu ? '' : 'hidden lg:hamburger-menu__lg'}`}>
 				<ul className="menu-list">
-					<li className="flex self-start lg:self-center mb-4 lg:mb-0">
-						<Logo width="96" height="96" />
-					</li>
+					<Link href={`/admin`} passHref>
+						<a>
+							<li className="flex self-start lg:self-center mb-4 lg:mb-0">
+								<Logo width="96" height="96" />
+							</li>
+						</a>
+					</Link>
 
 					<li>
 						<LinkComponent link={`/admin`} title="Dashboard">

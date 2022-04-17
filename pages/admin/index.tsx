@@ -97,7 +97,7 @@ const AdminHome: NextPage<DataProps> = (props) => {
 			{user ? (
 				+user.user_metadata?.role === 0 ? (
 					<>
-						<MetaTags title="Dashboard" description="Dashboard of IMS" />
+						<MetaTags title="Dashboard | IMS" description="Dashboard of IMS" />
 						<Header />
 						<main className="below-navigation-bar flex flex-col gap-6">
 							<h1>Dashboard</h1>

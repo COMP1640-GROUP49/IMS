@@ -2,12 +2,14 @@
 import { GetServerSideProps, NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { ClipLoader } from 'react-spinners';
 import { Button } from 'components/Button';
 import { Header } from 'components/Header';
 import { Icon } from 'components/Icon';
 import { MetaTags } from 'components/MetaTags';
 import Pagination from 'components/Pagination';
+import { UserContext } from 'components/PrivateRoute';
 import { UserList } from 'components/UserList';
 import { getUsersList } from 'pages/api/admin';
 import { IAccountData, IAccountsProps } from 'lib/interfaces';
@@ -46,35 +48,44 @@ const UsersManagement: NextPage<IAccountsProps> = ({ data: accounts }) => {
 	const handlePaginationClick = () => {
 		scrollToElementByClassName('scrollPos');
 	};
-
+	const user = useContext(UserContext);
 	return (
 		<>
-			<MetaTags title="Users Management" description="Manage users of IMS" />
-			<Header />
-			<main className="body-container flex flex-col gap-6 below-navigation-bar">
-				<div className="flex flex-col gap-6 lg:flex-row lg:justify-between">
-					<h1 className="scrollPos">Users</h1>
-					<Link href={`${asPath}/create`} passHref>
-						<a>
-							<Button icon className="btn-primary self-start sm:self-stretch">
-								<Icon name="UserPlus" size="16" />
-								Create new user account
-							</Button>
-						</a>
-					</Link>
-				</div>
-				<UserList accounts={currentItems} />
-				<Pagination
-					items={accounts as []}
-					currentItems={currentItems as []}
-					itemOffset={itemOffset}
-					pageCount={pageCount}
-					handlePaginationClick={handlePaginationClick}
-					handlePageClick={handlePageClick}
-				/>
-			</main>
+			{user ? (
+				+user.user_metadata?.role === 0 ? (
+					<>
+						<MetaTags title="Users Management" description="Manage users of IMS" />
+						<Header />
+						<main className="body-container flex flex-col gap-6 below-navigation-bar">
+							<div className="flex flex-col gap-6 lg:flex-row lg:justify-between items-center">
+								<h1 className="scrollPos">Users</h1>
+								<Link href={`${asPath}/create`} passHref>
+									<a>
+										<Button icon className="btn-primary self-start sm:self-stretch">
+											<Icon name="UserPlus" size="16" />
+											Create new user account
+										</Button>
+									</a>
+								</Link>
+							</div>
+							<UserList accounts={currentItems} />
+							<Pagination
+								items={accounts as []}
+								currentItems={currentItems as []}
+								itemOffset={itemOffset}
+								pageCount={pageCount}
+								handlePaginationClick={handlePaginationClick}
+								handlePageClick={handlePageClick}
+							/>
+						</main>
+					</>
+				) : (
+					<ClipLoader />
+				)
+			) : (
+				<ClipLoader />
+			)}
 		</>
 	);
 };
-
 export default UsersManagement;

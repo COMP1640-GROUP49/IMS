@@ -17,7 +17,7 @@ import Pagination from 'components/Pagination';
 import { UserContext } from 'components/PrivateRoute';
 import { TopicList } from 'components/TopicList/';
 import { getDepartmentNameById, getDepartmentTopics } from 'pages/api/department';
-import { IDepartmentData, IDepartmentsProps, ITopicsProps } from 'lib/interfaces';
+import { IDepartmentData, IDepartmentsProps, ITopicData, ITopicsProps } from 'lib/interfaces';
 import { scrollToElementByClassName } from 'utils/scrollAnimate';
 import {
 	getAllIdeasInEachDepartment,
@@ -28,8 +28,7 @@ import {
 } from './api/graph';
 import { getTopicsListByDepartmentId } from './api/topic';
 
-export const getServerSideProps: GetServerSideProps = async () => {
-	const { data, error: error6 } = await getDepartmentTopics();
+export const getServerSideProps: GetServerSideProps = async (props) => {
 	const { data: ideasInEachDepartment, error } = await getAllIdeasInEachDepartment();
 	const { data: contributorsInEachDepartment, error: error1 } = await getContributorsInEachDepartment();
 	const { data: ideasWithoutComment, error: error2 } = await getIdeasWithoutCommentsInEachDepartment();
@@ -46,7 +45,6 @@ export const getServerSideProps: GetServerSideProps = async () => {
 			ideasWithoutComment,
 			anonymousIdeas,
 			anonymousComments,
-			data,
 		},
 	};
 };
@@ -86,24 +84,23 @@ interface DataProps {
 			anonymous_comments_count: number;
 		}
 	];
-	data: IDepartmentsProps;
 }
 
 const Home: NextPage<DataProps> = (props: DataProps) => {
-	const departments = props.data;
+	const [topics, setTopics] = useState<ITopicsProps>();
+
 	const limit = 5;
-	const [currentItems, setCurrentItems] = useState<IDepartmentData[]>();
+	const [currentItems, setCurrentItems] = useState<ITopicData[]>([]);
 	const [pageCount, setPageCount] = useState(0);
 	const [itemOffset, setItemOffset] = useState(0);
 	const [department_name, setDepartmentName] = useState('');
 
 	const user = useContext(UserContext);
-	const [topics, setTopics] = useState<ITopicsProps>();
 
 	useEffect(() => {
 		const loadTopics = async () => {
 			const { data } = await getTopicsListByDepartmentId(user?.user_metadata?.department as string);
-			setTopics(data as unknown as ITopicsProps);
+			!topics && setTopics(data as unknown as ITopicsProps);
 			const { department_name: name } = await getDepartmentNameById(user?.user_metadata?.department as string);
 			setDepartmentName(name);
 		};
@@ -111,27 +108,20 @@ const Home: NextPage<DataProps> = (props: DataProps) => {
 		user && user.user_metadata.role !== 0 && user.user_metadata.role !== 1 && void loadTopics();
 
 		const endOffset = itemOffset + limit;
-		setCurrentItems((departments as unknown as []).slice(itemOffset, endOffset));
-		setPageCount(Math.ceil((departments as unknown as []).length / limit));
-	}, [itemOffset, departments, limit, user]);
+		topics && setCurrentItems((topics as unknown as []).slice(itemOffset, endOffset));
+		topics && setPageCount(Math.ceil((topics as unknown as []).length / limit));
+	}, [itemOffset, topics, limit, user]);
 
 	const handlePageClick = (event: any) => {
-		const newOffset = (event.selected * limit) % (departments as unknown as []).length;
-		setItemOffset(newOffset);
+		if (topics) {
+			const newOffset = (event.selected * limit) % (topics as unknown as []).length;
+			setItemOffset(newOffset);
+		}
 	};
 
 	const handlePaginationClick = () => {
 		scrollToElementByClassName('scrollPos');
 	};
-
-	const [showCreateDepartmentModal, setShowCreateDepartmentModal] = useState(false);
-	const handleShowCreateDepartmentModal = useCallback(() => {
-		setShowCreateDepartmentModal(!showCreateDepartmentModal);
-	}, [showCreateDepartmentModal]);
-
-	const handleCloseEditDepartmentModal = useCallback(() => {
-		setShowCreateDepartmentModal(false);
-	}, []);
 
 	const router = useRouter();
 
@@ -155,12 +145,12 @@ const Home: NextPage<DataProps> = (props: DataProps) => {
 
 	return (
 		<>
-			<MetaTags title="IMS" />
+			<MetaTags title="Home | IMS" />
 			<Header />
 			{/* QA Manager */}
 			{+user?.user_metadata?.role === 1 ? (
 				<>
-					<MetaTags title="Dashboard" description="Dashboard of IMS" />
+					<MetaTags title="Dashboard | IMS" description="Dashboard of IMS" />
 					<Header />
 					<main className="below-navigation-bar flex flex-col gap-6">
 						<div className="flex sm:flex-col gap-4 flex-row justify-between items-center">
@@ -232,6 +222,18 @@ const Home: NextPage<DataProps> = (props: DataProps) => {
 						</div>
 					</div>
 					<TopicList topics={topics} />
+					{topics && currentItems ? (
+						<Pagination
+							items={topics as unknown as []}
+							currentItems={currentItems as []}
+							itemOffset={itemOffset}
+							pageCount={pageCount}
+							handlePaginationClick={handlePaginationClick}
+							handlePageClick={handlePageClick}
+						/>
+					) : (
+						<ClipLoader />
+					)}
 				</main>
 			) : // Staff
 			+user?.user_metadata?.role === 3 ? (
@@ -242,6 +244,18 @@ const Home: NextPage<DataProps> = (props: DataProps) => {
 						</div>
 					</div>
 					<TopicList topics={topics} />
+					{topics && currentItems ? (
+						<Pagination
+							items={topics as unknown as []}
+							currentItems={currentItems as []}
+							itemOffset={itemOffset}
+							pageCount={pageCount}
+							handlePaginationClick={handlePaginationClick}
+							handlePageClick={handlePageClick}
+						/>
+					) : (
+						<ClipLoader />
+					)}
 				</main>
 			) : (
 				<ClipLoader />

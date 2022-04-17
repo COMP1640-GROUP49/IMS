@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import moment from 'moment';
+import Link from 'next/link';
 import { useContext, useEffect, useState } from 'react';
 import Attachment from 'components/Attachment';
 import { Avatar } from 'components/Avatar';
@@ -138,25 +139,29 @@ const IdeaDetail = ({ idea: ideaData }: IIdeaData) => {
 		<>
 			<div className="flex flex-col gap-6 justify-between">
 				<div className="flex justify-between gap-2 items-center">
-					<div className="flex gap-2 flex-row items-center">
-						{avatarUrl && !idea.anonymous_posting ? (
-							<Avatar
-								src={`${avatarUrl}`}
-								size="48"
-								className="rounded-full"
-								alt={`${user?.avatar_url as string}'s avatar`}
-							/>
-						) : (
-							<Avatar src={'/default-avatar.png'} size="48" className="rounded-full" alt={`{}'s avatar`} />
-						)}
+					<Link href={`/user/${user?.username as string}`} passHref>
+						<a target={'_blank'} className={`${idea.anonymous_posting ? 'disabled-link' : ''}`}>
+							<div className="flex gap-2 flex-row items-center user-profile-link">
+								{avatarUrl && !idea.anonymous_posting ? (
+									<Avatar
+										src={`${avatarUrl}`}
+										size="48"
+										className="rounded-full"
+										alt={`${user?.avatar_url as string}'s avatar`}
+									/>
+								) : (
+									<Avatar src={'/default-avatar.png'} size="48" className="rounded-full" alt={`{}'s avatar`} />
+								)}
 
-						<div className="flex flex-col gap-1">
-							<p className="font-semi-bold">{!idea.anonymous_posting ? user?.account_full_name : 'Anonymous'}</p>
-							<p className="text-footer text-sonic-silver font-semi-bold">
-								{!idea.anonymous_posting ? `@${user?.username as string}` : 'Anonymous'}
-							</p>
-						</div>
-					</div>
+								<div className="flex flex-col gap-1">
+									<p className="font-semi-bold">{!idea.anonymous_posting ? user?.account_full_name : 'Anonymous'}</p>
+									<p className="text-footer text-sonic-silver font-semi-bold">
+										{!idea.anonymous_posting ? `@${user?.username as string}` : 'Anonymous'}
+									</p>
+								</div>
+							</div>
+						</a>
+					</Link>
 
 					<p className="text-footer font-light">{moment(idea.idea_created).fromNow()} </p>
 				</div>

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ParsedUrlQuery } from 'querystring';
 import { useCallback, useContext, useEffect, useState } from 'react';
+import { ClipLoader } from 'react-spinners';
 import { Button } from 'components/Button';
 import { CreateIdeaModal } from 'components/Form/form';
 import { Header } from 'components/Header';
@@ -139,55 +140,68 @@ const CategoryManagementPage: NextPage<IIdeasProps> = (props) => {
 
 	return (
 		<>
-			<MetaTags title={`${category.category_name}`} description={`Ideas in category ${category.category_name}`} />
-			<Header />
-			<main className="body-container flex flex-col gap-6 below-navigation-bar">
-				<div className="flex flex-col gap-6 lg:flex-row  lg:justify-between">
-					<div className="flex flex-col gap-2">
-						<Link href={asPath.replace((slug as string).toLowerCase(), '')}>
-							<a className="back-link">
-								<Icon size="24" name="RotateCcw" />
-								Back to categories list
-							</a>
-						</Link>
-						<h1>{`${category.category_name}`}</h1>
-						{category.category_description && <p>{category.category_description}</p>}
-					</div>
-					<Button
-						disabled={isFirstClosureExpired ? true : false}
-						onClick={handleShowCreateCategoryModal}
-						icon
-						className={`${isFirstClosureExpired ? 'btn-disabled' : 'btn-primary'} self-start sm:self-stretch`}
-					>
-						<Icon name="FilePlus" size="16" />
-						Submit new idea
-					</Button>
-					{showCreateIdeaModal && (
-						<Modal onCancel={handleCloseCreateIdeaModal} headerText={`Create New Idea`}>
-							<CreateIdeaModal account_id={user.id} topic_id={topic.topic_id} />
-						</Modal>
-					)}
-				</div>
-				{(isFirstClosureExpired || isFinalClosureExpired) && (
-					<p className="text-ultra-red italic">
-						{isFirstClosureExpired && isFinalClosureExpired
-							? 'First & final closure'
-							: isFirstClosureExpired
-							? 'First closure'
-							: isFinalClosureExpired && 'Final closure'}{' '}
-						has expired!
-					</p>
-				)}
-				<IdeaList ideas={currentItems} handleSortData={handleSortData} />
-				<Pagination
-					items={ideas as unknown as []}
-					currentItems={currentItems as []}
-					itemOffset={itemOffset}
-					pageCount={pageCount}
-					handlePaginationClick={handlePaginationClick}
-					handlePageClick={handlePageClick}
-				/>
-			</main>
+			{user ? (
+				+user.user_metadata?.role === 0 || +user.user_metadata?.role === 1 ? (
+					<>
+						<MetaTags
+							title={`All ideas | ${category.category_name}`}
+							description={`All ideas in category ${category.category_name}`}
+						/>
+						<Header />
+						<main className="body-container flex flex-col gap-6 below-navigation-bar">
+							<div className="flex flex-col gap-6 lg:flex-row  lg:justify-between">
+								<div className="flex flex-col gap-2">
+									<Link href={asPath.replace((slug as string).toLowerCase(), '')}>
+										<a className="back-link">
+											<Icon size="24" name="RotateCcw" />
+											Back to categories list
+										</a>
+									</Link>
+									<h1>{`${category.category_name}`}</h1>
+									{category.category_description && <p>{category.category_description}</p>}
+								</div>
+								<Button
+									disabled={isFirstClosureExpired ? true : false}
+									onClick={handleShowCreateCategoryModal}
+									icon
+									className={`${isFirstClosureExpired ? 'btn-disabled' : 'btn-primary'} self-start sm:self-stretch`}
+								>
+									<Icon name="FilePlus" size="16" />
+									Submit new idea
+								</Button>
+								{showCreateIdeaModal && (
+									<Modal onCancel={handleCloseCreateIdeaModal} headerText={`Create New Idea`}>
+										<CreateIdeaModal account_id={user.id} topic_id={topic.topic_id} />
+									</Modal>
+								)}
+							</div>
+							{(isFirstClosureExpired || isFinalClosureExpired) && (
+								<p className="text-ultra-red italic">
+									{isFirstClosureExpired && isFinalClosureExpired
+										? 'First & final closure'
+										: isFirstClosureExpired
+										? 'First closure'
+										: isFinalClosureExpired && 'Final closure'}{' '}
+									has expired!
+								</p>
+							)}
+							<IdeaList ideas={currentItems} handleSortData={handleSortData} />
+							<Pagination
+								items={ideas as unknown as []}
+								currentItems={currentItems as []}
+								itemOffset={itemOffset}
+								pageCount={pageCount}
+								handlePaginationClick={handlePaginationClick}
+								handlePageClick={handlePageClick}
+							/>
+						</main>
+					</>
+				) : (
+					<ClipLoader />
+				)
+			) : (
+				<ClipLoader />
+			)}
 		</>
 	);
 };

@@ -2,11 +2,14 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ParsedUrlQuery } from 'querystring';
+import { useContext } from 'react';
+import { ClipLoader } from 'react-spinners';
 import { Avatar } from 'components/Avatar';
 import { Button } from 'components/Button';
 import { Header } from 'components/Header';
 import { Icon } from 'components/Icon';
 import { MetaTags } from 'components/MetaTags';
+import { UserContext } from 'components/PrivateRoute';
 import { getAccountData, getUsersList } from 'pages/api/admin';
 import { IAccountData } from 'lib/interfaces';
 
@@ -51,6 +54,8 @@ const UserProfile = ({ data }: any) => {
 		account_phone_number,
 		avatar_url,
 	} = data as IAccountData['account'];
+	const user = useContext(UserContext);
+
 	return (
 		<>
 			<MetaTags title={`${account_full_name as string} | @${username}'s Profile`} />
@@ -71,15 +76,20 @@ const UserProfile = ({ data }: any) => {
 					<p>Address: {account_address}</p>
 					<p>Phone: {account_phone_number}</p>
 				</div>
-
-				<Link href={`${asPath}/edit`} passHref>
-					<a className="sm:self-stretch">
-						<Button icon className={'btn-primary w-full'}>
-							<Icon name="Edit" size="16" color="white" />
-							Edit my profile
-						</Button>
-					</a>
-				</Link>
+				{user ? (
+					+user.user_metadata?.role === account_role && (
+						<Link href={`${asPath}/edit`} passHref>
+							<a className="sm:self-stretch">
+								<Button icon className={'btn-primary w-full'}>
+									<Icon name="Edit" size="16" color="white" />
+									Edit my profile
+								</Button>
+							</a>
+						</Link>
+					)
+				) : (
+					<ClipLoader />
+				)}
 			</div>
 		</>
 	);

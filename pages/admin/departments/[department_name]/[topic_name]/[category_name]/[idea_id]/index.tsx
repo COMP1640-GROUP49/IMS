@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Router, { useRouter } from 'next/router';
 import { ParsedUrlQuery } from 'querystring';
 import { useCallback, useContext, useState } from 'react';
+import { ClipLoader } from 'react-spinners';
 import { Button } from 'components/Button';
 import { EditIdeaModal } from 'components/Form/form';
 import { Header } from 'components/Header';
@@ -100,73 +101,86 @@ const IdeaDetailPage: NextPage<IIdeasProps> = (props) => {
 
 	const currentUser = useContext(UserContext);
 
+	const user = useContext(UserContext);
+
 	return (
 		<>
-			<>
-				<MetaTags title={``} description={`Ideas in category`} />
-				<Header />
-				<main className="body-container flex flex-col gap-6 below-navigation-bar">
-					<div className="flex flex-col gap-3 lg:justify-between">
-						<Link href={asPath.replace((slug as string).toLowerCase(), '')}>
-							<a className="back-link">
-								<Icon size="24" name="RotateCcw" />
-								Back to ideas list
-							</a>
-						</Link>
-						<div className="flex gap-2 items-center">
-							<Icon size="16" name="Hash" />
-							<p>{category?.category_name}</p>
-						</div>
-						<div className="flex justify-between items-center">
-							<h1>{idea.idea_title}</h1>
+			{user ? (
+				+user.user_metadata?.role === 0 ? (
+					<>
+						<MetaTags
+							title={`${idea.idea_title}`}
+							description={`${idea.idea_title} in category ${category.category_name}`}
+						/>
+						<Header />
+						<main className="body-container flex flex-col gap-6 below-navigation-bar">
+							<div className="flex flex-col gap-3 lg:justify-between">
+								<Link href={asPath.replace((slug as string).toLowerCase(), '')}>
+									<a className="back-link">
+										<Icon size="24" name="RotateCcw" />
+										Back to ideas list
+									</a>
+								</Link>
+								<div className="flex gap-2 items-center">
+									<Icon size="16" name="Hash" />
+									<p>{category?.category_name}</p>
+								</div>
+								<div className="flex justify-between items-center">
+									<h1>{idea.idea_title}</h1>
 
-							{currentUser && idea.account_id === currentUser.id && (
-								<Button className="more-option relative" onClick={handleShowMoreMenu} icon>
-									<Icon size="24" name="MoreHorizontal" />
-									{showMoreMenu && (
-										<MoreMenu onCancel={handleCloseMoreMenu}>
-											<div className="flex flex-col gap 2 items-start">
-												<Button onClick={handleShowEditIdeaModal} className="btn-menu">
-													Edit idea
-												</Button>
+									{currentUser && idea.account_id === currentUser.id && (
+										<Button className="more-option relative" onClick={handleShowMoreMenu} icon>
+											<Icon size="24" name="MoreHorizontal" />
+											{showMoreMenu && (
+												<MoreMenu onCancel={handleCloseMoreMenu}>
+													<div className="flex flex-col gap 2 items-start">
+														<Button onClick={handleShowEditIdeaModal} className="btn-menu">
+															Edit idea
+														</Button>
 
-												<Button onClick={handleShowDeleteIdeaModal} className="btn-menu">
-													Delete idea
-												</Button>
-											</div>
-										</MoreMenu>
+														<Button onClick={handleShowDeleteIdeaModal} className="btn-menu">
+															Delete idea
+														</Button>
+													</div>
+												</MoreMenu>
+											)}
+										</Button>
 									)}
-								</Button>
-							)}
-						</div>
-					</div>
-					<IdeaDetail idea={idea} />
-					{showEditIdeaModal && (
-						<Modal onCancel={handleCloseEditIdeaModal} headerText={`Edit ${idea.idea_title}`}>
-							<EditIdeaModal duplicate={true} topic_id={topicId as string} ideaData={idea} />
-						</Modal>
-					)}
-
-					{showDeleteIdeaModal && (
-						<Modal onCancel={handleCloseDeleteModal}>
-							<div className="flex flex-col gap-6 justify-center">
-								<p>
-									Are you sure you want to delete this <span className="font-semi-bold">{idea.idea_title}</span>?
-								</p>
-								<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
-									{/*TODO: Edit delete button box-shadow*/}
-									<Button onClick={handleDeleteIdeaModal} className="btn-danger w-full">
-										Delete it
-									</Button>
-									<Button onClick={handleCloseDeleteModal} className="btn-secondary  w-full">
-										Cancel
-									</Button>
 								</div>
 							</div>
-						</Modal>
-					)}
-				</main>
-			</>
+							<IdeaDetail idea={idea} />
+							{showEditIdeaModal && (
+								<Modal onCancel={handleCloseEditIdeaModal} headerText={`Edit ${idea.idea_title}`}>
+									<EditIdeaModal duplicate={true} topic_id={topicId as string} ideaData={idea} />
+								</Modal>
+							)}
+
+							{showDeleteIdeaModal && (
+								<Modal onCancel={handleCloseDeleteModal}>
+									<div className="flex flex-col gap-6 justify-center">
+										<p>
+											Are you sure you want to delete this <span className="font-semi-bold">{idea.idea_title}</span>?
+										</p>
+										<div className="flex flex-row flex-auto gap-6 relative overflow-hidden">
+											{/*TODO: Edit delete button box-shadow*/}
+											<Button onClick={handleDeleteIdeaModal} className="btn-danger w-full">
+												Delete it
+											</Button>
+											<Button onClick={handleCloseDeleteModal} className="btn-secondary w-full">
+												Cancel
+											</Button>
+										</div>
+									</div>
+								</Modal>
+							)}
+						</main>
+					</>
+				) : (
+					<ClipLoader />
+				)
+			) : (
+				<ClipLoader />
+			)}
 		</>
 	);
 };

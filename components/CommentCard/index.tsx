@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import moment from 'moment';
+import Link from 'next/link';
 import { useContext, useEffect, useState } from 'react';
 import { ClipLoader } from 'react-spinners';
 import { Avatar } from 'components/Avatar';
@@ -86,15 +87,19 @@ export const CommentCard = ({ comment, loadCommentData }: CommentCardProps) => {
 
 	const handleLikeComment = async () => {
 		if (commentReactionState?.comment_reaction_type === 'like') {
-			const { newCommentReactionState } = await removeCommentReactionFromComment(
+			const { newCommentReactionState: removeLike } = await removeCommentReactionFromComment(
 				comment.comment_id,
 				currentUser.id,
 				'like'
 			);
-			setCommentReactionState(newCommentReactionState);
+			setCommentReactionState(removeLike);
 		} else {
-			const { newCommentReactionState } = await addCommentReactionToComment(comment.comment_id, currentUser.id, 'like');
-			setCommentReactionState(newCommentReactionState);
+			const { newCommentReactionState: addLike } = await addCommentReactionToComment(
+				comment.comment_id,
+				currentUser.id,
+				'like'
+			);
+			setCommentReactionState(addLike);
 		}
 		const data = await getAllCommentsByIdeaId(comment.idea_id, 'comment_created', false);
 		loadCommentData(data as unknown as ICommentsProps);
@@ -108,6 +113,7 @@ export const CommentCard = ({ comment, loadCommentData }: CommentCardProps) => {
 
 			const { commentReactionState } = await getCommentReactionStateOfUserInComment(currentUser.id, comment.comment_id);
 			setCommentReactionState(commentReactionState);
+
 			const { ideaData } = await getIdeaById(comment.idea_id);
 			const { topicId } = await getTopicIdByCategoryId((ideaData as unknown as IIdeaData['idea']).category_id);
 			const { data } = await getTopicById(topicId);
@@ -135,45 +141,54 @@ export const CommentCard = ({ comment, loadCommentData }: CommentCardProps) => {
 				!comment.parent_comment_id && (
 					<div className="flex flex-col comment-card">
 						<div className="flex flex-row justify-between items-center">
-							<div className="flex gap-2 flex-row items-center">
-								{avatarUrl && !comment.anonymous_posting ? (
-									<Avatar
-										src={`${avatarUrl}`}
-										size="48"
-										className="rounded-full"
-										alt={`${user?.avatar_url as string}'s avatar`}
-									/>
-								) : (
-									<Avatar src={'/default-avatar.png'} size="48" className="rounded-full" alt={`{}'s avatar`} />
-								)}
-								<div className="flex flex-col gap-1">
-									{user?.account_full_name && (
-										<p className="font-semi-bold">
-											{!comment.anonymous_posting ? user?.account_full_name : 'Anonymous'}
-										</p>
-									)}
-									{!comment.anonymous_posting && (
-										<p className="text-footer text-sonic-silver font-semi-bold">@{user?.username}</p>
-									)}
-								</div>
-								<p className="text-footer font-light">{moment(comment.comment_created).fromNow()} </p>
-							</div>
-							{comment.account_id === currentUser.id && (
-								<Button onClick={handleShowMoreMenu} className="relative more-option" icon>
-									<Icon size="24" name="MoreHorizontal" />
-									{showMoreMenu && (
-										<MoreMenu onCancel={handleCloseMoreMenu}>
-											<div className="flex flex-col gap 2 items-start">
-												<Button onClick={handleChangeToCommentEditor} className="btn-menu">
-													Edit comment
-												</Button>
-												<Button onClick={handleDeleteComment} className="btn-menu">
-													Delete comment
-												</Button>
-											</div>
-										</MoreMenu>
-									)}
-								</Button>
+							<Link href={`/user/${user?.username as string}`} passHref>
+								<a target={'_blank'} className={`${comment.anonymous_posting ? 'disabled-link' : ''}`}>
+									<div className="flex gap-2 flex-row items-center">
+										{avatarUrl && !comment.anonymous_posting ? (
+											<Avatar
+												src={`${avatarUrl}`}
+												size="48"
+												className="rounded-full"
+												alt={`${user?.avatar_url as string}'s avatar`}
+											/>
+										) : (
+											<Avatar src={'/default-avatar.png'} size="48" className="rounded-full" alt={`{}'s avatar`} />
+										)}
+										<div className="flex flex-col gap-1">
+											{user?.account_full_name && (
+												<p className="font-semi-bold">
+													{!comment.anonymous_posting ? user?.account_full_name : 'Anonymous'}
+												</p>
+											)}
+											{!comment.anonymous_posting && (
+												<p className="text-footer text-sonic-silver font-semi-bold">@{user?.username}</p>
+											)}
+										</div>
+										<p className="text-footer font-light">{moment(comment.comment_created).fromNow()} </p>
+									</div>
+								</a>
+							</Link>
+
+							{currentUser.id ? (
+								comment.account_id === currentUser.id && (
+									<Button onClick={handleShowMoreMenu} className="relative more-option" icon>
+										<Icon size="24" name="MoreHorizontal" />
+										{showMoreMenu && (
+											<MoreMenu onCancel={handleCloseMoreMenu}>
+												<div className="flex flex-col gap 2 items-start">
+													<Button onClick={handleChangeToCommentEditor} className="btn-menu">
+														Edit comment
+													</Button>
+													<Button onClick={handleDeleteComment} className="btn-menu">
+														Delete comment
+													</Button>
+												</div>
+											</MoreMenu>
+										)}
+									</Button>
+								)
+							) : (
+								<ClipLoader />
 							)}
 						</div>
 						<div className="comment-content">

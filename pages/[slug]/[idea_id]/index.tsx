@@ -103,7 +103,10 @@ const IdeaDetailPage: NextPage<IIdeasProps> = (props) => {
 	return (
 		<>
 			<>
-				<MetaTags title={``} description={`Ideas in category`} />
+				<MetaTags
+					title={`${idea.idea_title}`}
+					description={`${idea.idea_title} in category ${category.category_name}`}
+				/>
 				<Header />
 				<main className="body-container flex flex-col gap-6 below-navigation-bar">
 					<div className="flex flex-col gap-3 lg:justify-between">

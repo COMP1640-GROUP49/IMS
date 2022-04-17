@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import moment from 'moment';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ClipLoader } from 'react-spinners';
 import { Avatar } from 'components/Avatar';
@@ -119,25 +120,31 @@ export const ReplyCommentCard = ({
 			{avatarUrl && user ? (
 				<div className="flex flex-col comment-reply-card">
 					<div className="flex flex-row justify-between items-center ">
-						<div className="flex gap-2 flex-row items-center">
-							{avatarUrl && !comment.anonymous_posting ? (
-								<Avatar
-									src={`${avatarUrl}`}
-									size="48"
-									className="rounded-full"
-									alt={`${user?.avatar_url as string}'s avatar`}
-								/>
-							) : (
-								<Avatar src={'/default-avatar.png'} size="48" className="rounded-full" alt={`{}'s avatar`} />
-							)}
-							<div className="flex flex-col gap-1">
-								<p className="font-semi-bold">{!comment.anonymous_posting ? user?.account_full_name : 'Anonymous'}</p>
-								{!comment.anonymous_posting && (
-									<p className="text-footer text-sonic-silver font-semi-bold">@{user?.username}</p>
-								)}
-							</div>
-							<p className="text-footer font-light">{moment(comment.comment_created).fromNow()} </p>
-						</div>
+						<Link href={`/user/${user?.username}`} passHref>
+							<a target={'_blank'} className={`${comment.anonymous_posting ? 'disabled-link' : ''}`}>
+								<div className="flex gap-2 flex-row items-center">
+									{avatarUrl && !comment.anonymous_posting ? (
+										<Avatar
+											src={`${avatarUrl}`}
+											size="48"
+											className="rounded-full"
+											alt={`${user?.avatar_url as string}'s avatar`}
+										/>
+									) : (
+										<Avatar src={'/default-avatar.png'} size="48" className="rounded-full" alt={`{}'s avatar`} />
+									)}
+									<div className="flex flex-col gap-1">
+										<p className="font-semi-bold">
+											{!comment.anonymous_posting ? user?.account_full_name : 'Anonymous'}
+										</p>
+										{!comment.anonymous_posting && (
+											<p className="text-footer text-sonic-silver font-semi-bold">@{user?.username}</p>
+										)}
+									</div>
+									<p className="text-footer font-light">{moment(comment.comment_created).fromNow()} </p>
+								</div>
+							</a>
+						</Link>
 						{comment.account_id === currentUser.id && (
 							<Button onClick={handleShowMoreMenu} className="relative more-option" icon>
 								<Icon size="24" name="MoreHorizontal" />

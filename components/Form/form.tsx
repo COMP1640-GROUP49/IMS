@@ -1095,7 +1095,7 @@ export const EditDepartmentModal = ({ department }: any) => {
 		<>
 			<MetaTags
 				title={`Edit ${(department as IDepartmentData['department']).department_name}`}
-				description="Create a new user account"
+				description="Edit department"
 			/>
 			<form onSubmit={handleUpdateDepartment} className="flex flex-col gap-6">
 				<div className="flex flex-col gap-4">
@@ -1208,7 +1208,7 @@ export const CreateTopicModal = ({ department_id }: any) => {
 	}, [formValidation, formData]);
 	return (
 		<>
-			<MetaTags title={`Create New Topic`} description="Create a new user account" />
+			<MetaTags title={`Create New Topic`} description="Create a new topic" />
 			<div className="flex flex-col gap-6">
 				<form onSubmit={handleCreateNewTopic} className="flex flex-col gap-6">
 					<div className="flex flex-col gap-4">
@@ -1387,7 +1387,7 @@ export const EditTopicModal = ({ topicData }: any) => {
 	}, [formValidation, formData, topicData]);
 	return (
 		<>
-			<MetaTags title={`Create New Topic`} description="Create a new user account" />
+			<MetaTags title={`Edit Topic`} description="Edit a topic" />
 			<div className="flex flex-col gap-6">
 				<form onSubmit={handleUpdateTopic} className="flex flex-col gap-6">
 					<div className="flex flex-col gap-4">
@@ -1658,7 +1658,7 @@ export const EditCategoryModal = ({ categoryData }: any) => {
 	};
 	return (
 		<>
-			<MetaTags title={`Create New Topic`} description="Create a new user account" />
+			<MetaTags title={`Edit Category`} description="Edit a category" />
 			<div className="flex flex-col gap-6">
 				<form onSubmit={handleCreateNewCategory} className="flex flex-col gap-6">
 					<div className="flex flex-col gap-4">
@@ -2251,7 +2251,7 @@ export const EditIdeaModal = ({ ideaData, topic_id }: any) => {
 	return (
 		<>
 			<>
-				<MetaTags title={`Create New Idea`} description="Submit new idea" />
+				<MetaTags title={`Edit Idea`} description="Idea idea" />
 				<div className="flex flex-col gap-6">
 					<form onSubmit={handleUpdateIdea} className="form-edit flex flex-col gap-6">
 						<div className="flex flex-col gap-4">

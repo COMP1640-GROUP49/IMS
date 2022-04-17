@@ -17,7 +17,9 @@ const PrivateRoute = ({ children }: any) => {
 	const user = useUserData();
 	const router = useRouter();
 	const { asPath } = useRouter();
-
+	if (asPath === '/' && user && +user.user_metadata?.role === 0) {
+		void router.push('/admin');
+	}
 	useEffect(() => {
 		if (user) {
 			switch (+user?.user_metadata?.role) {
@@ -26,6 +28,12 @@ const PrivateRoute = ({ children }: any) => {
 						void router.push('/admin');
 					}
 					break;
+				case 2:
+				case 3:
+					if (asPath.startsWith('/departments')) {
+						void router.push('/');
+					}
+
 				default:
 					if (asPath === '/login' || asPath.includes('/admin/') || asPath.startsWith('/admin')) {
 						void router.push('/');

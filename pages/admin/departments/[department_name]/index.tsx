@@ -4,7 +4,8 @@ import { GetServerSideProps, NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ParsedUrlQuery } from 'querystring';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { ClipLoader } from 'react-spinners';
 import { Button } from 'components/Button';
 import { CreateTopicModal } from 'components/Form/form';
 import { Header } from 'components/Header';
@@ -12,6 +13,7 @@ import { Icon } from 'components/Icon';
 import { MetaTags } from 'components/MetaTags';
 import Modal from 'components/Modal';
 import Pagination from 'components/Pagination';
+import { UserContext } from 'components/PrivateRoute';
 import { TopicList } from 'components/TopicList';
 import { getDepartmentIdByName } from 'pages/api/department';
 import { getTopicsListByDepartmentId } from 'pages/api/topic';
@@ -84,45 +86,58 @@ const DepartmentPage: NextPage<ITopicsProps, IDepartmentProps> = (props) => {
 	const handlePaginationClick = () => {
 		scrollToElementByClassName('scrollPos');
 	};
+
+	const user = useContext(UserContext);
+
 	return (
 		<>
-			<MetaTags title={`${department_name as string} Department`} />
-			<Header />
-			<main className="body-container flex flex-col gap-6 below-navigation-bar">
-				<div className="flex lg:flex-row lg:justify-between lg:items-center flex-col gap-6">
-					<div className="flex flex-col gap-2">
-						<Link href={asPath.replace((department_name as string).toLowerCase(), '')}>
-							<a className="back-link">
-								<Icon size="24" name="RotateCcw" />
-								Back to departments list
-							</a>
-						</Link>
-						<h1>{`${department_name as string} Department`}</h1>
-					</div>
-					<Button
-						onClick={handleShowCreateTopicModal}
-						icon
-						className="btn-primary  sm:self-stretch md:self-start lg:self-end"
-					>
-						<Icon size="16" name="FolderPlus" />
-						Create new topic
-					</Button>
-					{showCreateTopicModal && (
-						<Modal onCancel={handleCloseCreateTopicModal} headerText={`Create New Topic`}>
-							<CreateTopicModal department_id={department_id as string} />
-						</Modal>
-					)}
-				</div>
-				<TopicList topics={currentItems} />
-				<Pagination
-					items={topics as []}
-					currentItems={currentItems as []}
-					itemOffset={itemOffset}
-					pageCount={pageCount}
-					handlePaginationClick={handlePaginationClick}
-					handlePageClick={handlePageClick}
-				/>
-			</main>
+			{user ? (
+				+user.user_metadata?.role === 0 ? (
+					<>
+						<MetaTags title={`${department_name as string} Department`} />
+						<Header />
+						<main className="body-container flex flex-col gap-6 below-navigation-bar">
+							<div className="flex lg:flex-row lg:justify-between lg:items-center flex-col gap-6">
+								<div className="flex flex-col gap-2">
+									<Link href={asPath.replace((department_name as string).toLowerCase(), '')}>
+										<a className="back-link">
+											<Icon size="24" name="RotateCcw" />
+											Back to departments list
+										</a>
+									</Link>
+									<h1>{`${department_name as string} Department`}</h1>
+								</div>
+								<Button
+									onClick={handleShowCreateTopicModal}
+									icon
+									className="btn-primary  sm:self-stretch md:self-start lg:self-center"
+								>
+									<Icon size="16" name="FolderPlus" />
+									Create new topic
+								</Button>
+								{showCreateTopicModal && (
+									<Modal onCancel={handleCloseCreateTopicModal} headerText={`Create New Topic`}>
+										<CreateTopicModal department_id={department_id as string} />
+									</Modal>
+								)}
+							</div>
+							<TopicList topics={currentItems} />
+							<Pagination
+								items={topics as []}
+								currentItems={currentItems as []}
+								itemOffset={itemOffset}
+								pageCount={pageCount}
+								handlePaginationClick={handlePaginationClick}
+								handlePageClick={handlePageClick}
+							/>
+						</main>
+					</>
+				) : (
+					<ClipLoader />
+				)
+			) : (
+				<ClipLoader />
+			)}
 		</>
 	);
 };
