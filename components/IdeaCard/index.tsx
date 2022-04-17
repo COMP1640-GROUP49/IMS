@@ -139,9 +139,11 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 							<td>
 								<span className="flex items-center gap-1 card-info">
 									<Icon size="16" name="File" />
-									<p className={!idea.idea_content ? 'italic' : 'idea-content'}>
-										{convert(idea.idea_content, { wordwrap: 50, whitespaceCharacters: '\t\r\n\f\u200b' }) ||
-											`No content`}
+									<p className={!idea.idea_content || idea.idea_content === '<p><br></p>' ? 'italic' : 'idea-content'}>
+										{!idea?.idea_content || idea?.idea_content === '<p><br></p>'
+											? 'No content'
+											: convert(idea.idea_content, { wordwrap: 50, whitespaceCharacters: '\t\r\n\f\u200b' }) ||
+											  `No content`}
 									</p>
 								</span>
 							</td>
@@ -189,9 +191,7 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 					</a>
 				</Link>
 				{user ? (
-					+user.user_metadata?.role !== 0 || +user.user_metadata?.role !== 1 ? (
-						<> </>
-					) : (
+					+user.user_metadata?.role === 0 || +user.user_metadata?.role === 1 ? (
 						<div className="idea-card__action">
 							<td>
 								<div className="flex flex-1 justify-between lg:justify-start lg:gap-4">
@@ -247,6 +247,8 @@ export const IdeaCard = ({ idea }: IIdeaData) => {
 								</div>
 							</td>
 						</div>
+					) : (
+						<></>
 					)
 				) : (
 					<>

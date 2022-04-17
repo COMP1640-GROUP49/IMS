@@ -58,6 +58,12 @@ export const CommentInput = ({ idea, user, loadCommentData }: CommentInputProps)
 				...(formData as ICommentData['comment']),
 				anonymous_posting: (event.target as HTMLInputElement).checked,
 			});
+			setFormAutomaticEmail({
+				...formAutomaticEmail,
+				username: (event.target as HTMLInputElement).checked
+					? 'An anonymous user'
+					: (user.user_metadata as IAccountData['account']).username,
+			});
 		}
 	};
 
@@ -72,7 +78,9 @@ export const CommentInput = ({ idea, user, loadCommentData }: CommentInputProps)
 
 		setFormAutomaticEmail({
 			...formAutomaticEmail,
-			username: (user.user_metadata as IAccountData['account']).username,
+			username: !formData?.anonymous_posting
+				? `@${(user.user_metadata as IAccountData['account']).username}`
+				: 'An anonymous user',
 			comment_content: data,
 		});
 

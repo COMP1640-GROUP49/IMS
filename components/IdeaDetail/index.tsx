@@ -18,6 +18,7 @@ import { getAccountByAccountId } from 'pages/api/user';
 import { IAccountData, ICommentsProps, IIdeaData, IReactionData } from 'lib/interfaces';
 
 const IdeaDetail = ({ idea: ideaData }: IIdeaData) => {
+	console.log('🚀 ~ file: index.tsx ~ line 21 ~ IdeaDetail ~ ideaData', ideaData);
 	const [idea, setIdea] = useState<IIdeaData['idea']>(ideaData);
 	const [avatarUrl, setAvatarUrl] = useState('');
 	const [user, setUser] = useState<IAccountData['account']>();
@@ -168,7 +169,9 @@ const IdeaDetail = ({ idea: ideaData }: IIdeaData) => {
 				<div className="idea-content__disabled-editor">
 					<RichTextEditor
 						className="disabled-editor"
-						value={idea?.idea_content || '<em>No content</em>'}
+						value={
+							!idea?.idea_content || idea?.idea_content === '<p><br></p>' ? '<em>No content</em>' : idea?.idea_content
+						}
 						readOnly={true}
 						placeholder={`Input idea's content`}
 					/>

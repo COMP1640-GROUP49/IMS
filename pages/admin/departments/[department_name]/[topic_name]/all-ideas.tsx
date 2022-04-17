@@ -9,7 +9,7 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { CSVLink } from 'react-csv';
 import { ClipLoader } from 'react-spinners';
 import { Button } from 'components/Button';
-import { CreateCategoryModal } from 'components/Form/form';
+import { CreateCategoryModal, CreateIdeaModal } from 'components/Form/form';
 import { Header } from 'components/Header';
 import { Icon } from 'components/Icon';
 import { IdeaList } from 'components/IdeaList';
@@ -196,13 +196,14 @@ const AllIdeas: NextPage<ICategoriesProps> = (props) => {
 		}
 	};
 
-	const [showCreateCategoriesModal, setShowCreateCategoriesModal] = useState(false);
-	const handleShowCreateCategoryModal = useCallback(() => {
-		setShowCreateCategoriesModal(!showCreateCategoriesModal);
-	}, [showCreateCategoriesModal]);
+	const [showCreateIdeaModal, setShowCreateIdeaModal] = useState(false);
 
-	const handleCloseCreateCategoriesModal = useCallback(() => {
-		setShowCreateCategoriesModal(false);
+	const handleShowCreateCategoryModal = useCallback(() => {
+		setShowCreateIdeaModal(!showCreateIdeaModal);
+	}, [showCreateIdeaModal]);
+
+	const handleCloseCreateIdeaModal = useCallback(() => {
+		setShowCreateIdeaModal(false);
 	}, []);
 
 	const handleDownloadAllIdeas = async () => {
@@ -284,13 +285,21 @@ const AllIdeas: NextPage<ICategoriesProps> = (props) => {
 								</div>
 								<div className="flex flex-col md:flex-row gap-4  md:justify-between justify-center">
 									<Button
+										disabled={isFirstClosureExpired ? true : false}
 										onClick={handleShowCreateCategoryModal}
 										icon
-										className="btn-primary lg:w-full self-start sm:self-stretch"
+										className={`${
+											isFirstClosureExpired ? 'btn-disabled' : 'btn-primary'
+										} self-start sm:self-stretch lg:self-stretch`}
 									>
-										<Icon name="PlusCircle" size="16" />
-										Create new category
+										<Icon name="FilePlus" size="16" />
+										Submit new idea
 									</Button>
+									{showCreateIdeaModal && (
+										<Modal onCancel={handleCloseCreateIdeaModal} headerText={`Create New Idea`}>
+											<CreateIdeaModal account_id={user.id} topic_id={topic.topic_id} />
+										</Modal>
+									)}
 									<Button
 										onClick={handleDownloadAllIdeas}
 										icon
@@ -305,11 +314,6 @@ const AllIdeas: NextPage<ICategoriesProps> = (props) => {
 										filename={`${topic.topic_name.toLowerCase().replace(/ /g, `-`)}-csv.csv`}
 									/>
 								</div>
-								{showCreateCategoriesModal && (
-									<Modal onCancel={handleCloseCreateCategoriesModal} headerText={`Create New Category`}>
-										<CreateCategoryModal topic_id={topic.topic_id} />
-									</Modal>
-								)}
 							</div>
 							<IdeaList
 								topic_id={topic.topic_id}
