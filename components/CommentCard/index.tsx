@@ -295,7 +295,7 @@ export const CommentCard = ({ comment, loadCommentData }: CommentCardProps) => {
 									loadCommentData={loadCommentData}
 									parent_comment={comment}
 									user={currentUser}
-									initialValue={`@${user?.username as string}`}
+									initialValue={`${!comment.anonymous_posting ? `@${user?.username as string}` : ''}`}
 								/>
 							)}
 						</div>
