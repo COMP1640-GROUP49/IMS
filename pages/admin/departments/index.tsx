@@ -66,7 +66,7 @@ const DepartmentManagementPage: NextPage<IDepartmentsProps> = ({ data: departmen
 						<MetaTags title="Departments Management" description="Manage departments of IMS" />
 						<Header />
 						<main className="body-container flex flex-col gap-6 below-navigation-bar">
-							<div className="flex flex-col gap-6 lg:flex-row lg:justify-between items-center">
+							<div className="flex flex-col gap-6 lg:flex-row lg:justify-between lg:items-center">
 								<h1 className="scrollPos">Departments</h1>
 								<Button
 									onClick={handleShowCreateDepartmentModal}
